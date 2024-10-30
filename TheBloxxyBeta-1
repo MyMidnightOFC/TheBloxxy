@@ -1,6 +1,7 @@
 -- =========================== LIBRARY XD ===========================
 if true then
-    local queue_on_teleport = queue_on_teleport
+    local f22 = function()end
+    local queue_on_teleport = queue_on_teleport or f22
 
     if syn then
         queue_on_teleport = syn.queue_on_teleport
@@ -3011,12 +3012,13 @@ if true then
             {item = "Ice-Ice", key = "V", delay = 0, M = 50}
         },
         correr = {
-            {item = "Dragon Trident", key = "X", delay = 0.7, M = 50},
-            {item = "Kitsune-Kitsune", key = "C", delay = 0.2, M = 30},
-            {item = "Kitsune-Kitsune", key = "X", delay = 0.2, M = 50},
-            {item = "Kitsune-Kitsune", key = "Z", delay = 0.2, M = 50},
-            {item = "Godhuman", key = "X", delay = 1, M = 50},
-            {item = "Godhuman", key = "C", delay = 1, M = 50},
+            {item = "Dragon Trident", key = "X", delay = 0.7, M = 50, T = 1},
+            {item = "Kitsune-Kitsune", key = "C", delay = 0.14, M = 30, T = 1},
+            {item = "Kitsune-Kitsune", key = "X", delay = 0.14, M = 50},
+            {item = "Kitsune-Kitsune", key = "Z", delay = 0.15, M = 50},
+            {item = "Godhuman", key = "X", delay = 0.2, M = 50, T = 1},
+            {item = "Godhuman", key = "Z", delay = 0.2, M = 50},
+            {item = "Godhuman", key = "C", delay = 0.2, M = 50, T = 0, S = 2},
         }
     }
 
@@ -3050,10 +3052,12 @@ if true then
                 local key = action.key
                 local t = action.delay or 0.7
                 local d = action.M or 400
+                local T = action.T or 0
+                local s = action.S or 2
 
                 -- Posiciona o player (conforme seu código) e equipa a arma
                 local root = plr.Character.HumanoidRootPart
-                if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") then
+                if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
                     _G.U723 = true
                     for i = 1, 2 do
                         currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
@@ -3087,6 +3091,7 @@ if true then
                     end
                     -- Pressiona a tecla especificada
                     game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                    wait(s)
                     game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
                     currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
                     newPosition = currentPosition + Vector3.new(2, 2.5, 0)
