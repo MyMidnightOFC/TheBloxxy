@@ -1,4 +1,5 @@
 -- =========================== LIBRARY XD ===========================
+print("New Script...")
 if true then
     local f22 = function()end
     local queue_on_teleport = queue_on_teleport or f22
