@@ -3017,8 +3017,8 @@ if true then
         voar = {
             -- Removi as aspas de "voar" e "correr" para que fiquem como chaves da tabela
             {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
-            {item = "Soul Guitar", key = "X", delay = 1.2, M = 30, T = 1},
-            {item = "Ice-Ice", key = "V", delay = 0, M = 50, T = 1}
+            {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+            {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
         },
         correr = {
             {item = "Dragon Trident", key = "X", delay = 0.5, M = 50, T = 1},
