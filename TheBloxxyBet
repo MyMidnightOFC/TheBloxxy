@@ -308,7 +308,7 @@ if true then
                         local avgDirection = calculateAverage(directionHistory, monitoringTime)
 
                         -- Calcula a posição prevista
-                        local sensitivityFactor, deltaTime = 0.4, 0.5
+                        local sensitivityFactor, deltaTime = 0.43, 0.5
                         local predictedPosition =
                             rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
 
