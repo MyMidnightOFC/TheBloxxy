@@ -3019,16 +3019,6 @@ if true then
             {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
             {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
             {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
-        },
-        correr = {
-            {item = "Dragon Trident", key = "X", delay = 0.5, M = 50, T = 1},
-            {item = "Kitsune-Kitsune", key = "C", delay = 0.3, M = 30, T = 1},
-            {item = "Kitsune-Kitsune", key = "X", delay = 0.38, M = 50},
-            {item = "Kitsune-Kitsune", key = "Z", delay = 0.4, M = 50},
-            {item = "Kabucha", key = "X", delay = 0.4, M = 50, T = 1},
-            {item = "Kitsune-Kitsune", key = "F", delay = 0.5, M = 50, T = 1},
-            {item = "Godhuman", key = "X", delay = 0.3, M = 50, T = 0},
-            {item = "Godhuman", key = "C", delay = 0, M = 50, T = 1},
         }
     }
 
@@ -3136,18 +3126,6 @@ if true then
             end
         }
     )
-
-
-    Save:AddButton(
-        {
-            Name = "TEST 2",
-            Callback = function()
-                addTeleportTool30("correr")
-            end
-        }
-    )
-
-                addTeleportTool30("correr")
                 addTeleportTool30("voar")
 
 
