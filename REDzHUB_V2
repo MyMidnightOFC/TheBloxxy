@@ -663,9 +663,9 @@ function redzlib:MakeWindow(Configs)
   end
   function Window:AddMinimizeButton(Configs)
     local Button = MakeDrag(Create("ImageButton", ScreenGui, {
-      Size = UDim2.fromOffset(35, 35),
-      Position = UDim2.fromScale(0.15, 0.15),
-      BackgroundTransparency = 1,
+      Size = UDim2.fromOffset(45, 45),
+      Position = UDim2.fromScale(0.12, 0.12),
+      BackgroundTransparency = 0.8,
       BackgroundColor3 = Theme["Color Hub 2"],
       AutoButtonColor = true,
       ImageColor3 = Color3.fromRGB(255, 0, 0) 
@@ -677,7 +677,7 @@ function redzlib:MakeWindow(Configs)
           hue = (hue + 2) % 360
           local color = Color3.fromHSV(hue / 360, 1, 1)
           button.ImageColor3 = color
-          wait(0.001) -- Ajuste a velocidade da animação alterando o valor da espera
+          wait(0.01) -- Ajuste a velocidade da animação alterando o valor da espera
       end
   end
 
