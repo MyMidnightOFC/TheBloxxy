@@ -1,5 +1,6 @@
 -- =========================== LIBRARY XD ===========================
 print("New Script...")
+print(";-;")
 if true then
     local f22 = function()end
     local queue_on_teleport = queue_on_teleport or f22
@@ -234,7 +235,7 @@ if true then
     function SuperView()
         -- Variáveis globais para controlar o script
         _G.IsScriptRunning = true
-        _G.MonitoringTime = 50
+        _G.MonitoringTime = 70
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
 
@@ -308,7 +309,7 @@ if true then
                         local avgDirection = calculateAverage(directionHistory, monitoringTime)
 
                         -- Calcula a posição prevista
-                        local sensitivityFactor, deltaTime = 0.35, 0.45
+                        local sensitivityFactor, deltaTime = 0.43, 0.5
                         local predictedPosition =
                             rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
 
@@ -579,7 +580,8 @@ if true then
 
     spawn(UpdateWaponList)
 
-    function NotificationMenuGame(M, M2)
+    function NotificationMenuGame(M, M2, T)
+        T = T or 7
         M2 = M2 or "Information returning from the script in compatibility mode!!"
         if (_G.CompatibilitySolara) then
             _G.OrionLib:MakeNotification(
@@ -587,7 +589,7 @@ if true then
                     Name = M,
                     Content = M2,
                     Image = "rbxassetid://4483345998",
-                    Time = 7
+                    Time = T
                 }
             )
             return
@@ -656,24 +658,54 @@ if true then
     task.spawn(
         function()
             function AimBotPart()
-                local oldhook
-                oldhook =
-                    hookmetamethod(
-                    game,
-                    "__namecall",
-                    function(self, ...)
-                        if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
-                            local args = {...}
-                            local Vector = args[1]
-                            if typeof(Vector) == "Vector3" then
-                                if getgenv().AimbotPos then
-                                    return oldhook(self, getgenv().AimbotPos, ...)
+            local success, errorMessage = pcall(function()
+                    if (_G.CompatibilitySolara) then
+                        local gg = getrawmetatable(game)
+                        local old = gg.__namecall
+                        setreadonly(gg, false)
+                        gg.__namecall =
+                            newcclosure(
+                            function(...)
+                                local method = getnamecallmethod()
+                                local args = {...}
+                                if tostring(method) == "FireServer" then
+                                    if tostring(args[1]) == "RemoteEvent" then
+                                        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+                                            if getgenv().AimbotPos then
+                                                    args[2] = getgenv().AimbotPos
+                                                return old(unpack(args))
+                                            end
+                                        end
+                                    end
                                 end
+                                return old(...)
                             end
-                        end
-                        return oldhook(self, ...)
+                        )
+                    else
+                        local oldhook
+                        oldhook =
+                            hookmetamethod(
+                            game,
+                            "__namecall",
+                            function(self, ...)
+                                if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
+                                    local args = {...}
+                                    local Vector = args[1]
+                                    if typeof(Vector) == "Vector3" then
+                                        if getgenv().AimbotPos then
+                                            return oldhook(self, getgenv().AimbotPos, ...)
+                                        end
+                                    end
+                                end
+                                return oldhook(self, ...)
+                            end
+                        )
                     end
-                )
+                end)
+
+                if not (success) then
+                    NotificationMenuGame("Error Occurred XD", errorMessage, 45)
+                end
             end
 
             -- Chame a função AimBotPart com os parâmetros corretos
@@ -688,27 +720,32 @@ if true then
         return math.floor(tonumber(n) + 0.5)
     end
     local function F_Number(numero)
-        -- Converte o número para string
-        local numeroString = tostring(numero)
-
-        -- Define a lista de sufixos e seus valores
+        -- Define a lista de sufixos e seus valores, incluindo bilhões
         local sufixos = {
+            {valor = 1e9, sufixo = "B"},
             {valor = 1e6, sufixo = "M"},
             {valor = 1e3, sufixo = "K"}
         }
-
-        -- Verifica se o número é maior que o maior sufixo (1 milhão)
+    
+        -- Verifica o sufixo apropriado para o número
         for _, sufixoInfo in ipairs(sufixos) do
             if numero >= sufixoInfo.valor then
-                -- Calcula o valor formatado e adiciona o sufixo
+                -- Calcula o valor formatado com precisão de duas casas decimais
                 local valorFormatado = numero / sufixoInfo.valor
-                return string.format("%.1f%s", valorFormatado, sufixoInfo.sufixo)
+                if valorFormatado >= 100 then
+                    return string.format("%.0f%s", valorFormatado, sufixoInfo.sufixo) -- Sem casas decimais para valores grandes
+                elseif valorFormatado >= 10 then
+                    return string.format("%.1f%s", valorFormatado, sufixoInfo.sufixo) -- Uma casa decimal para valores médios
+                else
+                    return string.format("%.2f%s", valorFormatado, sufixoInfo.sufixo) -- Duas casas decimais para valores pequenos
+                end
             end
         end
-
+    
         -- Caso não se aplique nenhum sufixo, retorna o número original
-        return numeroString
+        return tostring(numero)
     end
+    
     Number = math.random(1, 1000000)
     function UpdateEspPlayer()
         for i, v in pairs(game:GetService "Players":GetChildren()) do
@@ -762,8 +799,15 @@ if true then
                                 end
 
                                 if _G.ESPPlayerViewExtra then
-                                    bount_extra = "[ " .. bount .. " ]\n"
+                                    bount_extra = "[ " .. bount .. " ]"
                                 end
+
+                                if (CheckSafeZone(v.Character)) then
+                                    bount_extra = bount_extra .. " - SAFE\n"
+                                else
+                                    bount_extra = bount_extra .. "\n"
+                                end
+
                                 if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
                                     v.Character.Head["NameEsp" .. Number].TextLabel.Text =
                                         (bount_extra ..
@@ -793,6 +837,25 @@ if true then
         end
     end
 
+    function CheckSafeZone(p)
+        -- Verifica se 'p' possui 'HumanoidRootPart' e 'Humanoid' para evitar erros
+        if not p:FindFirstChild("HumanoidRootPart") or not p:FindFirstChild("Humanoid") then
+            return false
+        end
+    
+        for i, v in pairs(game:GetService("Workspace")["_WorldOrigin"].SafeZones:GetChildren()) do
+            if v:IsA("Part") then
+                local distance = (v.Position - p.HumanoidRootPart.Position).magnitude
+                local healthPercentage = p.Humanoid.Health / p.Humanoid.MaxHealth
+                if distance <= 200 and healthPercentage >= 0.95 then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+    
+    
     function findIndex(item, list)
         for i, v in ipairs(list) do
             if v == item then
@@ -836,12 +899,18 @@ if true then
                     table.insert(PlayersIndicatorList, player.Name)
 
                     -- Definir a cor principal com base no time e valores
-                    local MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
+                        MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
+                    if (CheckSafeZone(character)) then
+                        MainColor = Color3.fromRGB(0, 255, 50) -- Padrão Verde
+                    end
+
                     if
                         tostring(game.Players.LocalPlayer.Team) == "Marines" and
                             game.Players.LocalPlayer.Team == player.Team
                      then
-                        MainColor = Color3.fromRGB(0, 255, 0) -- Verde para time igual
+                        MainColor = Color3.fromRGB(255, 0, 255) -- Verde para time igual
+                    elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 10000000 then
+                        MainColor = Color3.fromRGB(153, 0, 255)
                     elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 3000000 then
                         MainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
                     end
@@ -967,7 +1036,7 @@ if true then
                 function()
                     game:GetService("RunService").Stepped:Connect(
                         function()
-                            if _G.Setting_table.NoClip then
+                            if _G.Setting_table.NoClip or _G.Clip then
                                 for _, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
                                     if v:IsA("BasePart") then
                                         v.CanCollide = false
@@ -1200,8 +1269,8 @@ if true then
         local Window =
             redzlib:MakeWindow(
             {
-                Title = "TheBloxxyPvP",
-                SubTitle = "ESPECIAL EDITION!!",
+                Title = "MyMidnight Team",
+                SubTitle = "BloxFruits Super Script!",
                 SaveFolder = "testando | redz lib v5.lua"
             }
         )
@@ -1677,6 +1746,15 @@ if true then
                 Name = "Join Marine Team",
                 Callback = function()
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+                end
+            }
+        )
+
+        Script:AddButton(
+            {
+                Name = "Rejoin Server!!",
+                Callback = function()
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
                 end
             }
         )
@@ -2324,26 +2402,32 @@ if true then
                     if Value and not _G.VPO then
                         OJO()
                     end
+                    local F = function()
+                        if
+                            _G.SPLY and _G.SPLY.Character and
+                                _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
+                         then
+                            if (_G.SelectedBall and _G.IsScriptRunning) then
+                                getgenv().AimbotPos = _G.SelectedPosition
+                                return
+                            end
+
+                            currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
+                            newPosition = currentPosition
+                            getgenv().AimbotPos = newPosition
+                        end
+                    end
 
                     if (Value) then
                         ASV1_1 =
-                            game:GetService("RunService").RenderStepped:Connect(
-                            function()
-                                if
-                                    _G.SPLY and _G.SPLY.Character and
-                                        _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
-                                 then
-                                    if (_G.SelectedBall and _G.IsScriptRunning) then
-                                        getgenv().AimbotPos = _G.SelectedPosition
-                                        return
-                                    end
+                            game:GetService("RunService").RenderStepped:Connect(F)
 
-                                    currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
-                                    newPosition = currentPosition
-                                    getgenv().AimbotPos = newPosition
-                                end
+                        spawn(function()
+
+                            while (ASV1_1) do wait()
+                                F()
                             end
-                        )
+                        end)
                     else
                         pcall(
                             function()
@@ -3016,19 +3100,9 @@ if true then
     _G.ActionList = {
         voar = {
             -- Removi as aspas de "voar" e "correr" para que fiquem como chaves da tabela
-            {item = "Dragon Trident", key = "X", delay = 0.7, M = 450},
-            {item = "Soul Guitar", key = "X", delay = 1.2, M = 30},
-            {item = "Ice-Ice", key = "V", delay = 0, M = 50}
-        },
-        correr = {
-            {item = "Dragon Trident", key = "X", delay = 0.5, M = 50, T = 1},
-            {item = "Kitsune-Kitsune", key = "C", delay = 0.3, M = 30, T = 1},
-            {item = "Kitsune-Kitsune", key = "X", delay = 0.38, M = 50},
-            {item = "Kitsune-Kitsune", key = "Z", delay = 0.4, M = 50},
-            {item = "Kabucha", key = "X", delay = 0.4, M = 50, T = 1},
-            {item = "Kitsune-Kitsune", key = "F", delay = 0.5, M = 50, T = 1},
-            {item = "Godhuman", key = "X", delay = 0.3, M = 50, T = 0},
-            {item = "Godhuman", key = "C", delay = 0, M = 50, T = 1},
+            {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
+            {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+            {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
         }
     }
 
@@ -3064,6 +3138,12 @@ if true then
                 local d = action.M or 400
                 local T = action.T or 0
 
+                local distance =
+                    round(
+                    (game:GetService("Players").LocalPlayer.Character.Head.Position - _G.SPLY.Character.Head.Position).Magnitude /
+                        3
+                )
+
                 if (distance > d) then
                     root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
                     NotificationMenuGame("Jogador muito distante...")
@@ -3086,11 +3166,7 @@ if true then
                     end
                 end
 
-                local distance =
-                    round(
-                    (game:GetService("Players").LocalPlayer.Character.Head.Position - _G.SPLY.Character.Head.Position).Magnitude /
-                        3
-                )
+                
 
                 if (distance > d) then
                     root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
@@ -3119,8 +3195,6 @@ if true then
                     return
                 end
             end
-            wait(4)
-            _G.U723 = false
         end
 
         tool.Activated:Connect(A)
@@ -3136,18 +3210,6 @@ if true then
             end
         }
     )
-
-
-    Save:AddButton(
-        {
-            Name = "TEST 2",
-            Callback = function()
-                addTeleportTool30("correr")
-            end
-        }
-    )
-
-                addTeleportTool30("correr")
                 addTeleportTool30("voar")
 
 
