@@ -1,6 +1,9 @@
 -- =========================== LIBRARY XD ===========================
 print("New Script...")
 print(";-;")
+print("Man, it's")
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+_G.OrionLib = OrionLib
 if true then
     local f22 = function()end
     local queue_on_teleport = queue_on_teleport or f22
