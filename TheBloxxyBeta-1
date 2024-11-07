@@ -1,10 +1,10 @@
 -- =========================== LIBRARY XD ===========================
 print("New Script...")
-print(";-;")
-print("Man, it's")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 _G.OrionLib = OrionLib
 if true then
+print("1")
+
     local f22 = function()end
     local queue_on_teleport = queue_on_teleport or f22
 
@@ -14,6 +14,8 @@ if true then
     queue_on_teleport(
         [[loadstring(game:HttpGet("https://raw.githubusercontent.com/accountnop/magmaisgay/main/magma"))()]]
     )
+print("2")
+
 
     local placeId = game.PlaceId
     SEA = ""
@@ -52,6 +54,7 @@ if true then
     function FireRemote(...)
         return CommF:InvokeServer(...)
     end
+    print("3")
 
     _G.OJO_VS = {}
     function OJO()
@@ -234,6 +237,8 @@ if true then
         end
     )
 
+print("4")
+
     _G.OJO_SV = {}
     function SuperView()
         -- Variáveis globais para controlar o script
@@ -337,6 +342,7 @@ if true then
                 end
             )
         end
+        print("5")
 
         -- Função para atualizar o jogador monitorado
         local function updateTargetPlayer(player)
@@ -397,6 +403,7 @@ if true then
             end
         end
     )
+    print("6")
 
     function SuperHeight(p)
         local player = p
@@ -429,6 +436,7 @@ if true then
 
         checkHeight()
     end
+    print("7")
 
     function CH(pl)
         local player = pl
@@ -478,6 +486,7 @@ if true then
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(Tool)
         end
     end
+    print("8")
 
     function Hop()
         local PlaceID = game.PlaceId
@@ -562,6 +571,7 @@ if true then
         end
         Teleport()
     end
+    print("9")
 
     function UpdateWaponList()
         while true do
@@ -582,6 +592,7 @@ if true then
     end
 
     spawn(UpdateWaponList)
+    print("10")
 
     function NotificationMenuGame(M, M2, T)
         T = T or 7
@@ -622,6 +633,7 @@ if true then
             require(game.ReplicatedStorage.Notification).new(...):Display()
         end
     end
+    print("12")
 
     function JMP()
         local Players = game:GetService("Players")
@@ -657,6 +669,7 @@ if true then
             return nil
         end
     end
+    print("13")
 
     task.spawn(
         function()
@@ -715,6 +728,7 @@ if true then
             AimBotPart() -- Certifique-se de que 'part' e 'tool' estejam definidos corretamente
         end
     )
+    print("14")
 
     function isnil(thing)
         return (thing == nil)
@@ -748,6 +762,7 @@ if true then
         -- Caso não se aplique nenhum sufixo, retorna o número original
         return tostring(numero)
     end
+print("15")
     
     Number = math.random(1, 1000000)
     function UpdateEspPlayer()
@@ -858,6 +873,7 @@ if true then
         return false
     end
     
+print("16")
     
     function findIndex(item, list)
         for i, v in ipairs(list) do
@@ -884,6 +900,7 @@ if true then
         RemoveHighlightV1()
         CreateHighlightV1()
     end
+    print("17")
 
     function CreateHighlightV1()
         local Players = game:GetService("Players")
@@ -923,7 +940,7 @@ if true then
                     billboardGui.Name = "Indicator"
                     billboardGui.Parent = head
                     billboardGui.Size = UDim2.new(5.2, 0, 7, 0)
-                    billboardGui.StudsOffset = Vector3.new(0.5, -2.5, 0)
+                    billboardGui.StudsOffset = Vector3.new(-0.15, -2.5, 0)
                     billboardGui.AlwaysOnTop = true
 
                     local frame = Instance.new("Frame")
@@ -975,6 +992,7 @@ if true then
             _G.Clip = false
         end
     end
+    print("19")
 
     function StopTween(target)
         if not target then
@@ -1032,6 +1050,7 @@ if true then
             )
         end
     )
+    print("100")
 
     spawn(
         function()
@@ -1052,6 +1071,7 @@ if true then
             )
         end
     )
+    print("11")
 
     if not (_G.CompatibilitySolara) then
         local CameraShaker = require(game.ReplicatedStorage.Util.CameraShaker)
@@ -1086,6 +1106,7 @@ if true then
             end
         )
     end
+    print("15")
 
     function AutoHaki()
         if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
@@ -1122,6 +1143,7 @@ if true then
 
         return false
     end
+    print("14")
 
     function NameSword()
         for i, v in next, game:GetService("Players").LocalPlayer.Backpack:GetChildren() do
@@ -1151,10 +1173,12 @@ if true then
         end
         return false
     end
+    print("12")
 
     while not NameMelee() do
         wait(1)
     end
+    print("14")
 
     ReloadList = function()
         spawn(
@@ -1185,7 +1209,8 @@ if true then
         )
     end
     ReloadList()
-    --================== End ==================
+print("13333")
+--================== End ==================
     print()
 
     -- =========================== Save System ;-; ===========================
@@ -1247,6 +1272,7 @@ if true then
                 Check_Setting(Name)
             end
         end
+        print("???")
 
         Reload_Setting(_G.Check_Save_Setting)
         Check_Setting(_G.Check_Save_Setting)
@@ -1263,6 +1289,8 @@ if true then
 
     --================== Menu =====================
     if true then
+print("What")
+
         -- Criação da interface com a RedzLib
         local redzlib =
             loadstring(
@@ -2485,7 +2513,7 @@ if true then
                         spawn(
                             function()
                                 while _G.Setting_table.LigthV1 do
-                                    wait(5)
+                                    wait(1)
                                     if _G.Setting_table.LigthV1 then
                                         ReloadHighlightV1()
                                     end
