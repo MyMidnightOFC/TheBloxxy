@@ -1,6 +1,10 @@
 -- =========================== LIBRARY XD ===========================
 print("New Script...")
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+_G.OrionLib = OrionLib
 if true then
+print("1")
+
     local f22 = function()end
     local queue_on_teleport = queue_on_teleport or f22
 
@@ -10,6 +14,8 @@ if true then
     queue_on_teleport(
         [[loadstring(game:HttpGet("https://raw.githubusercontent.com/accountnop/magmaisgay/main/magma"))()]]
     )
+print("2")
+
 
     local placeId = game.PlaceId
     SEA = ""
@@ -28,6 +34,41 @@ if true then
     end
     _G.Setting_table = {}
     _G.Setting_table["OK"] = true
+
+    _G.ForceImpulse = _G.ForceImpulse or 1.8
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local camera = game.Workspace.CurrentCamera
+    local userInputService = game:GetService("UserInputService")
+    local runService = game:GetService("RunService")
+
+    local launchForceHorizontal = 200 -- Força do impulso horizontal
+    local launchForceUp = 100         -- Força do impulso vertical
+    local impulseDuration = 0.1     -- Duração do impulso em segundos
+
+    -- Função para lançar o personagem
+    function launchPlayer()
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            -- Captura apenas o eixo X da direção da câmera
+            local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+            -- Calcula a força final do impulso, aplicando o multiplicador
+            local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * _G.ForceImpulse
+
+            -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
+            local startTime = tick()
+            local connection
+            connection = runService.Heartbeat:Connect(function()
+                if tick() - startTime < impulseDuration then
+                    rootPart.Velocity = launchDirection
+                else
+                    connection:Disconnect() -- Termina o impulso após o tempo de duração
+                end
+            end)
+        end
+    end
+
+
 
     local Player = game.Players.LocalPlayer
 
@@ -48,6 +89,7 @@ if true then
     function FireRemote(...)
         return CommF:InvokeServer(...)
     end
+    print("3")
 
     _G.OJO_VS = {}
     function OJO()
@@ -230,6 +272,8 @@ if true then
         end
     )
 
+print("4")
+
     _G.OJO_SV = {}
     function SuperView()
         -- Variáveis globais para controlar o script
@@ -333,6 +377,7 @@ if true then
                 end
             )
         end
+        print("5")
 
         -- Função para atualizar o jogador monitorado
         local function updateTargetPlayer(player)
@@ -393,6 +438,7 @@ if true then
             end
         end
     )
+    print("6")
 
     function SuperHeight(p)
         local player = p
@@ -425,6 +471,7 @@ if true then
 
         checkHeight()
     end
+    print("7")
 
     function CH(pl)
         local player = pl
@@ -474,6 +521,7 @@ if true then
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(Tool)
         end
     end
+    print("8")
 
     function Hop()
         local PlaceID = game.PlaceId
@@ -558,6 +606,7 @@ if true then
         end
         Teleport()
     end
+    print("9")
 
     function UpdateWaponList()
         while true do
@@ -578,8 +627,10 @@ if true then
     end
 
     spawn(UpdateWaponList)
+    print("10")
 
-    function NotificationMenuGame(M, M2)
+    function NotificationMenuGame(M, M2, T)
+        T = T or 7
         M2 = M2 or "Information returning from the script in compatibility mode!!"
         if (_G.CompatibilitySolara) then
             _G.OrionLib:MakeNotification(
@@ -587,7 +638,7 @@ if true then
                     Name = M,
                     Content = M2,
                     Image = "rbxassetid://4483345998",
-                    Time = 7
+                    Time = T
                 }
             )
             return
@@ -617,6 +668,7 @@ if true then
             require(game.ReplicatedStorage.Notification).new(...):Display()
         end
     end
+    print("12")
 
     function JMP()
         local Players = game:GetService("Players")
@@ -652,34 +704,66 @@ if true then
             return nil
         end
     end
+    print("13")
 
     task.spawn(
         function()
             function AimBotPart()
-                local oldhook
-                oldhook =
-                    hookmetamethod(
-                    game,
-                    "__namecall",
-                    function(self, ...)
-                        if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
-                            local args = {...}
-                            local Vector = args[1]
-                            if typeof(Vector) == "Vector3" then
-                                if getgenv().AimbotPos then
-                                    return oldhook(self, getgenv().AimbotPos, ...)
+            local success, errorMessage = pcall(function()
+                    if (_G.CompatibilitySolara) then
+                        local gg = getrawmetatable(game)
+                        local old = gg.__namecall
+                        setreadonly(gg, false)
+                        gg.__namecall =
+                            newcclosure(
+                            function(...)
+                                local method = getnamecallmethod()
+                                local args = {...}
+                                if tostring(method) == "FireServer" then
+                                    if tostring(args[1]) == "RemoteEvent" then
+                                        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+                                            if getgenv().AimbotPos then
+                                                    args[2] = getgenv().AimbotPos
+                                                return old(unpack(args))
+                                            end
+                                        end
+                                    end
                                 end
+                                return old(...)
                             end
-                        end
-                        return oldhook(self, ...)
+                        )
+                    else
+                        local oldhook
+                        oldhook =
+                            hookmetamethod(
+                            game,
+                            "__namecall",
+                            function(self, ...)
+                                if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
+                                    local args = {...}
+                                    local Vector = args[1]
+                                    if typeof(Vector) == "Vector3" then
+                                        if getgenv().AimbotPos then
+                                            return oldhook(self, getgenv().AimbotPos, ...)
+                                        end
+                                    end
+                                end
+                                return oldhook(self, ...)
+                            end
+                        )
                     end
-                )
+                end)
+
+                if not (success) then
+                    NotificationMenuGame("Error Occurred XD", errorMessage, 45)
+                end
             end
 
             -- Chame a função AimBotPart com os parâmetros corretos
             AimBotPart() -- Certifique-se de que 'part' e 'tool' estejam definidos corretamente
         end
     )
+    print("14")
 
     function isnil(thing)
         return (thing == nil)
@@ -688,27 +772,33 @@ if true then
         return math.floor(tonumber(n) + 0.5)
     end
     local function F_Number(numero)
-        -- Converte o número para string
-        local numeroString = tostring(numero)
-
-        -- Define a lista de sufixos e seus valores
+        -- Define a lista de sufixos e seus valores, incluindo bilhões
         local sufixos = {
+            {valor = 1e9, sufixo = "B"},
             {valor = 1e6, sufixo = "M"},
             {valor = 1e3, sufixo = "K"}
         }
-
-        -- Verifica se o número é maior que o maior sufixo (1 milhão)
+    
+        -- Verifica o sufixo apropriado para o número
         for _, sufixoInfo in ipairs(sufixos) do
             if numero >= sufixoInfo.valor then
-                -- Calcula o valor formatado e adiciona o sufixo
+                -- Calcula o valor formatado com precisão de duas casas decimais
                 local valorFormatado = numero / sufixoInfo.valor
-                return string.format("%.1f%s", valorFormatado, sufixoInfo.sufixo)
+                if valorFormatado >= 100 then
+                    return string.format("%.0f%s", valorFormatado, sufixoInfo.sufixo) -- Sem casas decimais para valores grandes
+                elseif valorFormatado >= 10 then
+                    return string.format("%.1f%s", valorFormatado, sufixoInfo.sufixo) -- Uma casa decimal para valores médios
+                else
+                    return string.format("%.2f%s", valorFormatado, sufixoInfo.sufixo) -- Duas casas decimais para valores pequenos
+                end
             end
         end
-
+    
         -- Caso não se aplique nenhum sufixo, retorna o número original
-        return numeroString
+        return tostring(numero)
     end
+print("15")
+    
     Number = math.random(1, 1000000)
     function UpdateEspPlayer()
         for i, v in pairs(game:GetService "Players":GetChildren()) do
@@ -762,8 +852,15 @@ if true then
                                 end
 
                                 if _G.ESPPlayerViewExtra then
-                                    bount_extra = "[ " .. bount .. " ]\n"
+                                    bount_extra = "[ " .. bount .. " ]"
                                 end
+
+                                if (CheckSafeZone(v.Character)) then
+                                    bount_extra = bount_extra .. " - SAFE\n"
+                                else
+                                    bount_extra = bount_extra .. "\n"
+                                end
+
                                 if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
                                     v.Character.Head["NameEsp" .. Number].TextLabel.Text =
                                         (bount_extra ..
@@ -793,6 +890,26 @@ if true then
         end
     end
 
+    function CheckSafeZone(p)
+        -- Verifica se 'p' possui 'HumanoidRootPart' e 'Humanoid' para evitar erros
+        if not p:FindFirstChild("HumanoidRootPart") or not p:FindFirstChild("Humanoid") then
+            return false
+        end
+    
+        for i, v in pairs(game:GetService("Workspace")["_WorldOrigin"].SafeZones:GetChildren()) do
+            if v:IsA("Part") then
+                local distance = (v.Position - p.HumanoidRootPart.Position).magnitude
+                local healthPercentage = p.Humanoid.Health / p.Humanoid.MaxHealth
+                if distance <= 200 and healthPercentage >= 0.95 then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+    
+print("16")
+    
     function findIndex(item, list)
         for i, v in ipairs(list) do
             if v == item then
@@ -818,6 +935,7 @@ if true then
         RemoveHighlightV1()
         CreateHighlightV1()
     end
+    print("17")
 
     function CreateHighlightV1()
         local Players = game:GetService("Players")
@@ -836,12 +954,18 @@ if true then
                     table.insert(PlayersIndicatorList, player.Name)
 
                     -- Definir a cor principal com base no time e valores
-                    local MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
+                        MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
+                    if (CheckSafeZone(character)) then
+                        MainColor = Color3.fromRGB(0, 255, 50) -- Padrão Verde
+                    end
+
                     if
                         tostring(game.Players.LocalPlayer.Team) == "Marines" and
                             game.Players.LocalPlayer.Team == player.Team
                      then
-                        MainColor = Color3.fromRGB(0, 255, 0) -- Verde para time igual
+                        MainColor = Color3.fromRGB(255, 0, 255) -- Verde para time igual
+                    elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 10000000 then
+                        MainColor = Color3.fromRGB(153, 0, 255)
                     elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 3000000 then
                         MainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
                     end
@@ -851,7 +975,7 @@ if true then
                     billboardGui.Name = "Indicator"
                     billboardGui.Parent = head
                     billboardGui.Size = UDim2.new(5.2, 0, 7, 0)
-                    billboardGui.StudsOffset = Vector3.new(0.5, -2.5, 0)
+                    billboardGui.StudsOffset = Vector3.new(-0.15, -2.5, 0)
                     billboardGui.AlwaysOnTop = true
 
                     local frame = Instance.new("Frame")
@@ -903,6 +1027,7 @@ if true then
             _G.Clip = false
         end
     end
+    print("19")
 
     function StopTween(target)
         if not target then
@@ -960,6 +1085,7 @@ if true then
             )
         end
     )
+    print("100")
 
     spawn(
         function()
@@ -967,7 +1093,7 @@ if true then
                 function()
                     game:GetService("RunService").Stepped:Connect(
                         function()
-                            if _G.Setting_table.NoClip then
+                            if _G.Setting_table.NoClip or _G.Clip then
                                 for _, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
                                     if v:IsA("BasePart") then
                                         v.CanCollide = false
@@ -980,6 +1106,7 @@ if true then
             )
         end
     )
+    print("11")
 
     if not (_G.CompatibilitySolara) then
         local CameraShaker = require(game.ReplicatedStorage.Util.CameraShaker)
@@ -1014,6 +1141,7 @@ if true then
             end
         )
     end
+    print("15")
 
     function AutoHaki()
         if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
@@ -1050,6 +1178,7 @@ if true then
 
         return false
     end
+    print("14")
 
     function NameSword()
         for i, v in next, game:GetService("Players").LocalPlayer.Backpack:GetChildren() do
@@ -1079,10 +1208,12 @@ if true then
         end
         return false
     end
+    print("12")
 
     while not NameMelee() do
         wait(1)
     end
+    print("14")
 
     ReloadList = function()
         spawn(
@@ -1113,7 +1244,8 @@ if true then
         )
     end
     ReloadList()
-    --================== End ==================
+print("13333")
+--================== End ==================
     print()
 
     -- =========================== Save System ;-; ===========================
@@ -1175,6 +1307,7 @@ if true then
                 Check_Setting(Name)
             end
         end
+        print("???")
 
         Reload_Setting(_G.Check_Save_Setting)
         Check_Setting(_G.Check_Save_Setting)
@@ -1191,6 +1324,8 @@ if true then
 
     --================== Menu =====================
     if true then
+print("What")
+
         -- Criação da interface com a RedzLib
         local redzlib =
             loadstring(
@@ -1200,8 +1335,8 @@ if true then
         local Window =
             redzlib:MakeWindow(
             {
-                Title = "TheBloxxyPvP",
-                SubTitle = "ESPECIAL EDITION!!",
+                Title = "MyMidnight Team",
+                SubTitle = "BloxFruits Super Script!",
                 SaveFolder = "testando | redz lib v5.lua"
             }
         )
@@ -1680,10 +1815,191 @@ if true then
                 end
             }
         )
+
+        Script:AddButton(
+            {
+                Name = "Rejoin Server!!",
+                Callback = function()
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+                end
+            }
+        )
     end
 
     --================== Utilities =====================
     if true then
+        Utilities:AddSection({"Super Button ( Mobile )"})
+
+        function RemoveToggleButton()
+            if toggleButton then
+                toggleButton:Destroy()
+                toggleButton = false
+            end
+        end
+
+        function AddToggleButton()
+            
+            if not toggleButton then
+                toggleButton = Instance.new("TextButton")
+
+                toggleButton.Text = "Blox Tools"
+                toggleButton.Size = UDim2.new(0, 125, 0, 40) -- Tamanho maior e mais retangular
+                toggleButton.Position = UDim2.new(1, 0, 0, 40) -- Posicionamento mais visível no canto superior direito
+                toggleButton.AnchorPoint = Vector2.new(1, 0)
+                toggleButton.BackgroundTransparency = 0.25 -- Leve transparência para um visual mais moderno
+                toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 48) -- Cor de fundo mais escura para dar um estilo flat
+                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- Texto branco para contraste
+                toggleButton.TextSize = 18 -- Tamanho do texto maior para melhor visibilidade
+                toggleButton.Font = Enum.Font.GothamBold -- Fonte Gotham para um ar mais clean e moderno
+                toggleButton.BorderSizePixel = 0 -- Sem borda para um visual flat
+
+                local uiCorner = Instance.new("UICorner")
+                uiCorner.CornerRadius = UDim.new(0.1, 0) -- Bordas levemente arredondadas
+                uiCorner.Parent = toggleButton
+
+                local uiStroke = Instance.new("UIStroke")
+                uiStroke.Thickness = 1.5 -- Espessura fina para manter o visual elegante
+                uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Borda em tom cinza escuro
+                uiStroke.Transparency = 0.35 -- Borda semi-transparente para suavidade
+                uiStroke.Parent = toggleButton
+
+                toggleButton.MouseEnter:Connect(function()
+                    toggleButton:TweenSize(UDim2.new(0, 130, 0, 45), "Out", "Quad", 0.2, true) -- Aumenta ao passar o mouse
+                    toggleButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60) -- Leve alteração de cor
+                    uiStroke.Color = Color3.fromRGB(120, 120, 120) -- Clareia a borda ao passar o mouse
+                end)
+
+                toggleButton.MouseLeave:Connect(function()
+                    toggleButton:TweenSize(UDim2.new(0, 120, 0, 40), "Out", "Quad", 0.2, true) -- Volta ao tamanho normal
+                    toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 48) -- Cor de fundo original
+                    uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Volta à cor original da borda
+                end)
+
+                toggleButton.MouseButton1Click:Connect(function()
+                    toggleButton:TweenSize(UDim2.new(0, 110, 0, 35), "Out", "Quad", 0.1, true)
+                    wait(0.1)
+                    toggleButton:TweenSize(UDim2.new(0, 120, 0, 40), "Out", "Quad", 0.1, true)
+
+                    -- Chama a função do botão
+                    ActionSuperButton()
+                end)
+
+                toggleButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+            end
+
+
+
+        end
+
+        function PlayUseSong()
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://9120139331"
+            sound.Parent = game:GetService("SoundService")
+            sound.Volume = 4
+            sound:Play()
+        end
+
+        function ActionSuperButton()
+            if SuperButtonNumberAction == 0 then
+                PlayUseSong()
+                launchPlayer()
+            end
+
+            if SuperButtonNumberAction == 1 then
+                local player = game.Players.LocalPlayer
+                local character = player and player.Character
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+                wait(0.05)
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+                wait(0.05)
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+            end
+
+            if SuperButtonNumberAction == 2 then
+                if (_G.SelectedItemButtom) then
+                    if containsItem(_G.WeaponList, _G.SelectedItemButtom) then
+                        EquipWeapon(_G.SelectedItemButtom)
+                        PlayUseSong()
+                        NotificationMenuGame("I'm ready!! ( XD )")
+                    else
+                        NotificationMenuGame("???")
+                    end
+                else
+                    NotificationMenuGame("First it is necessary to calibrate the item...", "You can do this in the menu where you activated the button.")
+                end
+            end
+
+            if SuperButtonNumberAction == 9 then
+                MinkV7Toggle:Set((not _G.MinkV7))
+            end
+        end
+
+        List = {
+            "Super Boost",
+            "Manual SafeMode",
+            "Hold an Item",
+            "Change MinkV7"
+        }
+
+        if (_G.Setting_table.ItemSaved) then
+            _G.SelectedItemButtom = _G.Setting_table.ItemSaved
+        end
+
+        Utilities:AddButton({
+            Name = "Select Item. (<font color='rgb(60, 250, 60)'>Calibrate</font>)",
+            Callback = function()
+            local tool = tostring(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"))
+              NotificationMenuGame((tool))
+              _G.SelectedItemButtom = tool
+            end
+          })
+
+
+        Utilities:AddDropdown({
+            Name = "Power of Impulse. ( <font color='rgb(50, 250, 30)'>Super Button</font> )",
+            Options = {"1", "1.25", "1.5", "1.8", "2", "2.5", "3"},
+            Default = _G.Setting_table.Impulse or {"1.8"},
+            MultSelect = false,
+            Callback = function(Value)
+                _G.Setting_table.Impulse = (Value)
+                _G.ForceImpulse = tonumber(Value)
+            end
+          })
+
+        Utilities:AddToggle(
+            {
+                Name = "Insert Button ( <font color='rgb(50, 250, 0)'>GUI</font> )",
+                Description = "A button is added to perform some action! with one click!",
+                Default = _G.Setting_table.InsertButtom or false,
+                Callback = function(Value)
+                    _G.Setting_table.InsertButtom = Value
+                    pcall(
+                        function()
+                            if Value then
+                                AddToggleButton()
+                            else
+                                RemoveToggleButton()
+                            end
+                        end
+                    )
+                end
+            }
+        )
+
+        Utilities:AddDropdown(
+            {
+                Name = "Primary Execution",
+                Options = List,
+                Default = _G.Setting_table.PrimaryExecution or {"Suprise"},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.PrimaryExecution = Value
+                    L = List
+                    SuperButtonNumberAction = findIndex(Value, L) - 1
+                end
+            }
+        )
+
         Utilities:AddSection(
             {
                 Name = "Utilities"
@@ -1799,6 +2115,8 @@ if true then
                 end
             }
         )
+
+       
 
         JumpForceFunction()
 
@@ -1963,7 +2281,7 @@ if true then
 
         Utilities:AddToggle(
             {
-                Name = "Auto Remove Damage V2!! ( <font color='rgb(250, 60, 60)'>It may crash</font> )",
+                Name = "Auto Remove Damage V2!! ( <font color='rgb(60, 250, 60)'>Fixed, Improved</font> )",
                 Default = _G.Setting_table.Dam or false,
                 Callback = function(Value)
                     _G.Setting_table.Dam = Value
@@ -1994,201 +2312,7 @@ if true then
             }
         )
 
-        Utilities:AddSection({"Super Button ( Mobile )"})
-
-        function RemoveToggleButton()
-            if toggleButton then
-                toggleButton:Destroy()
-                toggleButton = false
-            end
-        end
-
-        function AddToggleButton()
-            if not toggleButton then
-                -- Criando o botão
-                toggleButton = Instance.new("TextButton")
-
-                -- Configurações do botão
-                toggleButton.Text = "Blox"
-                toggleButton.Size = UDim2.new(0, 100, 0, 70) -- Tamanho ajustado
-                toggleButton.Position = UDim2.new(0, 575, 0, 90) -- Posição na tela
-                toggleButton.BackgroundTransparency = 0.5 -- Opacidade do botão
-                toggleButton.BackgroundColor3 = Color3.new(0.5, 0.5, 1) -- Cor de fundo do botão
-                toggleButton.BorderSizePixel = 10 -- Remove a borda padrão
-                toggleButton.TextSize = 10 -- Tamanho do texto
-
-                -- Adicionando UICorner para arredondar o botão
-                local uiCorner = Instance.new("UICorner")
-                uiCorner.CornerRadius = UDim.new(0.15, 0) -- Tornando o botão redondo
-                uiCorner.Parent = toggleButton
-
-                -- Adicionando uma borda rosa ao botão
-                local uiStroke = Instance.new("UIStroke")
-                uiStroke.Thickness = 0.4 -- Espessura da borda
-                uiStroke.Color = Color3.new(0, 0, 0) -- Cor da borda
-                uiStroke.Parent = toggleButton
-
-                -- Definindo o Parent para o botão
-                toggleButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
-
-                -- Variáveis de controle
-                N = 0
-                LockStopped = false
-
-                -- Conectando o evento de clique do botão
-                toggleButton.MouseButton1Click:Connect(
-                    function()
-                        ActionSuperButton()
-                    end
-                )
-            end
-        end
-
-        function PlayUseSong()
-            local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://9120139331"
-            sound.Parent = game:GetService("SoundService")
-            sound.Volume = 4
-            sound:Play()
-        end
-
-        function ActionSuperButton()
-            if SuperButtonNumberAction == 0 then
-                PlayUseSong()
-                NotificationMenuGame("Beetroot with sugar!!")
-            end
-
-            if SuperButtonNumberAction == 1 then
-                local player = game.Players.LocalPlayer
-                local character = player and player.Character
-                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
-                wait(0.05)
-                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
-                wait(0.05)
-                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
-            end
-
-            if SuperButtonNumberAction == 2 then
-                if containsItem(_G.WeaponList, "Auto Teleport + V:Ice") then
-                    EquipWeapon("Auto Teleport + V:Ice")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 3 then
-                if containsItem(_G.WeaponList, "Auto Teleport + V:Ice + Player") then
-                    EquipWeapon("Auto Teleport + V:Ice + Player")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 4 then
-                if containsItem(_G.WeaponList, "Auto Teleport + X:Soul Guitar") then
-                    EquipWeapon("Auto Teleport + X:Soul Guitar")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 5 then
-                if containsItem(_G.WeaponList, "Auto Teleport + X:Dragon Trident") then
-                    EquipWeapon("Auto Teleport + X:Dragon Trident")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 6 then
-                if containsItem(_G.WeaponList, "Auto Teleport + X:Dragon Trident") then
-                    EquipWeapon("Auto Teleport + X:Dragon Trident")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 7 then
-                if containsItem(_G.WeaponList, "Auto Teleport + X:Dragon Trident + Player") then
-                    EquipWeapon("Auto Teleport + X:Dragon Trident + Player")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD )")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 8 then
-                if containsItem(_G.WeaponList, "TP X:D-T + X:SoulGuitar + Player") then
-                    EquipWeapon("TP X:D-T + X:SoulGuitar + Player")
-                    PlayUseSong()
-                    NotificationMenuGame("I'm ready!! ( XD ) [ Warning ]")
-                else
-                    NotificationMenuGame("???")
-                end
-            end
-
-            if SuperButtonNumberAction == 9 then
-                MinkV7Toggle:Set((not _G.MinkV7))
-            end
-        end
-
-        List = {
-            "Suprise",
-            "Manual SafeMode",
-            "Hold teleport with V:Ice",
-            "Hold teleport to Player + V:Ice",
-            "Teleport With SoulGuitar",
-            "Teleport with X:Dragon-Trident",
-            "Teleport player + X:SoulGuitar",
-            "Teleport with X:Dragon-Trident + Player",
-            "TP X:D-T + X:SoulGuitar + Player",
-            "Change MinkV7"
-        }
-
-        Utilities:AddToggle(
-            {
-                Name = "Insert Button ( <font color='rgb(50, 250, 0)'>GUI</font> )",
-                Description = "A button is added to perform some action! with one click!",
-                Default = _G.Setting_table.InsertButtom or false,
-                Callback = function(Value)
-                    _G.Setting_table.InsertButtom = Value
-                    pcall(
-                        function()
-                            if Value then
-                                AddToggleButton()
-                            else
-                                RemoveToggleButton()
-                            end
-                        end
-                    )
-                end
-            }
-        )
-
-        Utilities:AddDropdown(
-            {
-                Name = "Primary Execution",
-                Options = List,
-                Default = _G.Setting_table.PrimaryExecution or {"Suprise"},
-                MultSelect = false,
-                Callback = function(Value)
-                    _G.Setting_table.PrimaryExecution = Value
-                    L = List
-                    SuperButtonNumberAction = findIndex(Value, L) - 1
-                end
-            }
-        )
+      
     end
 
     --================== Players =====================
@@ -2324,26 +2448,32 @@ if true then
                     if Value and not _G.VPO then
                         OJO()
                     end
+                    local F = function()
+                        if
+                            _G.SPLY and _G.SPLY.Character and
+                                _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
+                         then
+                            if (_G.SelectedBall and _G.IsScriptRunning) then
+                                getgenv().AimbotPos = _G.SelectedPosition
+                                return
+                            end
+
+                            currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
+                            newPosition = currentPosition
+                            getgenv().AimbotPos = newPosition
+                        end
+                    end
 
                     if (Value) then
                         ASV1_1 =
-                            game:GetService("RunService").RenderStepped:Connect(
-                            function()
-                                if
-                                    _G.SPLY and _G.SPLY.Character and
-                                        _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
-                                 then
-                                    if (_G.SelectedBall and _G.IsScriptRunning) then
-                                        getgenv().AimbotPos = _G.SelectedPosition
-                                        return
-                                    end
+                            game:GetService("RunService").RenderStepped:Connect(F)
 
-                                    currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
-                                    newPosition = currentPosition
-                                    getgenv().AimbotPos = newPosition
-                                end
+                        spawn(function()
+
+                            while (ASV1_1) do wait()
+                                F()
                             end
-                        )
+                        end)
                     else
                         pcall(
                             function()
@@ -2398,7 +2528,7 @@ if true then
                         spawn(
                             function()
                                 while _G.Setting_table.LigthV1 do
-                                    wait(5)
+                                    wait(1)
                                     if _G.Setting_table.LigthV1 then
                                         ReloadHighlightV1()
                                     end
@@ -3568,3 +3698,42 @@ if true then
         end
     )
 end
+
+
+--[[-- Script para lançar o jogador na direção horizontal da câmera (eixo X) e para cima com força e tempo controlados
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local camera = game.Workspace.CurrentCamera
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+-- Configurações do impulso
+local launchForceHorizontal = 200 -- Força do impulso horizontal
+local launchForceUp = 100         -- Força do impulso vertical
+local forceMultiplier = 1.8    -- Multiplicador de força (intensidade do impulso)
+local impulseDuration = 0.1     -- Duração do impulso em segundos
+
+-- Função para lançar o personagem
+local function launchPlayer()
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        -- Captura apenas o eixo X da direção da câmera
+        local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+        -- Calcula a força final do impulso, aplicando o multiplicador
+        local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * forceMultiplier
+        
+        -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
+        local startTime = tick()
+        local connection
+        connection = runService.Heartbeat:Connect(function()
+            if tick() - startTime < impulseDuration then
+                rootPart.Velocity = launchDirection
+            else
+                connection:Disconnect() -- Termina o impulso após o tempo de duração
+            end
+        end)
+    end
+end
+
+launchPlayer()
+]]
