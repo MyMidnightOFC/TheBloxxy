@@ -42,9 +42,9 @@ print("2")
     local userInputService = game:GetService("UserInputService")
     local runService = game:GetService("RunService")
 
-    local launchForceHorizontal = 200 -- Força do impulso horizontal
-    local launchForceUp = 100         -- Força do impulso vertical
-    local impulseDuration = 0.1     -- Duração do impulso em segundos
+    local launchForceHorizontal = 250 -- Força do impulso horizontal
+    local launchForceUp = 85         -- Força do impulso vertical
+    local impulseDuration = 0.125     -- Duração do impulso em segundos
 
     -- Função para lançar o personagem
     function launchPlayer()
