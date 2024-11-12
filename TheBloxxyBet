@@ -2296,7 +2296,7 @@ end)
         Utilities:AddToggle(
             {
                 Name = "Super Graphics ( <font color='rgb(250, 50, 60)'>-FPS</font> )",
-                Default = _G.Setting_table.FPS2 or false,
+                Default = _G.Setting_table.FPS3 or false,
                 Callback = function(Value)
                     _G.Setting_table.FPS2 = Value
                     if Value then
