@@ -42,9 +42,9 @@ print("2")
     local userInputService = game:GetService("UserInputService")
     local runService = game:GetService("RunService")
 
-    local launchForceHorizontal = 250 -- Força do impulso horizontal
-    local launchForceUp = 85         -- Força do impulso vertical
-    local impulseDuration = 0.125     -- Duração do impulso em segundos
+    local launchForceHorizontal = 210 -- Força do impulso horizontal
+    local launchForceUp = 78         -- Força do impulso vertical
+    local impulseDuration = 0.1    -- Duração do impulso em segundos
 
     -- Função para lançar o personagem
     function launchPlayer()
@@ -69,6 +69,67 @@ print("2")
     end
 
 
+-- Verifica a existência do jogador em _G.SPLY e move o LocalPlayer para 50 unidades atrás do jogador com altura condicional baseada na distância ao chão
+local distanceBehind = 50 -- Distância atrás do jogador selecionado
+local minHeightFromGround = 45 -- Distância mínima do chão para aplicar a redução de altura pela metade
+
+    function getDistanceToGround(position)
+        local rayOrigin = position
+        local rayDirection = Vector3.new(0, -500, 0) -- Direção do raio para baixo (suficientemente longo)
+        local rayParams = RaycastParams.new()
+        rayParams.FilterDescendantsInstances = {player.Character} -- Ignora o próprio personagem do LocalPlayer
+
+        -- Executa o raycast
+        local raycastResult = game.Workspace:Raycast(rayOrigin, rayDirection, rayParams)
+        if raycastResult then
+            return raycastResult.Position.Y, (position.Y - raycastResult.Position.Y) -- Retorna a altura do chão e a distância até o chão
+        else
+            return nil, math.huge -- Se não encontrar o chão, retorna um valor muito grande
+        end
+    end
+
+    function TPTBP()
+        -- Verifica se _G.SPLY está definido e se é um jogador válido
+        if _G.SPLY and _G.SPLY:IsA("Player") and _G.SPLY.Character then
+            local selectedPlayer = _G.SPLY
+            local selectedCharacter = selectedPlayer.Character
+            local camera = selectedPlayer:FindFirstChild("Camera") or game.Workspace.CurrentCamera
+            local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+            -- Verifica se o jogador tem uma câmera ativa e o LocalPlayer está carregado
+            if camera and rootPart then
+                -- Pega a direção para trás da câmera
+                local backDirection = -camera.CFrame.LookVector
+                local currentPosition = rootPart.Position
+
+                -- Calcula a nova posição atrás do jogador
+                local newPosition = Vector3.new(
+                    selectedCharacter.HumanoidRootPart.Position.X + (backDirection.X * distanceBehind),
+                    currentPosition.Y, -- A altura será ajustada dependendo da distância do chão
+                    selectedCharacter.HumanoidRootPart.Position.Z + (backDirection.Z * distanceBehind)
+                )
+
+                -- Calcula a altura do chão e a distância até ele
+                local groundHeight, distanceToGround = getDistanceToGround(currentPosition)
+
+                -- Define a altura com base na distância até o chão
+                if distanceToGround >= minHeightFromGround then
+                    newPosition = Vector3.new(newPosition.X, currentPosition.Y / 2, newPosition.Z) -- Reduz pela metade
+                else
+                    -- Coloca o jogador no nível do chão
+                    newPosition = Vector3.new(newPosition.X, groundHeight, newPosition.Z)
+                end
+
+                -- Confirma se o LocalPlayer não vai parar abaixo do chão
+                if newPosition.Y < groundHeight then
+                    newPosition = Vector3.new(newPosition.X, groundHeight, newPosition.Z)
+                end
+                
+                -- Move o LocalPlayer para a nova posição calculada
+                rootPart.CFrame = CFrame.new(newPosition)
+            end
+        end
+    end
 
     local Player = game.Players.LocalPlayer
 
@@ -1875,14 +1936,31 @@ print("What")
                     uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Volta à cor original da borda
                 end)
 
-                toggleButton.MouseButton1Click:Connect(function()
-                    toggleButton:TweenSize(UDim2.new(0, 110, 0, 35), "Out", "Quad", 0.1, true)
-                    wait(0.1)
-                    toggleButton:TweenSize(UDim2.new(0, 120, 0, 40), "Out", "Quad", 0.1, true)
+                local holdTime = 0.075 -- Tempo necessário para acionar a função 2 (em segundos)
+local isHolding = false
+local holdStartTime
 
-                    -- Chama a função do botão
-                    ActionSuperButton()
-                end)
+toggleButton.MouseButton1Down:Connect(function()
+    isHolding = true
+    holdStartTime = tick()
+    
+    while isHolding do
+        if tick() - holdStartTime >= holdTime then
+            ActionSuperButton(SuperButtonNumberAction2)
+            isHolding = false
+            break
+        end
+        wait(0.1) -- Intervalo para checar continuamente
+    end
+end)
+
+toggleButton.MouseButton1Up:Connect(function()
+    if isHolding then
+        ActionSuperButton(SuperButtonNumberAction)
+        isHolding = false
+    end
+end)
+
 
                 toggleButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
             end
@@ -1899,13 +1977,17 @@ print("What")
             sound:Play()
         end
 
-        function ActionSuperButton()
-            if SuperButtonNumberAction == 0 then
+        function ActionSuperButton(t)
+            if t == 0 then
                 PlayUseSong()
                 launchPlayer()
             end
 
-            if SuperButtonNumberAction == 1 then
+            if t == 1 then
+                TPTBP()
+            end
+
+            if t == 2 then
                 local player = game.Players.LocalPlayer
                 local character = player and player.Character
                 character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
@@ -1915,7 +1997,7 @@ print("What")
                 character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
             end
 
-            if SuperButtonNumberAction == 2 then
+            if t == 3 then
                 if (_G.SelectedItemButtom) then
                     if containsItem(_G.WeaponList, _G.SelectedItemButtom) then
                         EquipWeapon(_G.SelectedItemButtom)
@@ -1929,31 +2011,34 @@ print("What")
                 end
             end
 
-            if SuperButtonNumberAction == 9 then
+            if t == 4 then
                 MinkV7Toggle:Set((not _G.MinkV7))
             end
         end
 
         List = {
             "Super Boost",
+            "Where is he? ( Player )",
             "Manual SafeMode",
             "Hold an Item",
             "Change MinkV7"
         }
 
-        if (_G.Setting_table.ItemSaved) then
-            _G.SelectedItemButtom = _G.Setting_table.ItemSaved
-        end
-
-        Utilities:AddButton({
-            Name = "Select Item. (<font color='rgb(60, 250, 60)'>Calibrate</font>)",
+       A = Utilities:AddButton({
+            Name = "Select Item. <font color='rgb(250, 250, 50)'>( Nothing )</font>",
             Callback = function()
             local tool = tostring(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"))
               NotificationMenuGame((tool))
               _G.SelectedItemButtom = tool
+              _G.Setting_table.ItemSaved = toll
+            A:Set("Select Item. <font color='rgb(60, 250, 60)'>( " .. _G.SelectedItemButtom .. " )</font>")
             end
-          })
+        })
 
+        if (_G.Setting_table.ItemSaved) then
+            _G.SelectedItemButtom = _G.Setting_table.ItemSaved
+            A:Set("Select Item. <font color='rgb(60, 250, 60)'>( " .. _G.SelectedItemButtom .. " )</font>")
+        end
 
         Utilities:AddDropdown({
             Name = "Power of Impulse. ( <font color='rgb(50, 250, 30)'>Super Button</font> )",
@@ -1996,6 +2081,20 @@ print("What")
                     _G.Setting_table.PrimaryExecution = Value
                     L = List
                     SuperButtonNumberAction = findIndex(Value, L) - 1
+                end
+            }
+        )
+
+        Utilities:AddDropdown(
+            {
+                Name = "Secondary Execution",
+                Options = List,
+                Default = _G.Setting_table.SecondaryExecution or {"Suprise"},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.SecondaryExecution = Value
+                    L = List
+                    SuperButtonNumberAction2 = findIndex(Value, L) - 1
                 end
             }
         )
@@ -2189,6 +2288,118 @@ print("What")
                     _G.MinkV7 = Value
                     if Value then
                         MinkV7Function()
+                    end
+                end
+            }
+        )
+
+        Utilities:AddToggle(
+            {
+                Name = "Super Graphics ( <font color='rgb(250, 50, 60)'>-FPS</font> )",
+                Default = _G.Setting_table.FPS2 or false,
+                Callback = function(Value)
+                    _G.Setting_table.FPS2 = Value
+                    if Value then
+                        local Lighting = game:GetService("Lighting")
+                        local player = game.Players.LocalPlayer
+                        local camera = game.Workspace.CurrentCamera
+
+                        -- Ajustes Iniciais de Iluminação
+                        Lighting.Brightness = 1.6
+                        Lighting.GlobalShadows = true
+                        Lighting.EnvironmentDiffuseScale = 1
+                        Lighting.EnvironmentSpecularScale = 0.7
+                        Lighting.ClockTime = 14 -- Horário inicial
+
+                        -- Correção de Cor para Mudança de Hora
+                        local colorCorrection = Instance.new("ColorCorrectionEffect")
+                        colorCorrection.Parent = Lighting
+
+                        -- Configurações para Raios Solares
+                        local sunRays = Instance.new("SunRaysEffect")
+                        sunRays.Intensity = 1
+                        sunRays.Spread = 1
+                        sunRays.Parent = Lighting
+
+                        -- Brilho suave para destaques
+                        local bloom = Instance.new("BloomEffect")
+                        bloom.Intensity = 0.15
+                        bloom.Size = 20
+                        bloom.Threshold = 1
+                        bloom.Parent = Lighting
+
+                        -- Alteração gradual da cor ao longo do dia
+                        local function updateLightingColor(hour)
+                            if hour >= 6 and hour < 12 then
+                                -- Manhã: tons mais frios
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(245, 245, 255), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.6
+                            elseif hour >= 12 and hour < 17 then
+                                -- Meio-dia: luz neutra
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 250, 240), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.8
+                            elseif hour >= 17 and hour < 18 then
+                                -- Entardecer: tons alaranjados
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 210, 160), 0.02)
+                                sunRays.Intensity = 0.05
+                                Lighting.Brightness = 1.4
+                            else
+                                -- Noite: tom azulado e luz suave
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(180, 200, 255), 0.02)
+                                sunRays.Intensity = 0.03
+                                Lighting.Brightness = 1.2
+                            end
+                        end
+
+                        -- Atualização de Iluminação e Hora com Transições Suaves
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local hour = Lighting.ClockTime
+                            updateLightingColor(hour)
+                        end)
+
+                        -- Função para aplicar reflexo realista à água
+                        local function applyWaterEffects()
+                            for _, waterPart in pairs(game.Workspace:GetDescendants()) do
+                                if waterPart:IsA("BasePart") and waterPart.Material == Enum.Material.Water then
+                                    waterPart.Reflectance = 0.8
+                                    waterPart.Transparency = 0.1
+                                end
+                            end
+                        end
+
+                        applyWaterEffects()
+
+                        -- Borrão de Movimento Dinâmico para Todos os Movimentos, incluindo a Câmera
+                        local motionBlur = Instance.new("BlurEffect")
+                        motionBlur.Size = 0
+                        motionBlur.Parent = Lighting
+
+                        local lastCameraPosition = camera.CFrame.Position
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local speed = (player.Character and player.Character.HumanoidRootPart.Velocity.Magnitude) or 0
+                            local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
+
+                            -- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
+                            local blurAmount = math.clamp(((speed / 2 )+ cameraSpeed) / 30, 0, 10)
+                            motionBlur.Size = blurAmount
+
+                            lastCameraPosition = camera.CFrame.Position
+                        end)
+
+
+                        local g = game
+
+                        for _, v in pairs(g:GetDescendants()) do
+
+                        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                        v.Lifetime = NumberRange.new(2.5, 2.5)
+
+                        end
+                        end
+
+
                     end
                 end
             }
@@ -3698,42 +3909,3 @@ if true then
         end
     )
 end
-
-
---[[-- Script para lançar o jogador na direção horizontal da câmera (eixo X) e para cima com força e tempo controlados
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local camera = game.Workspace.CurrentCamera
-local userInputService = game:GetService("UserInputService")
-local runService = game:GetService("RunService")
-
--- Configurações do impulso
-local launchForceHorizontal = 200 -- Força do impulso horizontal
-local launchForceUp = 100         -- Força do impulso vertical
-local forceMultiplier = 1.8    -- Multiplicador de força (intensidade do impulso)
-local impulseDuration = 0.1     -- Duração do impulso em segundos
-
--- Função para lançar o personagem
-local function launchPlayer()
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if rootPart then
-        -- Captura apenas o eixo X da direção da câmera
-        local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
-        -- Calcula a força final do impulso, aplicando o multiplicador
-        local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * forceMultiplier
-        
-        -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
-        local startTime = tick()
-        local connection
-        connection = runService.Heartbeat:Connect(function()
-            if tick() - startTime < impulseDuration then
-                rootPart.Velocity = launchDirection
-            else
-                connection:Disconnect() -- Termina o impulso após o tempo de duração
-            end
-        end)
-    end
-end
-
-launchPlayer()
-]]
