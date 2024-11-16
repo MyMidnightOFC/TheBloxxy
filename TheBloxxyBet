@@ -1936,7 +1936,7 @@ print("What")
                     uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Volta à cor original da borda
                 end)
 
-                local holdTime = 0.075 -- Tempo necessário para acionar a função 2 (em segundos)
+                local holdTime = 0.110 -- Tempo necessário para acionar a função 2 (em segundos)
 local isHolding = false
 local holdStartTime
 
@@ -2382,7 +2382,7 @@ end)
                             local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
 
                             -- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
-                            local blurAmount = math.clamp(((speed / 2 )+ cameraSpeed) / 30, 0, 10)
+                            local blurAmount = math.clamp(((speed / 2 ) + (cameraSpeed * 2)) / 30, 0, 10)
                             motionBlur.Size = blurAmount
 
                             lastCameraPosition = camera.CFrame.Position
@@ -3356,10 +3356,19 @@ end)
 
     _G.ActionList = {
         voar = {
-            -- Removi as aspas de "voar" e "correr" para que fiquem como chaves da tabela
             {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
             {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
             {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
+        },
+        pegar = {
+            {item = "Portal-Portal", key = "V", delay = 0.7, M = 450, T = 1},
+        },
+        fuder = {
+            {item = "Shark Anchor", key = "X", delay = 0.7, M = 450, T = 1},
+        },
+        fuder2 = {
+            {item = "Portal-Portal", key = "X", delay = 0.7, M = 450, T = 1},
+            {item = "Portal-Portal", key = "Z", delay = 0.7, M = 55, T = 1},
         }
     }
 
@@ -3468,6 +3477,8 @@ end)
         }
     )
                 addTeleportTool30("voar")
+                addTeleportTool30("pegar")
+                addTeleportTool30("fud")
 
 
     --================== Shop =====================
@@ -3909,3 +3920,63 @@ if true then
         end
     )
 end
+
+
+
+
+
+
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local tempoLimite = 1
+local segurando = false
+local tempoPressionado = 0
+local conexaoAtual = nil
+
+local function funcao1()
+    print("Função 1 executada!")
+end
+
+local function funcao2()
+    print("Função 2 executada!")
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.U and not gameProcessed then
+        segurando = true
+        tempoPressionado = 0
+        conexaoAtual = RunService.RenderStepped:Connect(function(deltaTime)
+            if not (_G.Setting_table.InsertButtom) then
+                return
+            end
+
+            if segurando then
+                tempoPressionado = tempoPressionado + deltaTime
+                if tempoPressionado >= tempoLimite then
+                    segurando = false
+                    ActionSuperButton(SuperButtonNumberAction2)
+                    if conexaoAtual then
+                        conexaoAtual:Disconnect()
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if not (_G.Setting_table.InsertButtom) then
+        return
+    end
+    
+    if input.KeyCode == Enum.KeyCode.U and segurando then
+        segurando = false
+        if tempoPressionado < tempoLimite then
+            ActionSuperButton(SuperButtonNumberAction)
+        end
+        if conexaoAtual then
+            conexaoAtual:Disconnect()
+        end
+    end
+end)
