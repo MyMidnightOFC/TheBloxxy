@@ -3473,12 +3473,13 @@ end)
             Name = "TEST",
             Callback = function()
                 addTeleportTool30("voar")
+                addTeleportTool30("pegar")
+                addTeleportTool30("fuder")
+                addTeleportTool30("fuder2")
             end
         }
     )
-                addTeleportTool30("voar")
-                addTeleportTool30("pegar")
-                addTeleportTool30("fud")
+              
 
 
     --================== Shop =====================
