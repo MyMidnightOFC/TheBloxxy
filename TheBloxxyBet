@@ -36,100 +36,97 @@ print("2")
     _G.Setting_table["OK"] = true
 
     _G.ForceImpulse = _G.ForceImpulse or 1.8
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local camera = game.Workspace.CurrentCamera
-    local userInputService = game:GetService("UserInputService")
-    local runService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local camera = game.Workspace.CurrentCamera
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
-    local launchForceHorizontal = 210 -- Força do impulso horizontal
-    local launchForceUp = 78         -- Força do impulso vertical
-    local impulseDuration = 0.1    -- Duração do impulso em segundos
+local launchForceHorizontal = 210 -- Força do impulso horizontal
+local launchForceUp = 78         -- Força do impulso vertical
+local impulseDuration = 0.1      -- Duração do impulso em segundos
 
-    -- Função para lançar o personagem
-    function launchPlayer()
-        local rootPart = character:FindFirstChild("HumanoidRootPart")
-        if rootPart then
-            -- Captura apenas o eixo X da direção da câmera
-            local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
-            -- Calcula a força final do impulso, aplicando o multiplicador
-            local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * _G.ForceImpulse
+-- Variável para armazenar o personagem atual
+local character = player.Character or player.CharacterAdded:Wait()
 
-            -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
-            local startTime = tick()
-            local connection
-            connection = runService.Heartbeat:Connect(function()
-                if tick() - startTime < impulseDuration then
-                    rootPart.Velocity = launchDirection
-                else
-                    connection:Disconnect() -- Termina o impulso após o tempo de duração
-                end
-            end)
-        end
-    end
+-- Função que atualiza o personagem sempre que ele reaparece
+local function onCharacterAdded(newCharacter)
+    character = newCharacter
+end
 
+-- Conecta o evento CharacterAdded para atualizar o personagem
+player.CharacterAdded:Connect(onCharacterAdded)
 
--- Verifica a existência do jogador em _G.SPLY e move o LocalPlayer para 50 unidades atrás do jogador com altura condicional baseada na distância ao chão
-local distanceBehind = 50 -- Distância atrás do jogador selecionado
-local minHeightFromGround = 45 -- Distância mínima do chão para aplicar a redução de altura pela metade
+-- Função para lançar o personagem
+function launchPlayer()
+    -- Certifica-se de que o personagem e o HumanoidRootPart existem
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        -- Captura apenas o eixo X da direção da câmera
+        local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+        -- Calcula a força final do impulso, aplicando o multiplicador
+        local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * _G.ForceImpulse
 
-    function getDistanceToGround(position)
-        local rayOrigin = position
-        local rayDirection = Vector3.new(0, -500, 0) -- Direção do raio para baixo (suficientemente longo)
-        local rayParams = RaycastParams.new()
-        rayParams.FilterDescendantsInstances = {player.Character} -- Ignora o próprio personagem do LocalPlayer
-
-        -- Executa o raycast
-        local raycastResult = game.Workspace:Raycast(rayOrigin, rayDirection, rayParams)
-        if raycastResult then
-            return raycastResult.Position.Y, (position.Y - raycastResult.Position.Y) -- Retorna a altura do chão e a distância até o chão
-        else
-            return nil, math.huge -- Se não encontrar o chão, retorna um valor muito grande
-        end
-    end
-
-    function TPTBP()
-        -- Verifica se _G.SPLY está definido e se é um jogador válido
-        if _G.SPLY and _G.SPLY:IsA("Player") and _G.SPLY.Character then
-            local selectedPlayer = _G.SPLY
-            local selectedCharacter = selectedPlayer.Character
-            local camera = selectedPlayer:FindFirstChild("Camera") or game.Workspace.CurrentCamera
-            local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-            -- Verifica se o jogador tem uma câmera ativa e o LocalPlayer está carregado
-            if camera and rootPart then
-                -- Pega a direção para trás da câmera
-                local backDirection = -camera.CFrame.LookVector
-                local currentPosition = rootPart.Position
-
-                -- Calcula a nova posição atrás do jogador
-                local newPosition = Vector3.new(
-                    selectedCharacter.HumanoidRootPart.Position.X + (backDirection.X * distanceBehind),
-                    currentPosition.Y, -- A altura será ajustada dependendo da distância do chão
-                    selectedCharacter.HumanoidRootPart.Position.Z + (backDirection.Z * distanceBehind)
-                )
-
-                -- Calcula a altura do chão e a distância até ele
-                local groundHeight, distanceToGround = getDistanceToGround(currentPosition)
-
-                -- Define a altura com base na distância até o chão
-                if distanceToGround >= minHeightFromGround then
-                    newPosition = Vector3.new(newPosition.X, currentPosition.Y / 2, newPosition.Z) -- Reduz pela metade
-                else
-                    -- Coloca o jogador no nível do chão
-                    newPosition = Vector3.new(newPosition.X, groundHeight, newPosition.Z)
-                end
-
-                -- Confirma se o LocalPlayer não vai parar abaixo do chão
-                if newPosition.Y < groundHeight then
-                    newPosition = Vector3.new(newPosition.X, groundHeight, newPosition.Z)
-                end
-                
-                -- Move o LocalPlayer para a nova posição calculada
-                rootPart.CFrame = CFrame.new(newPosition)
+        -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
+        local startTime = tick()
+        local connection
+        connection = runService.Heartbeat:Connect(function()
+            if tick() - startTime < impulseDuration then
+                rootPart.Velocity = launchDirection
+            else
+                connection:Disconnect() -- Termina o impulso após o tempo de duração
             end
+        end)
+    end
+end
+local player = game.Players.LocalPlayer
+local distanceBehind = 70 -- Distância atrás do jogador selecionado
+local minHeightFromGround = 45 -- Altura mínima para ajuste de posição
+
+-- Função para calcular a distância ao chão
+function getDistanceToGround(position)
+    local rayOrigin = position
+    local rayDirection = Vector3.new(0, -500, 0) -- Direção para baixo
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = {player.Character} -- Ignora o próprio personagem do LocalPlayer
+
+    -- Executa o Raycast
+    local raycastResult = game.Workspace:Raycast(rayOrigin, rayDirection, rayParams)
+    if raycastResult then
+        return raycastResult.Position.Y, (position.Y - raycastResult.Position.Y) -- Retorna altura do chão e distância até ele
+    else
+        return nil, math.huge -- Retorna "muito grande" se não encontrar o chão
+    end
+end
+
+-- Função para teleportar o LocalPlayer para trás da câmera de outro jogador
+function TPTBP()
+    if _G.SPLY and _G.SPLY:IsA("Player") and _G.SPLY.Character then
+        local selectedPlayer = _G.SPLY
+        local selectedCharacter = selectedPlayer.Character
+        local selectedRootPart = selectedCharacter:FindFirstChild("HumanoidRootPart")
+        local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+        -- Verifica se o personagem selecionado e o LocalPlayer têm as partes necessárias
+        if selectedRootPart and localRootPart then
+            -- Calcula a direção atrás do personagem selecionado
+            local backDirection = -selectedRootPart.CFrame.LookVector
+            local newPosition = selectedRootPart.Position + (backDirection * distanceBehind)
+
+            -- Calcula a altura do chão e ajusta a posição
+            local groundHeight, distanceToGround = getDistanceToGround(newPosition)
+            if groundHeight and distanceToGround >= minHeightFromGround then
+                newPosition = Vector3.new(newPosition.X, groundHeight + 10, newPosition.Z) -- Eleva 10 unidades acima do chão
+            else
+                newPosition = Vector3.new(newPosition.X, newPosition.Y, newPosition.Z)
+            end
+
+            -- Move o LocalPlayer para a nova posição
+            localRootPart.CFrame = CFrame.new(newPosition)
         end
     end
+end
+
 
     local Player = game.Players.LocalPlayer
 
@@ -339,18 +336,20 @@ print("4")
     function SuperView()
         -- Variáveis globais para controlar o script
         _G.IsScriptRunning = true
-        _G.MonitoringTime = 70
+        _G.MonitoringTime = 50
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
-
+        _G.SensitivitySpeed = 1 -- Sensibilidade à velocidade
+        _G.SensitivityDistance = 1 -- Sensibilidade à distância
+    
         -- Variáveis internas
         local sphere = nil
         local velocityHistory = {}
         local directionHistory = {}
-        local maxHistorySize = 100
+        local maxHistorySize = 150
         _G.SelectedPlayer = game.Players.LocalPlayer -- Inicia monitorando o local player por padrão
         local targetCharacter, humanoid, rootPart
-
+    
         -- Função para criar a esfera
         local function createSphere()
             local part = Instance.new("Part")
@@ -361,7 +360,7 @@ print("4")
             part.Transparency = 0.3
             return part
         end
-
+    
         -- Função para mudar a cor dinamicamente
         local function updateSphereColor(sphere)
             game:GetService("RunService").RenderStepped:Connect(
@@ -376,7 +375,7 @@ print("4")
                 end
             )
         end
-
+    
         -- Função para calcular a média de um histórico de valores
         local function calculateAverage(history, count)
             local sum = Vector3.new(0, 0, 0)
@@ -385,20 +384,20 @@ print("4")
             end
             return sum / count
         end
-
+    
         -- Função principal de monitoramento
         local function monitor()
             if not targetCharacter then
                 return
             end
-
+    
             game:GetService("RunService").RenderStepped:Connect(
                 function()
                     if _G.IsScriptRunning and humanoid and humanoid.Health > 0 then
                         -- Armazena no histórico
                         table.insert(velocityHistory, rootPart.Velocity)
                         table.insert(directionHistory, humanoid.MoveDirection)
-
+    
                         -- Limita o tamanho do histórico
                         if #velocityHistory > maxHistorySize then
                             table.remove(velocityHistory, 1)
@@ -406,24 +405,27 @@ print("4")
                         if #directionHistory > maxHistorySize then
                             table.remove(directionHistory, 1)
                         end
-
+    
                         -- Calcula a média de velocidade e direção
                         local monitoringTime = math.min(#velocityHistory, _G.MonitoringTime)
                         local avgVelocity = calculateAverage(velocityHistory, monitoringTime)
                         local avgDirection = calculateAverage(directionHistory, monitoringTime)
-
+    
+                        -- Ajusta com base nas variáveis globais
+                        local sensitivityFactor = 0.7 * _G.SensitivitySpeed
+                        local deltaTime = 0.55 * _G.SensitivityDistance
+    
                         -- Calcula a posição prevista
-                        local sensitivityFactor, deltaTime = 0.43, 0.5
                         local predictedPosition =
                             rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
-
+    
                         -- Atualiza a posição da esfera
                         if not sphere then
                             sphere = createSphere()
                             sphere.Parent = workspace
                             updateSphereColor(sphere)
                         end
-
+    
                         sphere.Position = predictedPosition
                         _G.SelectedPosition = predictedPosition
                         _G.SelectedBall = sphere
@@ -438,8 +440,7 @@ print("4")
                 end
             )
         end
-        print("5")
-
+    
         -- Função para atualizar o jogador monitorado
         local function updateTargetPlayer(player)
             if player and player.Character then
@@ -447,7 +448,7 @@ print("4")
                 targetCharacter = player.Character
                 humanoid = targetCharacter:WaitForChild("Humanoid")
                 rootPart = targetCharacter:WaitForChild("HumanoidRootPart")
-
+    
                 if not sphere then
                     sphere = createSphere()
                     sphere.Parent = workspace
@@ -455,11 +456,11 @@ print("4")
                 end
             end
         end
-
+    
         -- Função para mudar o jogador monitorado
         function MudarPlayerMonitorado(newPlayerName)
             local targetPlayer = game.Players:FindFirstChild(newPlayerName)
-
+    
             if targetPlayer then
                 updateTargetPlayer(targetPlayer)
             else
@@ -468,24 +469,25 @@ print("4")
                 updateTargetPlayer(game.Players.LocalPlayer)
             end
         end
-
+    
         -- Inicializa monitorando o local player
         updateTargetPlayer(_G.SelectedPlayer)
         monitor()
     end
-
+    
     -- Para mudar o jogador monitorado, use:
     -- MudarPlayerMonitorado("NomeDoJogador")
-
+    
     function ChangeTargetPlayer(newPlayerName)
         local targetPlayer = game.Players:FindFirstChild(newPlayerName)
         if targetPlayer then
             MudarPlayerMonitorado(newPlayerName)
         end
     end
-
+    
     -- Para usar a função, chame:
     -- ChangeTargetPlayer("NomeDoJogador")
+        
 
     _G.OJO_SV = {}
     spawn(
@@ -2656,6 +2658,14 @@ end)
                         _G.OJO_VS["AIM"] = nil
                     end
 
+
+                    game:GetService("RunService").Heartbeat:Connect(function()
+                        if (_G.SelectedBall and _G.IsScriptRunning) then
+                            getgenv().AimbotPos = _G.SelectedPosition
+                        end
+                    end)
+
+
                     if Value and not _G.VPO then
                         OJO()
                     end
@@ -3419,11 +3429,10 @@ end)
                 -- Posiciona o player (conforme seu código) e equipa a arma
                 local root = plr.Character.HumanoidRootPart
                 if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
-                    for i = 1, 2 do
+                    for i = 1, 10 do
                         currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
                         newPosition = currentPosition + Vector3.new(0, 2.5, 0)
                         root.CFrame = newPosition
-                        wait()
                     end
                 else
                     if (T == 1) then
@@ -3930,7 +3939,7 @@ end
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
-local tempoLimite = 1
+local tempoLimite = 0.200
 local segurando = false
 local tempoPressionado = 0
 local conexaoAtual = nil
