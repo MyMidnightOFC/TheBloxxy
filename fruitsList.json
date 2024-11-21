@@ -1,0 +1,213 @@
+{
+"Rocket": {
+  "Name": "Fruit",
+  "Size": "2.202446222305298, 1.0536112785339355, 1.48146390914917",
+  "Material": "Enum.Material.SmoothPlastic",
+  "Color": "0.356863, 0.364706, 0.411765",
+  "MeshId": "rbxassetid://15060012861"
+},
+"Spin": {
+  "Name": "Fruit",
+  "Size": "1.8492944240570068, 1.5687651634216309, 1.8492944240570068",
+  "Material": "Enum.Material.Plastic",
+  "Color": "0.639216, 0.635294, 0.647059",
+  "MeshId": "rbxassetid://15057683975"
+},
+"Chop": {
+  "Name": "Fruit",
+  "Size": "1.7256669998168945, 1.5022587776184082, 1.7256669998168945",
+  "Material": "Enum.Material.SmoothPlastic",
+  "Color": "0.321569, 0.14902, 0.372549",
+  "MeshId": "rbxassetid://15104782377"
+},
+"Bomb": {
+  "Name": "Fruit",
+  "Size": "2.008845567703247, 1.5765033960342407, 1.6352951526641846",
+  "Material": "Enum.Material.Plastic",
+  "Color": "0.639216, 0.635294, 0.647059",
+  "MeshId": "rbxassetid://15116740364"
+},
+"Smoke": {
+"Name": "Fruit",
+"Size": "1.9700088500976562, 1.8898332118988037, 1.9480462074279785",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15116696973"
+},
+"Spike": {
+"Name": "Fruit",
+"Size": "0.9100332260131836, 1.7205486297607422, 1.350518822669983",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15107005807"
+},
+"Flame": {
+"Name": "Fruit",
+"Size": "1.9570987224578857, 1.263403296470642, 1.6315672397613525",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15111584216"
+},
+"Sand": {
+"Name": "Fruit",
+"Size": "0.8513372540473938, 0.18984246253967285, 0.007500261068344116",
+"Material": "Enum.Material.Neon",
+"Color": "0.972549, 0.85098, 0.427451",
+"MeshId": "rbxassetid://15111517529"
+},
+"Dark": {
+"Name": "Fruit",
+"Size": "0.7954199910163879, 0.7954202890396118, 0.41672325134277344",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15111553409"
+},
+"Diamond": {
+"Name": "Fruit",
+"Size": "1.1280122995376587, 0.5817752480506897, 0.009763821959495544",
+"Material": "Enum.Material.Neon",
+"Color": "0.545098, 0.596078, 0.658824",
+"MeshId": "rbxassetid://15112600534"
+},
+"Light": {
+"Name": "Fruit",
+"Size": "2.185216188430786, 2.1165175437927246, 1.0774877071380615",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15100283484"
+},
+"Rubber": {
+"Name": "Fruit",
+"Size": "1.0616552829742432, 0.27854180335998535, 0.016500145196914673",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15104817760"
+},
+"Barrier": {
+"Name": "Fruit",
+"Size": "1.5646750926971436, 1.2513011693954468, 1.564675211906433",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15100485671"
+},
+"Ghost": {
+"Name": "Fruit",
+"Size": "1.7911779880523682, 1.5794624090194702, 1.7883721590042114",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15112333093"
+},
+"Magma": {
+"Name": "Fruit",
+"Size": "1.7564706802368164, 2.2098000049591064, 1.7567479610443115",
+"Material": "Enum.Material.Plastic",
+"Color": "0.0666667, 0.0666667, 0.0666667",
+"MeshId": "rbxassetid://15105350415"
+},
+"Quake": {
+"Name": "Fruit",
+"Size": "1.6352951526641846, 1.5022590160369873, 1.6352951526641846",
+"Material": "Enum.Material.Neon",
+"Color": "0.658824, 0.658824, 0.658824",
+"MeshId": "rbxassetid://15057718441"
+},
+"Buddha": {
+"Name": "Fruit",
+"Size": "1.682721734046936, 1.5022590160369873, 1.682721734046936",
+"Material": "Enum.Material.SmoothPlastic",
+"Color": "0.709804, 0.615686, 0.309804",
+"MeshId": "rbxassetid://15100313696"
+},
+"Love": {
+"Name": "Fruit",
+"Size": "1.7249999046325684, 1.5750000476837158, 1.7249999046325684",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15116730102"
+},
+"Spider": {
+"Name": "Fruit",
+"Size": "1.822723150253296, 1.5022590160369873, 1.822723388671875",
+"Material": "Enum.Material.SmoothPlastic",
+"Color": "0.972549, 0.972549, 0.972549",
+"MeshId": "rbxassetid://15116967784"
+},
+"Sound": {
+"Name": "Fruit",
+"Size": "1.7163687944412231, 1.402879238128662, 1.5223628282546997",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://14661873358"
+},
+"Phoenix": {
+"Name": "Fruit",
+"Size": "1.5352070331573486, 0.532459020614624, 1.606450080871582",
+"Material": "Enum.Material.Neon",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15100246632"
+},
+"Rumble": {
+"Name": "Fruit",
+"Size": "1.536463737487793, 1.4924397468566895, 1.536463737487793",
+"Material": "Enum.Material.Neon",
+"Color": "0, 0.65098, 0.65098",
+"MeshId": "rbxassetid://15116747420"
+},
+"Pain": {
+"Name": "Fruit",
+"Size": "1.6285929679870605, 1.5022590160369873, 1.6011046171188354",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15116721173"
+},
+"Blizzard": {
+"Name": "Fruit",
+"Size": "1.1860737800598145, 0.47409698367118835, 0.05839694291353226",
+"Material": "Enum.Material.Ice",
+"Color": "0.431373, 0.6, 0.792157",
+"MeshId": "rbxassetid://15100384816"
+},
+"Gravity": {
+"Name": "Fruit",
+"Size": "1.6742756366729736, 1.621488332748413, 1.4770091772079468",
+"Material": "Enum.Material.Neon",
+"Color": "1, 0.4, 0.8",
+"MeshId": "rbxassetid://15100299740"
+},
+"T-Rex": {
+"Name": "Fruit",
+"Size": "2.2337119579315186, 2.0309958457946777, 1.5959012508392334",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15708895165"
+},
+"Mammoth": {
+"Name": "Fruit",
+"Size": "1.1296700239181519, 0.21219447255134583, 0.026986688375473022",
+"Material": "Enum.Material.Neon",
+"Color": "0.658824, 0.658824, 0.658824",
+"MeshId": "rbxassetid://14661837634"
+},
+"Dough": {
+"Name": "Fruit",
+"Size": "1.8066339492797852, 0.7588180303573608, 1.806633710861206",
+"Material": "Enum.Material.SmoothPlastic",
+"Color": "0.313726, 0.133333, 0.388235",
+"MeshId": "rbxassetid://15100273645"
+},
+"Shadow": {
+"Name": "Fruit",
+"Size": "1.5855413675308228, 1.500000238418579, 1.500000238418579",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "rbxassetid://15112263502"
+},
+"Venom": {
+"Name": "Fruit",
+"Size": "1.3028072118759155, 1.3051977157592773, 1.302807331085205",
+"Material": "Enum.Material.Plastic",
+"Color": "0.639216, 0.635294, 0.647059",
+"MeshId": "https://assetdelivery.roblox.com/v1/asset/?id=10395893751"
+}
+
+}
