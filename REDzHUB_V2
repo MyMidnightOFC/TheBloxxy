@@ -1,4 +1,5 @@
--- Sorry RedzHub, but I needed to add the notification again.
+
+-- Sorry redz, I had to make some modifications to customize it :(
 local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -63,7 +64,7 @@ local redzlib = {
   Options = {},
   Flags = {},
   Tabs = {},
-  Icons = loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/RedzLibV5/main/Icons.Lua"))()
+  Icons = loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/RedzLibV5/refs/heads/main/Icons.lua"))()
 }
 
 local ViewportSize = workspace.CurrentCamera.ViewportSize
