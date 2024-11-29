@@ -1,4 +1,8 @@
 -- =========================== LIBRARY XD ===========================
+function print()
+
+end
+
 print("New Script...")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 _G.OrionLib = OrionLib
@@ -336,17 +340,17 @@ print("4")
     function SuperView()
         -- Variáveis globais para controlar o script
         _G.IsScriptRunning = true
-        _G.MonitoringTime = 50
+        _G.MonitoringTime = 65
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
-        _G.SensitivitySpeed = 1 -- Sensibilidade à velocidade
-        _G.SensitivityDistance = 1 -- Sensibilidade à distância
+        _G.SensitivitySpeed = 1.1 -- Sensibilidade à velocidade
+        _G.SensitivityDistance = 0.82 -- Sensibilidade à distância
     
         -- Variáveis internas
         local sphere = nil
         local velocityHistory = {}
         local directionHistory = {}
-        local maxHistorySize = 150
+        local maxHistorySize = 100
         _G.SelectedPlayer = game.Players.LocalPlayer -- Inicia monitorando o local player por padrão
         local targetCharacter, humanoid, rootPart
     
@@ -412,7 +416,7 @@ print("4")
                         local avgDirection = calculateAverage(directionHistory, monitoringTime)
     
                         -- Ajusta com base nas variáveis globais
-                        local sensitivityFactor = 0.7 * _G.SensitivitySpeed
+                        local sensitivityFactor = 0.5 * _G.SensitivitySpeed
                         local deltaTime = 0.55 * _G.SensitivityDistance
     
                         -- Calcula a posição prevista
@@ -2410,7 +2414,7 @@ end)
         Utilities:AddToggle(
             {
                 Name = "Super LiteMode ( <font color='rgb(50, 250, 60)'>+FPS</font> )",
-                Default = _G.Setting_table.FPS or false,
+                Default = _G.Setting_table.FPS2 or false,
                 Callback = function(Value)
                     _G.Setting_table.FPS = Value
                     if Value then
@@ -2659,7 +2663,7 @@ end)
                     end
 
 
-                    game:GetService("RunService").Heartbeat:Connect(function()
+                    _G.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
                         if (_G.SelectedBall and _G.IsScriptRunning) then
                             getgenv().AimbotPos = _G.SelectedPosition
                         end
@@ -2699,10 +2703,15 @@ end)
                         pcall(
                             function()
                                 if ASV1_1 then
+                                    _G.Heartbeat:Disconnect()
+                                    _G.Heartbeat = nil
                                     ASV1_1:Disconnect()
                                     ASV1_1 = nil
                                 end
-                                getgenv().AimbotPos = nil
+                                for i = 1, 10 do
+                                    getgenv().AimbotPos = nil
+                                    wait()
+                                end
                             end
                         )
                     end
@@ -3365,20 +3374,16 @@ end)
     end
 
     _G.ActionList = {
-        voar = {
+        ICE_COMBO = {
             {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
             {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
             {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
         },
-        pegar = {
-            {item = "Portal-Portal", key = "V", delay = 0.7, M = 450, T = 1},
+        ICE = {
+            {item = "Ice-Ice", key = "V", delay = 0, M = 450, T = 1},
         },
-        fuder = {
-            {item = "Shark Anchor", key = "X", delay = 0.7, M = 450, T = 1},
-        },
-        fuder2 = {
-            {item = "Portal-Portal", key = "X", delay = 0.7, M = 450, T = 1},
-            {item = "Portal-Portal", key = "Z", delay = 0.7, M = 55, T = 1},
+        SoulGuitar = {
+            {item = "Soul Guitar", key = "V", delay = 0, M = 450, T = 1},
         }
     }
 
@@ -3429,11 +3434,9 @@ end)
                 -- Posiciona o player (conforme seu código) e equipa a arma
                 local root = plr.Character.HumanoidRootPart
                 if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
-                    for i = 1, 10 do
                         currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
                         newPosition = currentPosition + Vector3.new(0, 2.5, 0)
                         root.CFrame = newPosition
-                    end
                 else
                     if (T == 1) then
                         NotificationMenuGame("Jogador não encontrado para a posição!")
@@ -3481,10 +3484,9 @@ end)
         {
             Name = "TEST",
             Callback = function()
-                addTeleportTool30("voar")
-                addTeleportTool30("pegar")
-                addTeleportTool30("fuder")
-                addTeleportTool30("fuder2")
+                addTeleportTool30("ICE_COMBO")
+                addTeleportTool30("ICE")
+                addTeleportTool30("SoulGuitar")
             end
         }
     )
@@ -3927,6 +3929,14 @@ if true then
             wait(1)
             restoreInventory()
             ReloadList()
+
+            pcall(function()
+            
+                addTeleportTool30("ICE_COMBO")
+                addTeleportTool30("ICE")
+                addTeleportTool30("SoulGuitar")
+            
+            end)
         end
     )
 end
@@ -3939,7 +3949,7 @@ end
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
-local tempoLimite = 0.200
+local tempoLimite = 1
 local segurando = false
 local tempoPressionado = 0
 local conexaoAtual = nil
