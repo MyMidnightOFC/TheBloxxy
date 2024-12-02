@@ -344,13 +344,13 @@ print("4")
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
         _G.SensitivitySpeed = 0.7
-        _G.SensitivityDistance = 0.8
+        _G.SensitivityDistance = 0.5
     
         -- Variáveis internas
         local sphere = nil
         local velocityHistory = {}
         local directionHistory = {}
-        local maxHistorySize = 150
+        local maxHistorySize = 350
         _G.SelectedPlayer = game.Players.LocalPlayer -- Inicia monitorando o local player por padrão
         local targetCharacter, humanoid, rootPart
     
@@ -1560,7 +1560,7 @@ print("What")
             {
                 Name = "PlayerView - Time",
                 MinValue = 2,
-                MaxValue = 150,
+                MaxValue = 350,
                 Default = 65,
                 Increase = 1,
                 Callback = function(Value)
