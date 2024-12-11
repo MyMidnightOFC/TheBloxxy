@@ -1608,6 +1608,10 @@ print("What")
                 Name = "Teleport To Safe! (<font color='rgb(250, 250, 60)'>TempleOfTime</font>)",
                 Description = "( IF YOU ARE PVP AGAINST ANOTHER SCRIPT )",
                 Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
                         "requestEntrance",
                         Vector3.new(28286, 14897, 103)
@@ -1623,6 +1627,10 @@ print("What")
             {
                 Name = "Teleport To Temple of Time",
                 Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
                     for i = 1, 3 do
                         task.wait()
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
@@ -1638,6 +1646,10 @@ print("What")
             {
                 Name = "Teleport To Mansion",
                 Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
                         "requestEntrance",
                         Vector3.new(-12471.169921875, 374.94024658203, -7551.677734375)
@@ -1707,7 +1719,7 @@ print("What")
                                                 if humanoidRootPart and humanoid then
                                                     local moveDirection = humanoid.MoveDirection
 
-                                                    if moveDirection.Magnitude > 0 then
+                                                    if moveDirection.Magnitude > 0  and not _G.Disabled then
                                                         local newVelocity =
                                                             Vector3.new(
                                                             moveDirection.X * _G.Setting_table.SafeMode_Speed,
@@ -1897,7 +1909,7 @@ print("What")
                                                             end
                                                         end
 
-                                                        if (IsHundredNoStunVar2) and not (_G.U723) then
+                                                        if (IsHundredNoStunVar2) and not (_G.U723) and not _G.Disabled then
                                                             bodyVelocity.P = 0
                                                             bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
                                                         end
@@ -3333,9 +3345,9 @@ end)
         Save:AddToggle(
             {
                 Name = "Teleport With Z:CDK + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
-                Default = _G.Setting_table.TP_VI_Player or false,
+                Default = _G.Setting_table.TP_ZCDK_Player or false,
                 Callback = function(Value)
-                    _G.Setting_table.TP_VI_Player = Value
+                    _G.Setting_table.TP_ZCDK_Player = Value
                     if not Value then
                         removeItemFromInventory("Z_CDK")
                         return
@@ -3348,9 +3360,9 @@ end)
         Save:AddToggle(
             {
                 Name = "Teleport With V:Dough + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
-                Default = _G.Setting_table.TP_VI_Player or false,
+                Default = _G.Setting_table.TP_VD_Player or false,
                 Callback = function(Value)
-                    _G.Setting_table.TP_VI_Player = Value
+                    _G.Setting_table.TP_VD_Player = Value
                     if not Value then
                         removeItemFromInventory("V_DOUGH")
                         return
@@ -4150,6 +4162,7 @@ local function onChatMessageReceived(message)
 
         end
 
+        createAuraEffect(2)
         createAuraEffect(3)
         createAuraEffect(4)
         
@@ -4161,6 +4174,92 @@ local function onChatMessageReceived(message)
         Lighting.EnvironmentSpecularScale = 0.5
 
 
+        -- Variável global para controle do FOV
+        _G.FOVSpeed = 100 -- Valor inicial, pode ser ajustado dinamicamente
+
+        -- Configurações do FOV
+        local minFOV = 70 -- Valor mínimo do FOV
+        local maxFOV = 200 -- Valor máximo do FOV
+        local smoothness = 0.2 -- Suavidade das transições (quanto menor, mais suave)
+
+        -- Referência à câmera
+        local camera = workspace.CurrentCamera
+
+        -- Atualização constante do FOV com base na variável global
+        game:GetService("RunService").RenderStepped:Connect(function()
+            -- Obtém o valor-alvo do FOV
+            local targetFOV = math.clamp(_G.FOVSpeed, minFOV, maxFOV)
+            
+            -- Ajusta o FOV suavemente para o valor desejado
+            camera.FieldOfView = camera.FieldOfView + (targetFOV - camera.FieldOfView) * smoothness
+        end)
+
+
+
+-- Função para calcular o valor de y baseado em x
+function calcularY(x)
+    -- Garantir que x esteja entre 0 e 20000
+    if x < 0 then
+        x = 0
+    elseif x > 20000 then
+        x = 20000
+    end
+    
+    -- Calcular y proporcionalmente
+    local y = 100 + (x / 20000) * (200 - 100)
+    
+    -- Arredondar para número inteiro
+    return math.floor(y)
+end
+
+-- Inicialização
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local HealthData = {} -- Armazena o histórico de vida
+local Interval = 480 -- Intervalo em segundos (2 minutos)
+local LastHealth = nil -- Última vida registrada do jogador
+
+-- Função para atualizar o histórico e calcular o dano
+local function UpdateHealth()
+    local Character = LocalPlayer.Character
+    if not Character then return end
+    local Humanoid = Character:FindFirstChild("Humanoid")
+    if not Humanoid then return end
+
+    local CurrentHealth = Humanoid.Health
+    if LastHealth then
+        local Damage = LastHealth - CurrentHealth
+        if Damage > 0 then
+            table.insert(HealthData, {Time = os.clock(), Damage = Damage})
+        end
+    end
+    LastHealth = CurrentHealth
+
+    -- Remover danos antigos (fora do intervalo de 2 minutos)
+    local CurrentTime = os.clock()
+    for i = #HealthData, 1, -1 do
+        if CurrentTime - HealthData[i].Time > Interval then
+            table.remove(HealthData, i)
+        end
+    end
+
+    -- Calcular o dano total nos últimos 2 minutos
+    local TotalDamage = 0
+    for _, entry in ipairs(HealthData) do
+        TotalDamage += entry.Damage
+    end
+
+    -- Exibir o dano total
+    _G.FOVSpeed = calcularY(TotalDamage)
+end
+
+spawn(function()
+    -- Monitorar a vida a cada segundo
+    while true do
+        task.wait(0.25)
+        UpdateHealth()
+    end
+end)
 
     end
     if message:lower() == "/1" then
@@ -4183,6 +4282,12 @@ local function removeAuraEffect()
         end
     end
 end
+
+local ChatService = game:GetService("Chat")
+
+ChatService:Chat(player.Character, "UAAAAAAAAAAAAAAAAAAAAAAA!!!!!!!!!.", Enum.ChatColor.Red)  -- Envia uma mensagem ao jogador
+ChatService:Chat(player.Character, "UUIUIUIUIUIUIU....", Enum.ChatColor.Red)  -- Envia uma mensagem ao jogador
+
 
 -- Restaurar configurações de iluminação
 local function restoreLighting()
@@ -4215,6 +4320,49 @@ removeAuraEffect()
 restoreLighting()
 disableMainScript()
 
+_G.FOVSpeed = 70
+
+    end
+
+    if message:lower() == "/2" then
+        for i = 1, 3 do
+            task.wait()
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                "requestEntrance",
+                Vector3.new(28286, 14897, 103)
+            )
+        end
+
+        spawn(function()
+    
+                            -- Remove o chat e a opção de digitar no chat por 30 segundos
+
+                local Players = game:GetService("Players")
+                local ChatService = game:GetService("Chat")
+
+                local function disableChat(player)
+                    -- Desativa o chat e a opção de digitar
+                    local playerGui = player:WaitForChild("PlayerGui")
+                    local chatFrame = playerGui:WaitForChild("Chat")
+                    local textBox = chatFrame:FindFirstChild("TextBox")
+                    
+                    if textBox then
+                        textBox.Text = ""  -- Limpa o texto
+                        textBox.Visible = false  -- Torna o campo de digitação invisível
+                    end
+                    
+                    ChatService:Chat(player.Character, "ADMIN ativado com exito.", Enum.ChatColor.Red)  -- Envia uma mensagem ao jogador
+
+                   
+                end
+
+                disableChat(game.Players.LocalPlayer)
+
+
+        end)
+    _G.Disabled = true
+    wait(15)
+    _G.Disabled = false
 
     end
 end
