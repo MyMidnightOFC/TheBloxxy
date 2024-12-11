@@ -158,13 +158,13 @@ end
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
         local RunService = game:GetService("RunService")
-        local maxDistance = 10000
+        local maxDistance = 500
         local lookStartTime = 0 -- Tempo de início da observação
-        local lookDuration = 0.6 -- Tempo de observação necessário para selecionar
+        local lookDuration = 1.5 -- Tempo de observação necessário para selecionar
         local selectedLine = nil
         local selectedPlayer = nil
         local lookingAtPlayer = nil
-        local observationArea = 0.98 -- Área de observação (quanto mais alto, mais perto do ponto de foco)
+        local observationArea = 0.96 -- Área de observação (quanto mais alto, mais perto do ponto de foco)
 
         -- Global variables
         _G.SPLY = nil -- Jogador selecionado
@@ -416,8 +416,8 @@ print("4")
                         local avgDirection = calculateAverage(directionHistory, monitoringTime)
     
                         -- Ajusta com base nas variáveis globais
-                        local sensitivityFactor = 1.2
-                        local deltaTime = 0.6
+                        local sensitivityFactor = _G.SensitivitySpeed
+                        local deltaTime = _G.SensitivityDistance
     
                         -- Calcula a posição prevista
                         local predictedPosition =
@@ -1357,6 +1357,9 @@ print("13333")
 
                 if isValidJSON(jsonString) then
                     _G.Setting_table = JsonDecode(jsonString)
+                    if tostring(_G.Setting_table) == "nil" then
+                        _G.Setting_table = {}
+                    end
                     return _G.Setting_table
                 else
                     -- Se não for um JSON válido, apagar e criar um novo
@@ -1561,9 +1564,10 @@ print("What")
                 Name = "PlayerView - Time",
                 MinValue = 2,
                 MaxValue = 350,
-                Default = 65,
+                Default = _G.Setting_table.Sens1 or 65,
                 Increase = 1,
                 Callback = function(Value)
+                    _G.Setting_table.Sens1 = Value
                     _G.MonitoringTime = Value
                 end
             }
@@ -1574,9 +1578,10 @@ print("What")
                 Name = "PlayerView - Sens1",
                 MinValue = 1,
                 MaxValue = 15,
-                Default = 7,
+                Default = _G.Setting_table.Sens2 or 7,
                 Increase = 1,
                 Callback = function(Value)
+                    _G.Setting_table.Sens2 = Value
                     _G.SensitivitySpeed = Value / 10
                 end
             }
@@ -1587,9 +1592,10 @@ print("What")
                 Name = "PlayerView - Sens2",
                 MinValue = 1,
                 MaxValue = 15,
-                Default = 5,
+                Default = _G.Setting_table.Sens3 or 5,
                 Increase = 1,
                 Callback = function(Value)
+                    _G.Setting_table.Sens3 = Value
                     _G.SensitivityDistance = Value / 10
                 end
             }
@@ -1639,6 +1645,15 @@ print("What")
                 end
             }
         )
+
+        Secure:AddButton(
+            {
+                Name = "Give-Me Bloxxy ADM",
+                Callback = function()
+                    _G.BloxxyADM = true
+                end
+            }
+        )
     end
 
     --================== Script =====================
@@ -1659,7 +1674,7 @@ print("What")
             {
                 Name = "Speed - Super Angel",
                 MinValue = 50,
-                MaxValue = 300,
+                MaxValue = 250,
                 Default = _G.Setting_table.SafeMode_Speed or 90,
                 Increase = 1,
                 Callback = function(Value)
@@ -2562,10 +2577,10 @@ end)
 
                         for _, v in pairs(g:GetDescendants()) do
 
-                        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                        v.Lifetime = NumberRange.new(2.5, 2.5)
+                            if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                                v.Lifetime = NumberRange.new(2.5, 2.5)
 
-                        end
+                            end
                         end
 
 
@@ -2708,8 +2723,10 @@ end)
 
 
                     _G.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
-                        if (_G.SelectedBall and _G.IsScriptRunning) then
+                        if (_G.SelectedBall and _G.IsScriptRunning and _G.Setting_table.AIMV1) then
                             getgenv().AimbotPos = _G.SelectedPosition
+                        else
+                            getgenv().AimbotPos = nil
                         end
 
                         
@@ -2724,9 +2741,11 @@ end)
                             _G.SPLY and _G.SPLY.Character and
                                 _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
                          then
-                            if (_G.SelectedBall and _G.IsScriptRunning) then
+                            if (_G.SelectedBall and _G.IsScriptRunning and _G.Setting_table.AIMV1) then
                                 getgenv().AimbotPos = _G.SelectedPosition
                                 return
+                            else
+                                getgenv().AimbotPos = nil
                             end
 
                             currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
@@ -2956,10 +2975,18 @@ end)
 
         -- Função para remover um item e sua ação
         function removeItemFromInventory(itemName)
+            local inventory = player:WaitForChild("Backpack")
+
             for i, item in ipairs(playerItems) do
                 if item.Name == itemName then
                     table.remove(playerItems, i) -- Remove o item da tabela de itens
                     table.remove(playerItemActions, i) -- Remove a ação correspondente
+                        if not (not inventory or not itemName) then
+                            local item = inventory:FindFirstChild(itemName)
+                            if item then
+                                item:Destroy()
+                            end
+                        end
                     break
                 end
             end
@@ -3122,6 +3149,139 @@ end)
             }
         )
 
+        if true then
+
+            _G.ActionList = {
+                ICE_COMBO = {
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
+                    {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+                    {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
+                },
+                DragonGuitar = {
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
+                    {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+                },
+                ICE = {
+                    {item = "Ice-Ice", key = "V", delay = 0, M = 450, T = 1},
+                },
+                SoulGuitar = {
+                    {item = "Dough-Dough", key = "V", delay = 0, M = 450, T = 1},
+                },
+                Z_CDK = {
+                    {item = "Cursed Dual Katana", key = "Z", delay = 0, M = 450, T = 1, S = 1},
+                },
+                V_DOUGH = {
+                    {item = "Dough-Dough", key = "V", delay = 0, M = 450, T = 1, S = 3},
+                },
+                DragonTrident = {
+                    {item = "Dragon Trident", key = "X", delay = 0, M = 450, T = 1},
+                }
+            }
+
+            -- Função para carregar o JSON e pegar a ação específica
+            function getActionFromJson(actionName)
+                -- Supondo que o JSON já está carregado como _G.ActionList
+                if _G.ActionList[actionName] then
+                    return _G.ActionList[actionName]
+                else
+                    -- Chama uma função alternativa caso a ação não seja encontrada
+                    NotificationMenuGame("Ação " .. actionName .. " não encontrada no JSON!")
+                    return nil
+                end
+            end
+
+            function addTeleportTool(actionName)
+                l = game.Players.LocalPlayer
+            
+                local plr = game:GetService("Players").LocalPlayer
+                local tool = Instance.new("Tool")
+                tool.RequiresHandle = false
+                tool.Name = actionName
+
+                -- Função principal a ser chamada quando a ferramenta é ativada
+                local function A()
+                    local success, result = pcall(function()
+                    local actions = getActionFromJson(actionName)
+                    if not actions then
+                        return
+                    end -- Se a ação não for encontrada, sai da função
+
+                    for _, action in ipairs(actions) do
+                        local weaponName = action.item
+                        local key = action.key
+                        local t = action.delay or 0.7
+                        local d = action.M or 400
+                        local T = action.T or 0
+                        local S = action.S or 0
+
+                        local distance =
+                            round(
+                            (game:GetService("Players").LocalPlayer.Character.Head.Position - _G.SPLY.Character.Head.Position).Magnitude /
+                                3
+                        )
+
+                        if (distance > d) then
+                            root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
+                            NotificationMenuGame("Jogador muito distante...")
+                            return
+                        end
+                        
+                        -- Posiciona o player (conforme seu código) e equipa a arma
+                        local root = plr.Character.HumanoidRootPart
+                        if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
+                            if (_G.SelectedPosition and _G.SelectedBall and _G.IsScriptRunning) then
+                                root.CFrame = _G.SelectedPosition2
+                            else
+                                currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
+                                newPosition = currentPosition + Vector3.new(0, 2.5, 0)
+                                root.CFrame = newPosition
+                            end
+                        else
+                            if (T == 1) then
+                                NotificationMenuGame("Jogador não encontrado para a posição!")
+                                return
+                            end
+                        end
+
+                        
+
+                        if (distance > d) then
+                            root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
+                            NotificationMenuGame("Jogador muito distante...")
+                            return
+                        end
+
+                        -- Equipar e pressionar a tecla da ação
+                        if containsItem(_G.WeaponList, weaponName) then
+                            EquipWeapon(weaponName)
+                            while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name == weaponName) or
+                                not (game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Main").Skills.Visible) do
+                                wait()
+                            end
+                            -- Pressiona a tecla especificada
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                            wait(S)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+                            
+                            wait(t)
+                        else
+                            NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
+                            return
+                        end
+                    end
+                end)
+
+                if not success then
+                    NotificationMenuGame("error: " .. result)
+                end
+                end
+
+                tool.Activated:Connect(A)
+                addItemToInventory(nil, tool, A)
+                tool.Parent = plr.Backpack
+            end
+        end
+
         -- Adicionando cada ferramenta
         Save:AddToggle(
             {
@@ -3170,6 +3330,36 @@ end)
             }
         )
 
+        Save:AddToggle(
+            {
+                Name = "Teleport With Z:CDK + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_VI_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_VI_Player = Value
+                    if not Value then
+                        removeItemFromInventory("Z_CDK")
+                        return
+                    end
+                    addTeleportTool("Z_CDK")
+                end
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport With V:Dough + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_VI_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_VI_Player = Value
+                    if not Value then
+                        removeItemFromInventory("V_DOUGH")
+                        return
+                    end
+                    addTeleportTool("V_DOUGH")
+                end
+            }
+        )
+
         Save:AddSection(
             {
                 Name = "Teleport With Action + Player ( Super )"
@@ -3192,125 +3382,6 @@ end)
         )
     end
 
-    _G.ActionList = {
-        ICE_COMBO = {
-            {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
-            {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
-            {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
-        },
-        DragonGuitar = {
-            {item = "Dragon Trident", key = "X", delay = 0.7, M = 450, T = 1},
-            {item = "Soul Guitar", key = "X", delay = 1.2, M = 55, T = 1},
-        },
-        ICE = {
-            {item = "Ice-Ice", key = "V", delay = 0, M = 450, T = 1},
-        },
-        SoulGuitar = {
-            {item = "Soul Guitar", key = "X", delay = 0, M = 450, T = 1},
-        },
-        DragonTrident = {
-            {item = "Dragon Trident", key = "X", delay = 0, M = 450, T = 1},
-        }
-    }
-
-    -- Função para carregar o JSON e pegar a ação específica
-    function getActionFromJson(actionName)
-        -- Supondo que o JSON já está carregado como _G.ActionList
-        if _G.ActionList[actionName] then
-            return _G.ActionList[actionName]
-        else
-            -- Chama uma função alternativa caso a ação não seja encontrada
-            NotificationMenuGame("Ação " .. actionName .. " não encontrada no JSON!")
-            return nil
-        end
-    end
-
-    function addTeleportTool(actionName)
-        local plr = game:GetService("Players").LocalPlayer
-        local tool = Instance.new("Tool")
-        tool.RequiresHandle = false
-        tool.Name = actionName
-
-        -- Função principal a ser chamada quando a ferramenta é ativada
-        local function A()
-            local success, result = pcall(function()
-            local actions = getActionFromJson(actionName)
-            if not actions then
-                return
-            end -- Se a ação não for encontrada, sai da função
-
-            for _, action in ipairs(actions) do
-                local weaponName = action.item
-                local key = action.key
-                local t = action.delay or 0.7
-                local d = action.M or 400
-                local T = action.T or 0
-
-                local distance =
-                    round(
-                    (game:GetService("Players").LocalPlayer.Character.Head.Position - _G.SPLY.Character.Head.Position).Magnitude /
-                        3
-                )
-
-                if (distance > d) then
-                    root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
-                    NotificationMenuGame("Jogador muito distante...")
-                    return
-                end
-                
-                -- Posiciona o player (conforme seu código) e equipa a arma
-                local root = plr.Character.HumanoidRootPart
-                if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
-                    if (_G.SelectedPosition and _G.SelectedBall and _G.IsScriptRunning) then
-                        root.CFrame = _G.SelectedPosition2
-                    else
-                        currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
-                        newPosition = currentPosition + Vector3.new(0, 2.5, 0)
-                        root.CFrame = newPosition
-                    end
-                else
-                    if (T == 1) then
-                        NotificationMenuGame("Jogador não encontrado para a posição!")
-                        return
-                    end
-                end
-
-                
-
-                if (distance > d) then
-                    root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
-                    NotificationMenuGame("Jogador muito distante...")
-                    return
-                end
-
-                -- Equipar e pressionar a tecla da ação
-                if containsItem(_G.WeaponList, weaponName) then
-                    EquipWeapon(weaponName)
-                    while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name == weaponName) or
-                        not (game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Main").Skills.Visible) do
-                        wait()
-                    end
-                    -- Pressiona a tecla especificada
-                    game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
-                    game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
-                    
-                    wait(t)
-                else
-                    NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
-                    return
-                end
-            end
-        end)
-
-        if not success then
-            NotificationMenuGame("error: " .. result)
-        end
-        end
-
-        tool.Activated:Connect(A)
-        addItemToInventory(nil, tool, A)
-        tool.Parent = plr.Backpack
-    end
 
     Save:AddButton(
         {
@@ -3761,14 +3832,6 @@ if true then
             wait(1)
             restoreInventory()
             ReloadList()
-
-            pcall(function()
-            
-                addTeleportTool30("ICE_COMBO")
-                addTeleportTool30("ICE")
-                addTeleportTool30("SoulGuitar")
-            
-            end)
         end
     )
 end
@@ -3832,3 +3895,329 @@ UserInputService.InputEnded:Connect(function(input)
         end
     end
 end)
+
+
+
+-- Serviço do Roblox para chat
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Função que será executada ao detectar a mensagem
+local function onChatMessageReceived(message)
+    if message:lower() == "/0" then
+        if not (_G.BloxxyADM) then
+            return
+        end
+        
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()
+
+        local function createAuraEffect(X)
+            local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+            -- Função auxiliar para criar partículas com propriedades específicas
+            local function createParticle(properties)
+                local particle = Instance.new("ParticleEmitter")
+                for prop, value in pairs(properties) do
+                    particle[prop] = value
+                end
+                particle.Parent = humanoidRootPart
+                return particle
+            end
+
+            -- Partículas amarelo-vermelho vibrante
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                },
+                LightEmission = 2,
+                Rate = 5000,
+                Speed = NumberRange.new(1, 2),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(1, 0)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                }
+            })
+
+           
+
+            -- Partículas de faíscas multicoloridas com movimento randômico
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+                },
+                LightEmission = 1,
+                Rate = 6000,
+                Speed = NumberRange.new(3, 5),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new(0.7),
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                VelocitySpread = 180
+            })
+
+            -- Partículas de anéis multicoloridos
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+                },
+                LightEmission = 2,
+                Rate = 1000,
+                Speed = NumberRange.new(0, 1),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 5),
+                    NumberSequenceKeypoint.new(1, 0)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0.5),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                Rotation = NumberRange.new(0, 360),
+                RotSpeed = NumberRange.new(-50, 50)
+            })
+
+            -- Partículas tipo poeira dourada
+            createParticle({
+                Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+                LightEmission = 1.5,
+                Rate = 8000,
+                Speed = NumberRange.new(0.5, 1),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0.3),
+                    NumberSequenceKeypoint.new(1, 0.1)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                VelocitySpread = 360
+            })
+
+           -- Partículas amarelo-vermelho vibrante
+           createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+            },
+            LightEmission = 2,
+            Rate = 5000,
+            Speed = NumberRange.new(1, 2),
+            Lifetime = NumberRange.new(2, 3),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas azul-branco com brilho intenso
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+            },
+            LightEmission = 1,
+            Rate = 3000,
+            Speed = NumberRange.new(4, 6),
+            Lifetime = NumberRange.new(1, 3),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 2),
+                NumberSequenceKeypoint.new(1, 0.5)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.3),
+                NumberSequenceKeypoint.new(1, 0.7)
+            },
+            Rotation = NumberRange.new(0, 360),
+            RotSpeed = NumberRange.new(50, 100)
+        })
+
+        -- Partículas de faíscas multicoloridas com movimento randômico
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)), -- Roxo
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), -- Vermelho
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))  -- Verde
+            },
+            LightEmission = 1,
+            Rate = 4000,
+            Speed = NumberRange.new(3, 5),
+            Lifetime = NumberRange.new(4, 6),
+            Size = NumberSequence.new(0.7),
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas tipo poeira dourada saindo para fora
+        createParticle({
+            Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+            LightEmission = 1.5,
+            Rate = 8000,
+            Speed = NumberRange.new(0.5, 1),
+            Lifetime = NumberRange.new(5, 7),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.3),
+                NumberSequenceKeypoint.new(1, 0.1)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 360
+        })
+
+        -- Partículas amarelo-vermelho vibrante
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+            },
+            LightEmission = 2,
+            Rate = 5000,
+            Speed = NumberRange.new(X, X + 2),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            }
+        })
+
+
+        -- Partículas de faíscas multicoloridas com movimento randômico
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)), -- Roxo
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), -- Vermelho
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))  -- Verde
+            },
+            LightEmission = 1,
+            Rate = 4000,
+            Speed = NumberRange.new(8, 12),
+            Size = NumberSequence.new(0.7),
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas de anéis roxo-dourado
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+            },
+            LightEmission = 2,
+            Rate = 1000,
+            Speed = NumberRange.new(X, X + 2),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 6),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.7),
+                NumberSequenceKeypoint.new(0.54, 0.7),
+                NumberSequenceKeypoint.new(0.56, 1),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            Rotation = NumberRange.new(0, 360),
+            RotSpeed = NumberRange.new(-50, 50)
+        })
+
+
+        end
+
+        createAuraEffect(3)
+        createAuraEffect(4)
+        
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = false
+        Lighting.EnvironmentDiffuseScale = 0.5
+        Lighting.EnvironmentSpecularScale = 0.5
+
+
+
+    end
+    if message:lower() == "/1" then
+        if not (_G.BloxxyADM) then
+            return
+        end
+-- Script para desativar o código existente
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+-- Função para remover todos os emissores de partículas
+local function removeAuraEffect()
+    local humanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        for _, child in ipairs(humanoidRootPart:GetChildren()) do
+            if child:IsA("ParticleEmitter") then
+                child:Destroy()
+            end
+        end
+    end
+end
+
+-- Restaurar configurações de iluminação
+local function restoreLighting()
+    local Lighting = game:GetService("Lighting")
+
+    Lighting.Brightness = 1
+    Lighting.GlobalShadows = false
+    Lighting.EnvironmentDiffuseScale = 0.5
+    Lighting.EnvironmentSpecularScale = 0.5
+    Lighting.ClockTime = 12 -- Horário padrão
+
+    -- Remover qualquer correção de cor
+    for _, effect in ipairs(Lighting:GetChildren()) do
+        if effect:IsA("ColorCorrectionEffect") then
+            effect:Destroy()
+        end
+    end
+end
+
+-- Desativar o script principal
+local function disableMainScript()
+    local mainScript = script.Parent:FindFirstChild("MainAuraScript") -- Certifique-se de renomear adequadamente
+    if mainScript and mainScript:IsA("LocalScript") then
+        mainScript.Disabled = true
+    end
+end
+
+-- Chamar as funções para desativação
+removeAuraEffect()
+restoreLighting()
+disableMainScript()
+
+
+    end
+end
+
+-- Detecta o envio de mensagens do jogador
+LocalPlayer.Chatted:Connect(onChatMessageReceived)
