@@ -1,9 +1,14 @@
- -- Configurações gerais
+wait(2)
+
+-- Configurações gerais
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
 
 -- Funções auxiliares
 local function criarParticula(position, parent, duracao, cor, tamanhoInicial, tamanhoFinal)
@@ -32,8 +37,8 @@ end
 
 local function criarExplosao(position, quantidade, parent, cor)
     for i = 1, quantidade do
-        local offset = Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5))
-        criarParticula(position + offset, parent, 1, cor, 0.5, math.random(3, 6))
+        local offset = Vector3.new(math.random(-8, 8), math.random(-8, 8), math.random(-8, 8))
+        criarParticula(position + offset, parent, 1, cor, 0.5, math.random(3, 5))
     end
 end
 
@@ -53,19 +58,308 @@ local function ativarPoder()
         flash:Destroy()
     end)
 
+
+local function disableAuraEffect()
+    local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+    -- Verifica e remove todos os ParticleEmitters da HumanoidRootPart
+    for _, child in ipairs(humanoidRootPart:GetChildren()) do
+        if child:IsA("ParticleEmitter") then
+            child:Destroy()
+        end
+    end
+end
+
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local function createAuraEffect()
+    local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+    -- Função auxiliar para criar partículas com propriedades específicas
+    local function createParticle(properties)
+        local particle = Instance.new("ParticleEmitter")
+        for prop, value in pairs(properties) do
+            particle[prop] = value
+        end
+        particle.Parent = humanoidRootPart
+        return particle
+    end
+
+    -- Partículas amarelo-vermelho vibrante
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+        },
+        LightEmission = 2,
+        Rate = 5000,
+        Speed = NumberRange.new(1, 2),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(1, 0)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        }
+    })
+
+    -- Partículas azul-branco com brilho intenso
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+        },
+        LightEmission = 3,
+        Rate = 3000,
+        Speed = NumberRange.new(2, 4),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 2),
+            NumberSequenceKeypoint.new(1, 0.5)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 0.7)
+        },
+        Rotation = NumberRange.new(0, 360),
+        RotSpeed = NumberRange.new(50, 100)
+    })
+
+    -- Partículas de faíscas multicoloridas com movimento randômico
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+        },
+        LightEmission = 1,
+        Rate = 6000,
+        Speed = NumberRange.new(3, 5),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new(0.7),
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        VelocitySpread = 180
+    })
+
+    -- Partículas de anéis multicoloridos
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+        },
+        LightEmission = 2,
+        Rate = 1000,
+        Speed = NumberRange.new(0, 1),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 5),
+            NumberSequenceKeypoint.new(1, 0)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0.5),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        Rotation = NumberRange.new(0, 360),
+        RotSpeed = NumberRange.new(-50, 50)
+    })
+
+    -- Partículas de anéis multicoloridos
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+        },
+        LightEmission = 2,
+        Rate = 1000,
+        Speed = NumberRange.new(0, 1),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 5),
+            NumberSequenceKeypoint.new(1, 0)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0.5),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        Rotation = NumberRange.new(0, 360),
+        RotSpeed = NumberRange.new(-50, 50)
+    })
+
+    -- Partículas tipo poeira dourada
+    createParticle({
+        Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+        LightEmission = 1.5,
+        Rate = 8000,
+        Speed = NumberRange.new(0.5, 1),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0.3),
+            NumberSequenceKeypoint.new(1, 0.1)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        VelocitySpread = 360
+    })
+
+end
+
+createAuraEffect()
+
+
+
+spawn(function()
+
+    -- Configurações iniciais
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Serviço de efeitos visuais
+local tweenService = game:GetService("TweenService")
+local debris = game:GetService("Debris")
+
+-- Função para criar partículas animadas
+local function criarParticulas2(parent, quantidade, cor, velocidade, tamanho)
+    for i = 1, quantidade do
+        local part = Instance.new("Part")
+        part.Size = Vector3.new(tamanho, tamanho, tamanho)
+        part.Shape = Enum.PartType.Ball
+        part.Color = cor
+        part.Material = Enum.Material.Neon
+        part.CanCollide = false
+        part.Anchored = true
+        part.CFrame = humanoidRootPart.CFrame * CFrame.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10))
+
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = Vector3.new(math.random(-velocidade, velocidade), math.random(-velocidade, velocidade), math.random(-velocidade, velocidade))
+        bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bodyVelocity.Parent = part
+
+        local tween = tweenService:Create(part, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 1, Size = Vector3.new(0, 0, 0)})
+        tween:Play()
+        tween.Completed:Connect(function()
+            part:Destroy()
+        end)
+
+        part.Parent = parent
+        debris:AddItem(part, 3) -- Remove a partícula após 3 segundos
+    end
+end
+
+-- Função para criar formas geométricas animadas
+local function criarFormas(parent, quantidade, cor, velocidade, tamanho)
+    for i = 1, quantidade do
+        local part = Instance.new("Part")
+        part.Size = Vector3.new(tamanho, tamanho, tamanho)
+        part.Shape = Enum.PartType.Block
+        part.Color = cor
+        part.Material = Enum.Material.Neon
+        part.CanCollide = false
+        part.Anchored = true
+        part.CFrame = humanoidRootPart.CFrame * CFrame.new(math.random(-15, 15), math.random(-15, 15), math.random(-15, 15)) * CFrame.Angles(math.random(), math.random(), math.random())
+
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = Vector3.new(math.random(-velocidade, velocidade), math.random(-velocidade, velocidade), math.random(-velocidade, velocidade))
+        bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bodyVelocity.Parent = part
+
+        local tween = tweenService:Create(part, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Transparency = 1, Size = Vector3.new(0, 0, 0)})
+        tween:Play()
+        tween.Completed:Connect(function()
+            part:Destroy()
+        end)
+
+        part.Parent = parent
+        debris:AddItem(part, 5) -- Remove a forma após 5 segundos
+    end
+end
+
+-- Função para criar brilho de tela
+local function criarBrilho()
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 10
+    bloom.Threshold = 2.5
+    bloom.Size = 24
+    bloom.Parent = game.Lighting
+    return bloom
+end
+
+-- Função para criar um piscar de tela
+local function piscarTela(cor, duracao)
+    local flash = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = cor
+    frame.BorderSizePixel = 0
+    frame.Parent = flash
+
+    local tween = tweenService:Create(frame, TweenInfo.new(duracao, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+    tween:Play()
+    tween.Completed:Connect(function()
+        flash:Destroy()
+    end)
+end
+
+-- Função de ativação
+local function ativarPoder()
+    -- Piscar de tela inicial
+
+    -- Brilho inicial
+    local brilho = criarBrilho()
+
+    -- Explosão inicial massiva
+    criarParticulas2(workspace, 500, Color3.fromRGB(255, 165, 0), 50, 2)
+    criarFormas(workspace, 50, Color3.fromRGB(255, 255, 0), 20, 3)
+
+    -- Partículas contínuas ao redor do jogador
+    local particulasLoop = true
+    spawn(function()
+        while particulasLoop do
+            criarParticulas2(workspace, 20, Color3.fromRGB(0, 255, 255), 10, 1)
+            criarFormas(workspace, 10, Color3.fromRGB(255, 0, 0), 15, 2)
+            wait(0.2)
+        end
+    end)
+
+    -- Após 10 segundos, finalizar o poder
+    wait(30.5)
+    particulasLoop = false
+    brilho:Destroy()
+
+    -- Explosão final
+    criarParticulas2(workspace, 70, Color3.fromRGB(255, 0, 0), 75, 3)
+    criarFormas(workspace, 70, Color3.fromRGB(255, 255, 255), 30, 4)
+    criarFormas(workspace, 50, Color3.fromRGB(255, 50, 50), 30, 4)
+end
+
+-- Ativar automaticamente ao carregar
+ativarPoder()
+
+
+end)
+
     -- Explosão inicial
     criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(85, 255, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 75, workspace, Color3.fromRGB(255, 85, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 75, workspace, Color3.fromRGB(85, 85, 255))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(85, 85, 255))
 
     -- Modificações visuais
     local blurEffect = Instance.new("BlurEffect", Camera)
-    blurEffect.Size = 2
+    blurEffect.Size = 1
 
     local bloomEffect = Instance.new("BloomEffect", Camera)
-    bloomEffect.Intensity = 2.2
+    bloomEffect.Intensity = 2
     bloomEffect.Size = 24
 
     local particulasFolder = Instance.new("Folder", workspace)
@@ -73,7 +367,7 @@ local function ativarPoder()
     -- Partículas contínuas
     local conexao = RunService.RenderStepped:Connect(function()
         criarParticula(
-            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5)),
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
             particulasFolder,
             1,
             Color3.fromRGB(85, 170, 255),
@@ -82,17 +376,67 @@ local function ativarPoder()
         )
 
         criarParticula(
-            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5)),
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
             particulasFolder,
             1,
             Color3.fromRGB(85, 255, 85),
             0.2,
             math.random(1, 2)
         )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(255, 85, 85),
+            0.2,
+            math.random(1, 2)
+        )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(85, 85, 255),
+            0.2,
+            math.random(1, 2)
+        )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(255, 255, 85),
+            0.2,
+            math.random(1, 2)
+        )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(255, 85, 255),
+            0.2,
+            math.random(1, 2)
+        )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(124, 50, 252),
+            0.2,
+            math.random(1, 2)
+        )
+
+        
     end)
+    
+
+
 
     -- Desativação
-    wait(5)
+    wait(30)
 
     -- Flash final
     local flashFinal = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
@@ -102,29 +446,31 @@ local function ativarPoder()
     frameFinal.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
     frameFinal.BackgroundTransparency = 0.5
 
-    local tweenFlashFinal = TweenService:Create(frameFinal, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 })
+    local tweenFlashFinal = TweenService:Create(frameFinal, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 })
     tweenFlashFinal:Play()
     tweenFlashFinal.Completed:Connect(function()
         flashFinal:Destroy()
     end)
 
     -- Explosão final
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 255, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(255, 85, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 85, 255))
-    wait(0.1)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 255, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(255, 85, 85))
-    wait(0.05)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 85, 255))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 255, 85))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 85, 255))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 255, 85))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.01)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 85, 255))
 
     -- Remover efeitos
+    particulasLoop = false
     blurEffect:Destroy()
     particulasFolder:Destroy()
     conexao:Disconnect()
+    disableAuraEffect()
     wait(1.5)
     bloomEffect:Destroy()
 
@@ -132,3 +478,4 @@ end
 
 -- Ativação do poder
 ativarPoder()
+
