@@ -1,0 +1,134 @@
+ -- Configurações gerais
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Funções auxiliares
+local function criarParticula(position, parent, duracao, cor, tamanhoInicial, tamanhoFinal)
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(0.5, 0.5, 0.5)
+    part.Shape = "Ball"
+    part.Material = "Neon"
+    part.Color = cor
+    part.Anchored = true
+    part.CanCollide = false
+    part.CFrame = CFrame.new(position)
+    part.Parent = parent
+
+    local tweenInfo = TweenInfo.new(
+        duracao,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
+    )
+
+    local tween = TweenService:Create(part, tweenInfo, { Size = Vector3.new(tamanhoFinal, tamanhoFinal, tamanhoFinal), Transparency = 1 })
+    tween:Play()
+    tween.Completed:Connect(function()
+        part:Destroy()
+    end)
+end
+
+local function criarExplosao(position, quantidade, parent, cor)
+    for i = 1, quantidade do
+        local offset = Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5))
+        criarParticula(position + offset, parent, 1, cor, 0.5, math.random(3, 6))
+    end
+end
+
+-- Ativação do poder
+local function ativarPoder()
+    -- Flash inicial
+    local flash = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+    flash.IgnoreGuiInset = true
+    local frame = Instance.new("Frame", flash)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BackgroundTransparency = 0.5
+
+    local tweenFlash = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 })
+    tweenFlash:Play()
+    tweenFlash.Completed:Connect(function()
+        flash:Destroy()
+    end)
+
+    -- Explosão inicial
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(85, 255, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 75, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 75, workspace, Color3.fromRGB(85, 85, 255))
+
+    -- Modificações visuais
+    local blurEffect = Instance.new("BlurEffect", Camera)
+    blurEffect.Size = 2
+
+    local bloomEffect = Instance.new("BloomEffect", Camera)
+    bloomEffect.Intensity = 2.2
+    bloomEffect.Size = 24
+
+    local particulasFolder = Instance.new("Folder", workspace)
+
+    -- Partículas contínuas
+    local conexao = RunService.RenderStepped:Connect(function()
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(85, 170, 255),
+            0.2,
+            math.random(1, 2)
+        )
+
+        criarParticula(
+            LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5)),
+            particulasFolder,
+            1,
+            Color3.fromRGB(85, 255, 85),
+            0.2,
+            math.random(1, 2)
+        )
+    end)
+
+    -- Desativação
+    wait(5)
+
+    -- Flash final
+    local flashFinal = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+    flashFinal.IgnoreGuiInset = true
+    local frameFinal = Instance.new("Frame", flashFinal)
+    frameFinal.Size = UDim2.new(1, 0, 1, 0)
+    frameFinal.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
+    frameFinal.BackgroundTransparency = 0.5
+
+    local tweenFlashFinal = TweenService:Create(frameFinal, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 })
+    tweenFlashFinal:Play()
+    tweenFlashFinal.Completed:Connect(function()
+        flashFinal:Destroy()
+    end)
+
+    -- Explosão final
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 255, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 85, 255))
+    wait(0.1)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 255, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(255, 85, 85))
+    wait(0.05)
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 50, workspace, Color3.fromRGB(85, 85, 255))
+
+    -- Remover efeitos
+    blurEffect:Destroy()
+    particulasFolder:Destroy()
+    conexao:Disconnect()
+    wait(1.5)
+    bloomEffect:Destroy()
+
+end
+
+-- Ativação do poder
+ativarPoder()
