@@ -1,4 +1,4 @@
-EO = _G.Config1 or 3 -- EffectOtmization
+EO = _G.Config1 or 0.5 -- EffectOtmization
 EO2 = 2 / EO -- EffectOtmization2
 
 -- Criação do objeto Sound
