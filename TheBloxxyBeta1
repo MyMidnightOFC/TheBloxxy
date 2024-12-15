@@ -1,3 +1,28 @@
+EO = _G.Config1 or 3 -- EffectOtmization
+EO2 = 2 / EO -- EffectOtmization2
+
+-- Criação do objeto Sound
+sound2 = Instance.new("Sound")
+sound2.SoundId = "rbxassetid://9125898975" -- ID do áudio
+sound2.Looped = true -- Define o loop
+sound2.Volume = 2.5 -- Ajusta o volume (1 é o máximo)
+sound2.Parent = game.Workspace -- Define o local onde o som será tocado
+
+
+-- Criação do objeto Sound
+local sound1 = Instance.new("Sound")
+sound1.SoundId = "rbxassetid://979751563" -- ID do áudio
+sound1.Looped = false -- Define o loop
+sound1.Volume = 0.65 -- Ajusta o volume (1 é o máximo)
+sound1.Parent = game.Workspace -- Define o local onde o som será tocado
+
+-- Criação do objeto Sound
+local sound3 = Instance.new("Sound")
+sound3.SoundId = "rbxassetid://9116426079" -- ID do áudio
+sound3.Looped = false -- Define o loop
+sound3.Volume = 1 -- Ajusta o volume (1 é o máximo)
+sound3.Parent = game.Workspace -- Define o local onde o som será tocado
+
 wait(2)
 
 -- Configurações gerais
@@ -9,6 +34,19 @@ local Camera = workspace.CurrentCamera
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 
+
+spawn(function()
+
+-- Função para tocar o som
+sound1:Play()
+wait(1)
+
+-- Função para tocar o som
+sound2:Play()
+
+
+end)
+wait(0.2)
 
 -- Funções auxiliares
 local function criarParticula(position, parent, duracao, cor, tamanhoInicial, tamanhoFinal)
@@ -71,149 +109,27 @@ local function disableAuraEffect()
 end
 
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+-- Variável global para controle do FOV
+_G.FOVSpeed = 75 -- Valor inicial, pode ser ajustado dinamicamente
 
-local function createAuraEffect()
-    local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+-- Configurações do FOV
+local minFOV = 70 -- Valor mínimo do FOV
+local maxFOV = 2000 -- Valor máximo do FOV
+local smoothness = 0.01 -- Suavidade das transições (quanto menor, mais suave)
 
-    -- Função auxiliar para criar partículas com propriedades específicas
-    local function createParticle(properties)
-        local particle = Instance.new("ParticleEmitter")
-        for prop, value in pairs(properties) do
-            particle[prop] = value
-        end
-        particle.Parent = humanoidRootPart
-        return particle
-    end
+-- Referência à câmera
+local camera = workspace.CurrentCamera
 
-    -- Partículas amarelo-vermelho vibrante
-    createParticle({
-        Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-        },
-        LightEmission = 2,
-        Rate = 5000,
-        Speed = NumberRange.new(1, 2),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(1, 0)
-        },
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(1, 1)
-        }
-    })
+-- Atualização constante do FOV com base na variável global
+game:GetService("RunService").RenderStepped:Connect(function()
+    -- Obtém o valor-alvo do FOV
+    local targetFOV = math.clamp(_G.FOVSpeed, minFOV, maxFOV)
 
-    -- Partículas azul-branco com brilho intenso
-    createParticle({
-        Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-        },
-        LightEmission = 3,
-        Rate = 3000,
-        Speed = NumberRange.new(2, 4),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 2),
-            NumberSequenceKeypoint.new(1, 0.5)
-        },
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(1, 0.7)
-        },
-        Rotation = NumberRange.new(0, 360),
-        RotSpeed = NumberRange.new(50, 100)
-    })
+    -- Ajusta o FOV suavemente para o valor desejado
+    camera.FieldOfView = camera.FieldOfView + (targetFOV - camera.FieldOfView) * smoothness
+end)
 
-    -- Partículas de faíscas multicoloridas com movimento randômico
-    createParticle({
-        Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
-        },
-        LightEmission = 1,
-        Rate = 6000,
-        Speed = NumberRange.new(3, 5),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new(0.7),
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(1, 1)
-        },
-        VelocitySpread = 180
-    })
-
-    -- Partículas de anéis multicoloridos
-    createParticle({
-        Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
-        },
-        LightEmission = 2,
-        Rate = 1000,
-        Speed = NumberRange.new(0, 1),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 5),
-            NumberSequenceKeypoint.new(1, 0)
-        },
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(1, 1)
-        },
-        Rotation = NumberRange.new(0, 360),
-        RotSpeed = NumberRange.new(-50, 50)
-    })
-
-    -- Partículas de anéis multicoloridos
-    createParticle({
-        Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
-        },
-        LightEmission = 2,
-        Rate = 1000,
-        Speed = NumberRange.new(0, 1),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 5),
-            NumberSequenceKeypoint.new(1, 0)
-        },
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(1, 1)
-        },
-        Rotation = NumberRange.new(0, 360),
-        RotSpeed = NumberRange.new(-50, 50)
-    })
-
-    -- Partículas tipo poeira dourada
-    createParticle({
-        Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
-        LightEmission = 1.5,
-        Rate = 8000,
-        Speed = NumberRange.new(0.5, 1),
-        Lifetime = NumberRange.new(0.5, 1.5),
-        Size = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0.3),
-            NumberSequenceKeypoint.new(1, 0.1)
-        },
-        Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(1, 1)
-        },
-        VelocitySpread = 360
-    })
-
-end
-
-createAuraEffect()
-
+_G.FOVSpeed = 100 -- Valor inicial, pode ser ajustado dinamicamente
 
 
 spawn(function()
@@ -285,12 +201,7 @@ end
 
 -- Função para criar brilho de tela
 local function criarBrilho()
-    local bloom = Instance.new("BloomEffect")
-    bloom.Intensity = 10
-    bloom.Threshold = 2.5
-    bloom.Size = 24
-    bloom.Parent = game.Lighting
-    return bloom
+    
 end
 
 -- Função para criar um piscar de tela
@@ -313,32 +224,35 @@ end
 local function ativarPoder()
     -- Piscar de tela inicial
 
-    -- Brilho inicial
-    local brilho = criarBrilho()
 
     -- Explosão inicial massiva
-    criarParticulas2(workspace, 500, Color3.fromRGB(255, 165, 0), 50, 2)
-    criarFormas(workspace, 50, Color3.fromRGB(255, 255, 0), 20, 3)
+     criarParticulas2(workspace, 250, Color3.fromRGB(255, 0, 0), 40, 3)
+    criarFormas(workspace, 80 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
+    criarFormas(workspace, 70 * EO, Color3.fromRGB(255, 255, 255), 1, 4)
+    criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
+    criarFormas(workspace, 20 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
 
     -- Partículas contínuas ao redor do jogador
     local particulasLoop = true
     spawn(function()
         while particulasLoop do
-            criarParticulas2(workspace, 20, Color3.fromRGB(0, 255, 255), 10, 1)
-            criarFormas(workspace, 10, Color3.fromRGB(255, 0, 0), 15, 2)
+            criarParticulas2(workspace, 20 * EO, Color3.fromRGB(0, 255, 255), 10, 1)
+            criarFormas(workspace, 8 * EO, Color3.fromRGB(255, 0, 0), 15, 2)
+            criarFormas(workspace, 8 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
             wait(0.2)
         end
     end)
 
     -- Após 10 segundos, finalizar o poder
-    wait(30.5)
+    wait(31)
     particulasLoop = false
     brilho:Destroy()
 
     -- Explosão final
-    criarParticulas2(workspace, 70, Color3.fromRGB(255, 0, 0), 75, 3)
-    criarFormas(workspace, 70, Color3.fromRGB(255, 255, 255), 30, 4)
-    criarFormas(workspace, 50, Color3.fromRGB(255, 50, 50), 30, 4)
+    criarParticulas2(workspace, 70 * EO, Color3.fromRGB(255, 0, 0), 75, 3)
+    criarFormas(workspace, 70 * EO, Color3.fromRGB(255, 255, 255), 30, 4)
+    criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 30, 4)
+    criarFormas(workspace, 20 * EO, Color3.fromRGB(50, 50, 255), 30, 4)
 end
 
 -- Ativar automaticamente ao carregar
@@ -347,25 +261,35 @@ ativarPoder()
 
 end)
 
+-- Modificações visuais
+local blurEffect = Instance.new("BlurEffect", Camera)
+blurEffect.Size = 1
+
+local bloomEffect = Instance.new("BloomEffect", Camera)
+bloomEffect.Intensity = 1
+bloomEffect.Size = 24
+bloomEffect.Threshold = 2.5
+
     -- Explosão inicial
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(85, 255, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100 * EO, workspace, Color3.fromRGB(85, 255, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(255, 85, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100 * EO, workspace, Color3.fromRGB(255, 85, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100, workspace, Color3.fromRGB(85, 85, 255))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 100 * EO, workspace, Color3.fromRGB(85, 85, 255))
 
-    -- Modificações visuais
-    local blurEffect = Instance.new("BlurEffect", Camera)
-    blurEffect.Size = 1
-
-    local bloomEffect = Instance.new("BloomEffect", Camera)
-    bloomEffect.Intensity = 2
-    bloomEffect.Size = 24
+   
 
     local particulasFolder = Instance.new("Folder", workspace)
 
     -- Partículas contínuas
+    X = 1
     local conexao = RunService.RenderStepped:Connect(function()
+    if (X < EO2) then
+        X = X + 1
+        return
+    end
+
+    X = 1
         criarParticula(
             LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10,10)),
             particulasFolder,
@@ -435,9 +359,26 @@ end)
 
 
 
+
     -- Desativação
     wait(30)
 
+
+spawn(function()
+
+
+
+
+-- Função para tocar o som
+sound3:Play()
+wait(0.5)
+if sound2 and sound2.SoundId == "rbxassetid://9125898975" then
+    sound2:Stop()
+    sound2:Destroy() -- Remove o objeto de som para liberar recursos
+end
+
+end)
+wait(0.5)
     -- Flash final
     local flashFinal = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
     flashFinal.IgnoreGuiInset = true
@@ -453,17 +394,17 @@ end)
     end)
 
     -- Explosão final
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 255, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(85, 255, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(255, 85, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(255, 85, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 85, 255))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(85, 85, 255))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 255, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(85, 255, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(255, 85, 85))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(255, 85, 85))
     wait(0.01)
-    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90, workspace, Color3.fromRGB(85, 85, 255))
+    criarExplosao(LocalPlayer.Character.HumanoidRootPart.Position, 90 * EO, workspace, Color3.fromRGB(85, 85, 255))
 
     -- Remover efeitos
     particulasLoop = false
@@ -471,6 +412,7 @@ end)
     particulasFolder:Destroy()
     conexao:Disconnect()
     disableAuraEffect()
+    _G.FOVSpeed = 70 -- Valor inicial, pode ser ajustado dinamicamente
     wait(1.5)
     bloomEffect:Destroy()
 
