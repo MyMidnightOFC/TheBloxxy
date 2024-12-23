@@ -131,6 +131,152 @@ end)
 
 _G.FOVSpeed = 100 -- Valor inicial, pode ser ajustado dinamicamente
 
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local function createAuraEffect()
+    local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+    -- Função auxiliar para criar partículas com propriedades específicas
+    local function createParticle(properties)
+        local particle = Instance.new("ParticleEmitter")
+        for prop, value in pairs(properties) do
+            particle[prop] = value
+        end
+        particle.Parent = humanoidRootPart
+        return particle
+    end
+
+    -- Partículas amarelo-vermelho vibrante
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+        },
+        LightEmission = 2,
+        Rate = 5000,
+        Speed = NumberRange.new(1, 2),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(1, 0)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        }
+    })
+
+    -- Partículas azul-branco com brilho intenso
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+        },
+        LightEmission = 3,
+        Rate = 3000,
+        Speed = NumberRange.new(2, 4),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 2),
+            NumberSequenceKeypoint.new(1, 0.5)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 0.7)
+        },
+        Rotation = NumberRange.new(0, 360),
+        RotSpeed = NumberRange.new(50, 100)
+    })
+
+    -- Partículas de faíscas multicoloridas com movimento randômico
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+        },
+        LightEmission = 1,
+        Rate = 6000,
+        Speed = NumberRange.new(3, 5),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new(0.7),
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        VelocitySpread = 180
+    })
+
+    -- Partículas de anéis multicoloridos
+    createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+        },
+        LightEmission = 2,
+        Rate = 1000,
+        Speed = NumberRange.new(0, 1),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 5),
+            NumberSequenceKeypoint.new(1, 0)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0.5),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        Rotation = NumberRange.new(0, 360),
+        RotSpeed = NumberRange.new(-50, 50)
+    })
+
+    -- Partículas tipo poeira dourada
+    createParticle({
+        Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+        LightEmission = 1.5,
+        Rate = 8000,
+        Speed = NumberRange.new(0.5, 1),
+        Lifetime = NumberRange.new(0.5, 1.5),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0.3),
+            NumberSequenceKeypoint.new(1, 0.1)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        VelocitySpread = 360
+    })
+
+    -- Partículas de vento próximo ao chão
+    local groundParticles = createParticle({
+        Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 200)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 150))
+        },
+        LightEmission = 1,
+        Rate = 4000,
+        Speed = NumberRange.new(2, 4),
+        Lifetime = NumberRange.new(0.5, 1),
+        Size = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(1, 0.5)
+        },
+        Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        },
+        VelocitySpread = 360
+    })
+
+    game:GetService("RunService").Heartbeat:Connect(function()
+        local isNearGround = humanoidRootPart.Position.Y < 3
+        groundParticles.Enabled = isNearGround
+    end)
+end
+
+createAuraEffect()
+
 
 spawn(function()
 
