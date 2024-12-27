@@ -34,6 +34,62 @@ local Camera = workspace.CurrentCamera
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 
+function JumpForceFunction(J)
+    _G.jumpPower = _G.jumpPower or 50
+
+    -- Função para forçar o JumpPower do LocalPlayer
+    local function forceJumpPower(humanoid)
+        humanoid.JumpPower = _G.jumpPower
+        humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
+            function()
+                if humanoid.JumpPower ~= _G.jumpPower then
+                    humanoid.JumpPower = _G.jumpPower
+                end
+            end
+        )
+    end
+
+    -- Referência ao jogador local
+    local player = game.Players.LocalPlayer
+
+    -- Conectar a função quando o personagem do jogador local for adicionado
+    player.CharacterAdded:Connect(
+        function(character)
+            local humanoid = character:WaitForChild("Humanoid")
+            forceJumpPower(humanoid)
+        end
+    )
+
+    -- Caso o personagem do jogador local já esteja carregado
+    if player.Character then
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            forceJumpPower(humanoid)
+        end
+    end
+
+    -- Função para atualizar o JumpPower do LocalPlayer
+    local function updateJumpPower()
+        if player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = _G.jumpPower
+            end
+        end
+    end
+
+    -- Atualizar o JumpPower do LocalPlayer constantemente
+    game:GetService("RunService").Stepped:Connect(
+        function()
+            updateJumpPower()
+        end
+    )
+end
+if not _G.jumpPower then
+    _G.jumpPower = 85
+    JumpForceFunction()
+end
+_G.jumpPower = 85
 
 spawn(function()
 
@@ -558,6 +614,7 @@ wait(0.5)
     particulasFolder:Destroy()
     conexao:Disconnect()
     disableAuraEffect()
+    _G.jumpPower = 50
     _G.FOVSpeed = 70 -- Valor inicial, pode ser ajustado dinamicamente
     wait(1.5)
     bloomEffect:Destroy()
