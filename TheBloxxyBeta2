@@ -1,0 +1,76 @@
+-- Script Local em StarterPlayerScripts
+
+-- Variáveis principais
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local camera = workspace.CurrentCamera
+
+-- Propriedades de voo
+local flying = false
+local speed = 100 -- Velocidade de voo
+local flyDirection = Vector3.new(0, 0, 0) -- Direção atual do voo
+local flyBodyGyro = Instance.new("BodyGyro")
+local flyBodyVelocity = Instance.new("BodyVelocity")
+
+-- Configurar BodyGyro
+flyBodyGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+flyBodyGyro.P = 1e5
+
+-- Configurar BodyVelocity
+flyBodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+
+-- Função para iniciar o voo
+local function StartFlying()
+    if flying then return end
+    flying = true
+
+    -- Posicionar o player na pose de voo
+    humanoid.PlatformStand = true
+    flyBodyGyro.Parent = rootPart
+    flyBodyVelocity.Parent = rootPart
+
+    -- Rotacionar o player para a pose de "Super-Homem"
+    local lookDirection = (camera.CFrame.Position + camera.CFrame.LookVector * 10) - rootPart.Position
+    flyBodyGyro.CFrame = CFrame.new(rootPart.Position, lookDirection) * CFrame.Angles(-math.rad(45), 0, 0)
+
+    -- Atualizar a direção de voo
+    flyDirection = camera.CFrame.LookVector + Vector3.new(0, 10, 0).Unit
+    flyBodyVelocity.Velocity = flyDirection * speed
+end
+
+-- Função para parar de voar
+local function StopFlying()
+    if not flying then return end
+    flying = false
+
+    -- Remover forças aplicadas
+    flyBodyGyro.Parent = nil
+    flyBodyVelocity.Parent = nil
+
+    -- Retornar o player à posição normal
+    humanoid.PlatformStand = false
+end
+
+-- Função para atualizar a direção do voo
+local function UpdateFlying()
+    if not flying then return end
+
+    -- Atualizar direção de voo
+    local lookDirection = (camera.CFrame.Position + camera.CFrame.LookVector * 10) - rootPart.Position
+    flyBodyGyro.CFrame = CFrame.new(rootPart.Position, lookDirection) * CFrame.Angles(-math.rad(45), 0, 0)
+    flyDirection = camera.CFrame.LookVector + Vector3.new(0, 10, 0).Unit
+    flyBodyVelocity.Velocity = flyDirection * speed
+end
+
+-- Eventos para atualizar o voo em tempo real
+game:GetService("RunService").RenderStepped:Connect(UpdateFlying)
+
+-- Exemplo de uso das funções
+-- Iniciar o voo:
+StartFlying()
+
+-- Parar o voo após 5 segundos:
+task.wait(5)
+StopFlying()
