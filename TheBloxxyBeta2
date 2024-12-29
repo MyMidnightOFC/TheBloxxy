@@ -1,76 +1,4490 @@
--- Script Local em StarterPlayerScripts
+-- =========================== LIBRARY XD ===========================
+function print()
 
--- Variáveis principais
+end
+
+print("New Script...")
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+_G.OrionLib = OrionLib
+if true then
+print("1")
+
+    local f22 = function()end
+    local queue_on_teleport = queue_on_teleport or f22
+
+    if syn then
+        queue_on_teleport = syn.queue_on_teleport
+    end
+    queue_on_teleport(
+        [[loadstring(game:HttpGet("https://raw.githubusercontent.com/accountnop/magmaisgay/main/magma"))()]]
+    )
+print("2")
+
+
+    local placeId = game.PlaceId
+    SEA = ""
+    if placeId == 2753915549 then
+        SEA = "1"
+    elseif placeId == 4442272183 then
+        SEA = "2"
+    elseif placeId == 7449423635 then
+        SEA = "3"
+    end
+
+    if (SEA == "") then
+        while true do
+            wait()
+        end
+    end
+    _G.Setting_table = {}
+    _G.Setting_table["OK"] = true
+
+    _G.ForceImpulse = _G.ForceImpulse or 1.8
+local player = game.Players.LocalPlayer
+local camera = game.Workspace.CurrentCamera
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+local launchForceHorizontal = 230 -- Força do impulso horizontal
+local launchForceUp = 78         -- Força do impulso vertical
+local impulseDuration = 0.15      -- Duração do impulso em segundos
+
+-- Variável para armazenar o personagem atual
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Função que atualiza o personagem sempre que ele reaparece
+local function onCharacterAdded(newCharacter)
+    character = newCharacter
+end
+
+-- Conecta o evento CharacterAdded para atualizar o personagem
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Função para lançar o personagem
+function launchPlayer()
+    -- Certifica-se de que o personagem e o HumanoidRootPart existem
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        -- Captura apenas o eixo X da direção da câmera
+        local horizontalDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+        -- Calcula a força final do impulso, aplicando o multiplicador
+        local launchDirection = (horizontalDirection * launchForceHorizontal + Vector3.new(0, launchForceUp, 0)) * _G.ForceImpulse
+
+        -- Define o tempo inicial e ativa o impulso até o fim do tempo definido
+        local startTime = tick()
+        local connection
+        connection = runService.Heartbeat:Connect(function()
+            if tick() - startTime < impulseDuration then
+                rootPart.Velocity = launchDirection
+            else
+                connection:Disconnect() -- Termina o impulso após o tempo de duração
+            end
+        end)
+    end
+end
+local player = game.Players.LocalPlayer
+local distanceBehind = 70 -- Distância atrás do jogador selecionado
+local minHeightFromGround = 45 -- Altura mínima para ajuste de posição
+
+-- Função para calcular a distância ao chão
+function getDistanceToGround(position)
+    local rayOrigin = position
+    local rayDirection = Vector3.new(0, -500, 0) -- Direção para baixo
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = {player.Character} -- Ignora o próprio personagem do LocalPlayer
+
+    -- Executa o Raycast
+    local raycastResult = game.Workspace:Raycast(rayOrigin, rayDirection, rayParams)
+    if raycastResult then
+        return raycastResult.Position.Y, (position.Y - raycastResult.Position.Y) -- Retorna altura do chão e distância até ele
+    else
+        return nil, math.huge -- Retorna "muito grande" se não encontrar o chão
+    end
+end
+
+-- Função para teleportar o LocalPlayer para trás da câmera de outro jogador
+function TPTBP()
+    if _G.SPLY and _G.SPLY:IsA("Player") and _G.SPLY.Character then
+        local selectedPlayer = _G.SPLY
+        local selectedCharacter = selectedPlayer.Character
+        local selectedRootPart = selectedCharacter:FindFirstChild("HumanoidRootPart")
+        local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+        -- Verifica se o personagem selecionado e o LocalPlayer têm as partes necessárias
+        if selectedRootPart and localRootPart then
+            -- Calcula a direção atrás do personagem selecionado
+            local backDirection = -selectedRootPart.CFrame.LookVector
+            local newPosition = selectedRootPart.Position + (backDirection * distanceBehind)
+
+            -- Calcula a altura do chão e ajusta a posição
+            local groundHeight, distanceToGround = getDistanceToGround(newPosition)
+            if groundHeight and distanceToGround >= minHeightFromGround then
+                newPosition = Vector3.new(newPosition.X, groundHeight + 10, newPosition.Z) -- Eleva 10 unidades acima do chão
+            else
+                newPosition = Vector3.new(newPosition.X, newPosition.Y, newPosition.Z)
+            end
+
+            -- Move o LocalPlayer para a nova posição
+            localRootPart.CFrame = CFrame.new(newPosition)
+        end
+    end
+end
+
+
+    local Player = game.Players.LocalPlayer
+
+    function VT(tabela)
+        local httpService = game:GetService("HttpService")
+        local jsonStr = httpService:JSONEncode(tabela)
+        return jsonStr
+    end
+
+    function round(n)
+        return math.floor(tonumber(n) + 0.5)
+    end
+
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes", 9e9)
+    local CommF = Remotes:WaitForChild("CommF_", 9e9)
+
+    function FireRemote(...)
+        return CommF:InvokeServer(...)
+    end
+    print("3")
+
+    _G.OJO_VS = {}
+    function OJO()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local RunService = game:GetService("RunService")
+        local maxDistance = 500
+        local lookStartTime = 0 -- Tempo de início da observação
+        local lookDuration = 1 -- Tempo de observação necessário para selecionar
+        local selectedLine = nil
+        local selectedPlayer = nil
+        local lookingAtPlayer = nil
+        local observationArea = 0.96 -- Área de observação (quanto mais alto, mais perto do ponto de foco)
+
+        -- Global variables
+        _G.SPLY = nil -- Jogador selecionado
+        _G.VPO = true -- Controla se o script continua
+
+        local function isPlayerAlive(player)
+            local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+            return humanoid and humanoid.Health > 0
+        end
+
+        -- Função para pegar o jogador mais próximo do ponto de foco (com compatibilidade para Shift Lock)
+        local function getNearestPlayerInView()
+            local camera = workspace.CurrentCamera
+            local closestPlayer = nil
+            local bestDotProduct = -1 -- Melhor jogador no centro da tela
+
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local character = player.Character
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+                    local adjustedCameraPosition = humanoidRootPart.Position - Vector3.new(0, 25.8, 0) -- Posição ajustada da câmera
+                    local direction = (adjustedCameraPosition - camera.CFrame.Position).unit
+
+                    -- Usa um ponto 0.5 unidades acima do centro da tela para compatibilidade com Shift Lock
+                    local dotProduct = direction:Dot(camera.CFrame.LookVector)
+
+                    -- Verifica se o jogador está dentro da área de observação
+                    if dotProduct > observationArea then
+                        -- Verifica se este jogador está mais centralizado (mais próximo do ponto de foco) que o anterior
+                        if dotProduct > bestDotProduct then
+                            if _G.LockPlayer then
+                                closestPlayer = _G.LockPlayerX
+                            else
+                                bestDotProduct = dotProduct
+                                closestPlayer = player
+                            end
+                        end
+                    end
+                end
+            end
+
+            _G.LockPlayerX = closestPlayer
+            return closestPlayer
+        end
+
+        -- Função para criar/atualizar a linha de seleção
+        local function createOrUpdateSelectionLine(player)
+            -- Identifica o alvo com base em `_G.IsScriptRunning`
+            local targetPart =
+                _G.IsScriptRunning and _G.SelectedBall or
+                (player and player.Character and player.Character:FindFirstChild("HumanoidRootPart"))
+
+            -- Verifica se o alvo atual existe
+            if targetPart then
+                -- Se não existe uma linha selecionada, cria uma nova linha com Attachments
+                if not selectedLine then
+                    local attachment0 = Instance.new("Attachment")
+                    attachment0.Position = Vector3.new(0, 0, 0)
+                    attachment0.Parent = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+                    local attachment1 = Instance.new("Attachment")
+                    attachment1.Position = Vector3.new(0, 0, 0)
+                    attachment1.Parent = targetPart
+
+                    selectedLine = Instance.new("Beam")
+                    selectedLine.Attachment0 = attachment0
+                    selectedLine.Attachment1 = attachment1
+                    selectedLine.FaceCamera = true
+                    selectedLine.Width0 = 1
+                    selectedLine.Width1 = 2
+                    selectedLine.LightEmission = 2
+                    selectedLine.LightInfluence = 0
+                    selectedLine.Parent = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                else
+                    -- Se o alvo mudou, recria a linha para o novo alvo
+                    if selectedLine.Attachment1.Parent ~= targetPart then
+                        selectedLine:Destroy()
+                        selectedLine = nil
+                        createOrUpdateSelectionLine(player) -- Recria a linha com o novo alvo
+                    end
+                end
+            else
+                -- Se o alvo sumiu, destrói a linha de seleção
+                if selectedLine then
+                    selectedLine:Destroy()
+                    selectedLine = nil
+                end
+            end
+        end
+
+        -- Função para atualizar a cor da linha de seleção
+        local function updateLineColor()
+            if selectedLine then
+                local time = tick()
+                local r = math.abs(math.sin(time))
+                local g = math.abs(math.sin(time + 2))
+                local b = math.abs(math.sin(time + 4))
+                selectedLine.Color = ColorSequence.new(Color3.new(r, g, b))
+            end
+        end
+
+        -- Limpa a seleção quando _G.VPO é falso
+        local function clearSelection()
+            _G.SPLY = nil
+            if selectedLine then
+                selectedLine:Destroy()
+                selectedLine = nil
+            end
+        end
+
+        -- Verifica o jogador mais próximo ao ponto de foco e aplica a lógica
+        RunService.RenderStepped:Connect(
+            function()
+                if not _G.VPO then
+                    clearSelection()
+                    return
+                end
+
+                -- Verifica se o LocalPlayer está vivo
+                if not isPlayerAlive(LocalPlayer) then
+                    clearSelection()
+                    -- Aguarda até o jogador reaparecer
+                    repeat
+                        wait()
+                    until isPlayerAlive(LocalPlayer)
+                end
+
+                local closestPlayerInView = getNearestPlayerInView()
+
+                if closestPlayerInView then
+                    -- Se um novo jogador está sendo observado, reinicia o temporizador de observação
+                    if closestPlayerInView ~= lookingAtPlayer then
+                        lookingAtPlayer = closestPlayerInView
+                        lookStartTime = tick() -- Inicia o tempo de observação
+                    elseif tick() - lookStartTime >= lookDuration then
+                        -- Se o tempo de observação for atingido, seleciona o jogador
+                        selectedPlayer = closestPlayerInView
+                        _G.SPLY = selectedPlayer
+                    end
+                else
+                    -- Reseta o temporizador de observação caso não esteja observando ninguém
+                    lookingAtPlayer = nil
+                    lookStartTime = 0
+                end
+
+                -- Atualiza a linha de seleção ou a destrói se não houver jogador selecionado
+                if selectedPlayer then
+                    if (selectedPlayer.Character and selectedPlayer.Character:WaitForChild("HumanoidRootPart")) then
+                        createOrUpdateSelectionLine(selectedPlayer)
+                        updateLineColor()
+                    else
+                        createOrUpdateSelectionLine(game.Players.LocalPlayer)
+                        updateLineColor()
+                    end
+                elseif selectedLine then
+                    selectedLine:Destroy()
+                    selectedLine = nil
+                end
+            end
+        )
+    end
+
+    spawn(
+        function()
+            while true do
+                wait(0.5)
+                if (next(_G.OJO_VS) == nil) then
+                    _G.VPO = false
+                end
+            end
+        end
+    )
+
+print("4")
+
+    _G.OJO_SV = {}
+    function SuperView()
+        -- Variáveis globais para controlar o script
+        _G.IsScriptRunning = true
+        _G.MonitoringTime = 70
+        _G.SelectedPosition = nil
+        _G.SelectedBall = nil
+        _G.SensitivitySpeed = 0.7
+        _G.SensitivityDistance = 0.5
+    
+        -- Variáveis internas
+        local sphere = nil
+        local velocityHistory = {}
+        local directionHistory = {}
+        local maxHistorySize = 350
+        _G.SelectedPlayer = game.Players.LocalPlayer -- Inicia monitorando o local player por padrão
+        local targetCharacter, humanoid, rootPart
+    
+        -- Função para criar a esfera
+        local function createSphere()
+            local part = Instance.new("Part")
+            part.Shape = Enum.PartType.Ball
+            part.Size = Vector3.new(3, 3, 3)
+            part.Anchored = true
+            part.CanCollide = false
+            part.Transparency = 0.3
+            return part
+        end
+    
+        -- Função para mudar a cor dinamicamente
+        local function updateSphereColor(sphere)
+            game:GetService("RunService").RenderStepped:Connect(
+                function()
+                    if sphere then
+                        local time = tick() % 5
+                        local r = math.abs(math.sin(time * math.pi / 5))
+                        local g = math.abs(math.sin((time + 1) * math.pi / 5))
+                        local b = math.abs(math.sin((time + 2) * math.pi / 5))
+                        sphere.BrickColor = BrickColor.new(Color3.new(r, g, b))
+                    end
+                end
+            )
+        end
+    
+        -- Função para calcular a média de um histórico de valores
+        local function calculateAverage(history, count)
+            local sum = Vector3.new(0, 0, 0)
+            for i = #history - count + 1, #history do
+                sum = sum + history[i]
+            end
+            return sum / count
+        end
+    
+        -- Função principal de monitoramento
+        local function monitor()
+            if not targetCharacter then
+                return
+            end
+    
+            game:GetService("RunService").RenderStepped:Connect(
+                function()
+                    if _G.IsScriptRunning and humanoid and humanoid.Health > 0 then
+                        -- Armazena no histórico
+                        table.insert(velocityHistory, rootPart.Velocity)
+                        table.insert(directionHistory, humanoid.MoveDirection)
+    
+                        -- Limita o tamanho do histórico
+                        if #velocityHistory > maxHistorySize then
+                            table.remove(velocityHistory, 1)
+                        end
+                        if #directionHistory > maxHistorySize then
+                            table.remove(directionHistory, 1)
+                        end
+    
+                        -- Calcula a média de velocidade e direção
+                        local monitoringTime = math.min(#velocityHistory, _G.MonitoringTime)
+                        local avgVelocity = calculateAverage(velocityHistory, monitoringTime)
+                        local avgDirection = calculateAverage(directionHistory, monitoringTime)
+    
+                        -- Ajusta com base nas variáveis globais
+                        local sensitivityFactor = _G.SensitivitySpeed
+                        local deltaTime = _G.SensitivityDistance
+    
+                        -- Calcula a posição prevista
+                        local predictedPosition =
+                            rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
+    
+                        -- Atualiza a posição da esfera
+                        if not sphere then
+                            sphere = createSphere()
+                            sphere.Parent = workspace
+                            updateSphereColor(sphere)
+                        end
+    
+                        sphere.Position = predictedPosition
+                        _G.SelectedPosition = predictedPosition
+                        _G.SelectedPosition2 = CFrame.new(predictedPosition)
+                        _G.SelectedBall = sphere
+                    else
+                        -- Reseta se o jogador sair do jogo ou perder a vida
+                        if sphere then
+                            sphere:Destroy()
+                            sphere = nil
+                        end
+                        _G.SelectedPosition = nil
+                    end
+                end
+            )
+        end
+    
+        -- Função para atualizar o jogador monitorado
+        local function updateTargetPlayer(player)
+            if player and player.Character then
+                _G.SelectedPlayer = player
+                targetCharacter = player.Character
+                humanoid = targetCharacter:WaitForChild("Humanoid")
+                rootPart = targetCharacter:WaitForChild("HumanoidRootPart")
+    
+                if not sphere then
+                    sphere = createSphere()
+                    sphere.Parent = workspace
+                    updateSphereColor(sphere)
+                end
+            end
+        end
+    
+        -- Função para mudar o jogador monitorado
+        function MudarPlayerMonitorado(newPlayerName)
+            local targetPlayer = game.Players:FindFirstChild(newPlayerName)
+    
+            if targetPlayer then
+                updateTargetPlayer(targetPlayer)
+            else
+                print("Jogador não encontrado: " .. newPlayerName)
+                -- Volta para o local player se o jogador não for encontrado
+                updateTargetPlayer(game.Players.LocalPlayer)
+            end
+        end
+    
+        -- Inicializa monitorando o local player
+        updateTargetPlayer(_G.SelectedPlayer)
+        monitor()
+    end
+    
+    -- Para mudar o jogador monitorado, use:
+    -- MudarPlayerMonitorado("NomeDoJogador")
+    
+    function ChangeTargetPlayer(newPlayerName)
+        local targetPlayer = game.Players:FindFirstChild(newPlayerName)
+        if targetPlayer then
+            MudarPlayerMonitorado(newPlayerName)
+        end
+    end
+    
+    -- Para usar a função, chame:
+    -- ChangeTargetPlayer("NomeDoJogador")
+        
+
+    _G.OJO_SV = {}
+    spawn(
+        function()
+            while true do
+                wait(0.5)
+                if (next(_G.OJO_SV) == nil) then
+                    _G.IsScriptRunning = false
+                    _G.SelectedBall = nil
+                end
+            end
+        end
+    )
+    print("6")
+
+    function SuperHeight(p)
+        local player = p
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+
+        -- Função para verificar a altura do jogador em relação ao chão
+        local function checkHeight()
+            local rayOrigin = rootPart.Position
+            local rayDirection = Vector3.new(0, -1000, 0) -- Direção para baixo (linha imaginária)
+
+            -- Configura o raio
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {character}
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+            local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+            if raycastResult then
+                local distance = (rayOrigin - raycastResult.Position).Magnitude
+                if distance > 15 then
+                    return true
+                else
+                    return false
+                end
+            else
+                return true
+            end
+        end
+
+        checkHeight()
+    end
+    print("7")
+
+    function CH(pl)
+        local player = pl
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+
+        -- Função para verificar a altura do jogador em relação ao chão
+        local function checkHeight()
+            local rayOrigin = rootPart.Position
+            local rayDirection = Vector3.new(0, -1000, 0) -- Direção para baixo (linha imaginária)
+
+            -- Configura o raio
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {character}
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+            local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+            if raycastResult then
+                local distance = (rayOrigin - raycastResult.Position).Magnitude
+                if distance > 10 then
+                    return true
+                else
+                    return false
+                end
+            else
+                return false
+            end
+        end
+
+        checkHeight()
+    end
+
+    function containsItem(table, item)
+        for _, value in ipairs(table) do
+            if value == item then
+                return true
+            end
+        end
+        return false
+    end
+
+    function EquipWeapon(ToolSe)
+        if game.Players.LocalPlayer.Backpack:FindFirstChild(ToolSe) then
+            Tool = game.Players.LocalPlayer.Backpack:FindFirstChild(ToolSe)
+            wait(.1)
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(Tool)
+        end
+    end
+    print("8")
+
+    function Hop()
+        local PlaceID = game.PlaceId
+        local AllIDs = {}
+        local foundAnything = ""
+        local actualHour = os.date("!*t").hour
+        local Deleted = false
+        function TPReturner()
+            local Site
+            if foundAnything == "" then
+                Site =
+                    game.HttpService:JSONDecode(
+                    game:HttpGet(
+                        "https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"
+                    )
+                )
+            else
+                Site =
+                    game.HttpService:JSONDecode(
+                    game:HttpGet(
+                        "https://games.roblox.com/v1/games/" ..
+                            PlaceID .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. foundAnything
+                    )
+                )
+            end
+            local ID = ""
+            if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+                foundAnything = Site.nextPageCursor
+            end
+            local num = 0
+            for i, v in pairs(Site.data) do
+                local Possible = true
+                ID = tostring(v.id)
+                if tonumber(v.maxPlayers) > tonumber(v.playing) then
+                    for _, Existing in pairs(AllIDs) do
+                        if num ~= 0 then
+                            if ID == tostring(Existing) then
+                                Possible = false
+                            end
+                        else
+                            if tonumber(actualHour) ~= tonumber(Existing) then
+                                local delFile =
+                                    pcall(
+                                    function()
+                                        AllIDs = {}
+                                        table.insert(AllIDs, actualHour)
+                                    end
+                                )
+                            end
+                        end
+                        num = num + 1
+                    end
+                    if Possible == true then
+                        table.insert(AllIDs, ID)
+                        wait()
+                        pcall(
+                            function()
+                                wait()
+                                game:GetService("TeleportService"):TeleportToPlaceInstance(
+                                    PlaceID,
+                                    ID,
+                                    game.Players.LocalPlayer
+                                )
+                            end
+                        )
+                        wait(4)
+                    end
+                end
+            end
+        end
+        function Teleport()
+            while wait() do
+                pcall(
+                    function()
+                        TPReturner()
+                        if foundAnything ~= "" then
+                            TPReturner()
+                        end
+                    end
+                )
+            end
+        end
+        Teleport()
+    end
+    print("9")
+
+    function UpdateWaponList()
+        while true do
+            WeaponList_0 = {}
+            for i, v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+                if v:IsA("Tool") then
+                    table.insert(WeaponList_0, v.Name)
+                end
+            end
+            for i, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+                if v:IsA("Tool") then
+                    table.insert(WeaponList_0, v.Name)
+                end
+            end
+            _G.WeaponList = WeaponList_0
+            wait(1)
+        end
+    end
+
+    spawn(UpdateWaponList)
+    print("10")
+
+    function NotificationMenuGame(M, M2, T)
+        T = T or 7
+        M2 = M2 or "Information returning from the script in compatibility mode!!"
+        if (_G.CompatibilitySolara) then
+            _G.OrionLib:MakeNotification(
+                {
+                    Name = M,
+                    Content = M2,
+                    Image = "rbxassetid://4483345998",
+                    Time = T
+                }
+            )
+            return
+        end
+        local games = {
+            [game.PlaceId] = {
+                Title = "Blox Fruits",
+                Icons = "rbxassetid://7607745682",
+                Welcome = function()
+                    return tostring(M)
+                end
+            }
+        }
+
+        if games[game.PlaceId] then
+            if games[game.PlaceId].Title == "Blox Fruits" then
+                local function notify(types, ...)
+                    if types == "Notify" then
+                        require(game.ReplicatedStorage.Notification).new(...):Display()
+                    end
+                end
+                notify("Notify", games[game.PlaceId].Welcome())
+            end
+        end
+
+        local function Text(...)
+            require(game.ReplicatedStorage.Notification).new(...):Display()
+        end
+    end
+    print("12")
+
+    function JMP()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local closestPlayer = nil
+        local closestDistance = math.huge
+        local localCharacter = LocalPlayer.Character
+        local localRootPart = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+
+        if localRootPart then
+            if (_G.SelectPly) then
+                if (game:GetService("Players")[_G.SelectPly] and game:GetService("Players")[_G.SelectPly].Character) then
+                    return game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.Position
+                end
+            end
+
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetRootPart = player.Character.HumanoidRootPart
+                    local distance = (targetRootPart.Position - localRootPart.Position).magnitude
+
+                    if distance < closestDistance then
+                        closestDistance = distance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+
+        if closestPlayer then
+            return closestPlayer.Character.HumanoidRootPart.Position
+        else
+            return nil
+        end
+    end
+    print("13")
+
+    task.spawn(
+        function()
+            function AimBotPart()
+            local success, errorMessage = pcall(function()
+                    if (_G.CompatibilitySolara) then
+                        local gg = getrawmetatable(game)
+                        local old = gg.__namecall
+                        setreadonly(gg, false)
+                        gg.__namecall =
+                            newcclosure(
+                            function(...)
+                                local method = getnamecallmethod()
+                                local args = {...}
+                                if tostring(method) == "FireServer" then
+                                    if tostring(args[1]) == "RemoteEvent" then
+                                        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+                                            if getgenv().AimbotPos then
+                                                    args[2] = getgenv().AimbotPos
+                                                return old(unpack(args))
+                                            end
+                                        end
+                                    end
+                                end
+                                return old(...)
+                            end
+                        )
+                    else
+                        local oldhook
+                        oldhook =
+                            hookmetamethod(
+                            game,
+                            "__namecall",
+                            function(self, ...)
+                                if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
+                                    local args = {...}
+                                    local Vector = args[1]
+                                    if typeof(Vector) == "Vector3" then
+                                        if getgenv().AimbotPos then
+                                            return oldhook(self, getgenv().AimbotPos, ...)
+                                        end
+                                    end
+                                end
+                                return oldhook(self, ...)
+                            end
+                        )
+                    end
+                end)
+
+                if not (success) then
+                    NotificationMenuGame("Error Occurred XD", errorMessage, 45)
+                end
+            end
+
+            -- Chame a função AimBotPart com os parâmetros corretos
+            AimBotPart() -- Certifique-se de que 'part' e 'tool' estejam definidos corretamente
+        end
+    )
+    print("14")
+
+    function isnil(thing)
+        return (thing == nil)
+    end
+    local function round(n)
+        return math.floor(tonumber(n) + 0.5)
+    end
+    local function F_Number(numero)
+        -- Define a lista de sufixos e seus valores, incluindo bilhões
+        local sufixos = {
+            {valor = 1e9, sufixo = "B"},
+            {valor = 1e6, sufixo = "M"},
+            {valor = 1e3, sufixo = "K"}
+        }
+    
+        -- Verifica o sufixo apropriado para o número
+        for _, sufixoInfo in ipairs(sufixos) do
+            if numero >= sufixoInfo.valor then
+                -- Calcula o valor formatado com precisão de duas casas decimais
+                local valorFormatado = numero / sufixoInfo.valor
+                if valorFormatado >= 100 then
+                    return string.format("%.0f%s", valorFormatado, sufixoInfo.sufixo) -- Sem casas decimais para valores grandes
+                elseif valorFormatado >= 10 then
+                    return string.format("%.1f%s", valorFormatado, sufixoInfo.sufixo) -- Uma casa decimal para valores médios
+                else
+                    return string.format("%.2f%s", valorFormatado, sufixoInfo.sufixo) -- Duas casas decimais para valores pequenos
+                end
+            end
+        end
+    
+        -- Caso não se aplique nenhum sufixo, retorna o número original
+        return tostring(numero)
+    end
+print("15")
+    
+    Number = math.random(1, 1000000)
+    function UpdateEspPlayer()
+        for i, v in pairs(game:GetService "Players":GetChildren()) do
+            pcall(
+                function()
+                    if not isnil(v.Character) then
+                        if _G.Setting_table.EspPlayer then
+                            if not isnil(v.Character.Head) and not v.Character.Head:FindFirstChild("NameEsp" .. Number) then
+                                local distance =
+                                    round(
+                                    (game:GetService("Players").LocalPlayer.Character.Head.Position -
+                                        v.Character.Head.Position).Magnitude / 3
+                                )
+                                if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
+                                    local bill = Instance.new("BillboardGui", v.Character.Head)
+                                    bill.Name = "NameEsp" .. Number
+                                    bill.ExtentsOffset = Vector3.new(-1, 3, 0)
+                                    bill.Size = UDim2.new(1, 210, 1, 90)
+                                    bill.Adornee = v.Character.Head
+                                    bill.AlwaysOnTop = true
+                                    local name = Instance.new("TextLabel", bill)
+
+                                    name.Font = "GothamBold"
+                                    name.FontSize = "Size14"
+                                    name.TextWrapped = true
+                                    name.Text = (v.Name .. " \n" .. distance .. " M")
+                                    name.Size = UDim2.new(1, 0, 1, 0)
+                                    name.TextYAlignment = "Top"
+                                    name.BackgroundTransparency = 1
+                                    name.TextStrokeTransparency = 0.5
+                                    if v.Team == game.Players.LocalPlayer.Team then
+                                        name.TextColor3 = Color3.new(0, 255, 0)
+                                    else
+                                        name.TextColor3 = Color3.new(255, 0, 0)
+                                    end
+                                end
+                            else
+                                local distance =
+                                    round(
+                                    (game:GetService("Players").LocalPlayer.Character.Head.Position -
+                                        v.Character.Head.Position).Magnitude / 3
+                                )
+                                local bount =
+                                    F_Number(game:GetService("Players")[v.Name].leaderstats["Bounty/Honor"].Value)
+                                local bount_extra = ""
+                                local Level = round(v.Data.Level.Value)
+                                if (Level == 2550) then
+                                    Level2 = tostring(v.Data.Level.Value) .. " ( MAX )"
+                                else
+                                    Level2 = tostring(v.Data.Level.Value)
+                                end
+
+                                if _G.ESPPlayerViewExtra then
+                                    bount_extra = "[ " .. bount .. " ]"
+                                end
+
+                                if (CheckSafeZone(v.Character)) then
+                                    bount_extra = bount_extra .. " - SAFE\n"
+                                else
+                                    bount_extra = bount_extra .. "\n"
+                                end
+
+                                if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
+                                    v.Character.Head["NameEsp" .. Number].TextLabel.Text =
+                                        (bount_extra ..
+                                        v.Name ..
+                                            " | " ..
+                                                distance ..
+                                                    " M\nHealth : " ..
+                                                        round(
+                                                            v.Character.Humanoid.Health * 100 /
+                                                                v.Character.Humanoid.MaxHealth
+                                                        ) ..
+                                                            "% Lv. " .. Level2)
+                                else
+                                    if v.Character.Head:FindFirstChild("NameEsp" .. Number) then
+                                        v.Character.Head:FindFirstChild("NameEsp" .. Number):Destroy()
+                                    end
+                                end
+                            end
+                        else
+                            if v.Character.Head:FindFirstChild("NameEsp" .. Number) then
+                                v.Character.Head:FindFirstChild("NameEsp" .. Number):Destroy()
+                            end
+                        end
+                    end
+                end
+            )
+        end
+    end
+
+    function CheckSafeZone(p)
+        -- Verifica se 'p' possui 'HumanoidRootPart' e 'Humanoid' para evitar erros
+        if not p:FindFirstChild("HumanoidRootPart") or not p:FindFirstChild("Humanoid") then
+            return false
+        end
+    
+        for i, v in pairs(game:GetService("Workspace")["_WorldOrigin"].SafeZones:GetChildren()) do
+            if v:IsA("Part") then
+                local distance = (v.Position - p.HumanoidRootPart.Position).magnitude
+                local healthPercentage = p.Humanoid.Health / p.Humanoid.MaxHealth
+                if distance <= 200 and healthPercentage >= 0.95 then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+    
+print("16")
+    
+    function findIndex(item, list)
+        for i, v in ipairs(list) do
+            if v == item then
+                return i
+            end
+        end
+        return nil
+    end
+
+    function RemoveHighlightV1()
+        local Players = game:GetService("Players")
+        _G.HighlightV1 = false
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            local indicator = _G.IndicatorInstanceList[player.Name]
+            if indicator then
+                indicator:Destroy()
+            end
+        end
+    end
+
+    function ReloadHighlightV1()
+        RemoveHighlightV1()
+        CreateHighlightV1()
+    end
+    print("17")
+
+    function CreateHighlightV1()
+        local Players = game:GetService("Players")
+        local PlayersIndicatorList = {}
+        _G.IndicatorInstanceList = {}
+        _G.HighlightV1 = true
+
+        _G.Highlight_L = true
+
+        -- Função para criar um indicador acima da cabeça do jogador
+        local function createIndicator(player)
+            local character = player.Character
+            if character and not character:FindFirstChild("Indicator") then
+                local head = character:FindFirstChild("Head")
+                if head and not table.find(PlayersIndicatorList, player.Name) then
+                    table.insert(PlayersIndicatorList, player.Name)
+
+                    -- Definir a cor principal com base no time e valores
+                        MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
+                    if (CheckSafeZone(character)) then
+                        MainColor = Color3.fromRGB(0, 255, 50) -- Padrão Verde
+                    end
+
+                    if
+                        tostring(game.Players.LocalPlayer.Team) == "Marines" and
+                            game.Players.LocalPlayer.Team == player.Team
+                     then
+                        MainColor = Color3.fromRGB(255, 0, 255) -- Verde para time igual
+                    elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 10000000 then
+                        MainColor = Color3.fromRGB(153, 0, 255)
+                    elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 3000000 then
+                        MainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
+                    end
+
+                    -- Criar o indicador visual
+                    local billboardGui = Instance.new("BillboardGui")
+                    billboardGui.Name = "Indicator"
+                    billboardGui.Parent = head
+                    billboardGui.Size = UDim2.new(5.2, 0, 7, 0)
+                    billboardGui.StudsOffset = Vector3.new(-0.15, -2.5, 0)
+                    billboardGui.AlwaysOnTop = true
+
+                    local frame = Instance.new("Frame")
+                    frame.Parent = billboardGui
+                    frame.Size = UDim2.new(1, 0, 1, 0)
+                    frame.BackgroundTransparency = _G.HighlightV1T
+                    frame.BackgroundColor3 = MainColor
+                    _G.IndicatorInstanceList[player.Name] = billboardGui
+                end
+            end
+        end
+
+        -- Aplicar o indicador para os jogadores existentes
+        for _, player in ipairs(Players:GetPlayers()) do
+            player.CharacterAdded:Connect(
+                function()
+                    createIndicator(player)
+                end
+            )
+            if player.Character then
+                createIndicator(player)
+            end
+        end
+    end
+
+    function topos(Pos)
+        Distance = (Pos.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+        _G.Distanec = Distance
+        if game.Players.LocalPlayer.Character.Humanoid.Sit == true then
+            game.Players.LocalPlayer.Character.Humanoid.Sit = false
+        end
+        pcall(
+            function()
+                tween =
+                    game:GetService("TweenService"):Create(
+                    game.Players.LocalPlayer.Character.HumanoidRootPart,
+                    TweenInfo.new(Distance / 350, Enum.EasingStyle.Linear),
+                    {CFrame = Pos}
+                )
+            end
+        )
+        tween:Play()
+        if Distance <= 100 then
+            tween:Cancel()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Pos
+        end
+        if _G.StopTween == true then
+            tween:Cancel()
+            _G.Clip = false
+        end
+    end
+    print("19")
+
+    function StopTween(target)
+        if not target then
+            _G.StopTween = true
+            wait()
+            topos(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+            if game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip") then
+                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip"):Destroy()
+            end
+            _G.StopTween = false
+            _G.Clip = false
+        end
+    end
+
+    function GetIDIconWithName(N)
+        ID = 10734975692
+        if (N == "Swords") then
+            ID = 10734975692
+        elseif (N == "Apple") then
+            ID = 10709761889
+        elseif (N == "Anchor") then
+            ID = 10709761530
+        elseif (N == "Angry") then
+            ID = 10709761629
+        elseif (N == "Joystick") then
+            ID = 10723416527
+        elseif (N == "Info") then
+            ID = 10723415903
+        elseif (N == "File-question") then
+            ID = 10723365987
+        end
+        return ID
+    end
+
+    spawn(
+        function()
+            pcall(
+                function()
+                    while wait(0.001) do
+                        if _G.Safe_Mode_Value then
+                            pcall(
+                                function()
+                                    local player = game.Players.LocalPlayer
+                                    local character = player and player.Character
+                                    if _G.Safe_Mode_Value or _G.Clip then
+                                        character.HumanoidRootPart.CFrame =
+                                            character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+                                    end
+                                end
+                            )
+                        end
+                    end
+                end
+            )
+        end
+    )
+    print("100")
+
+    spawn(
+        function()
+            pcall(
+                function()
+                    game:GetService("RunService").Stepped:Connect(
+                        function()
+                            if _G.Setting_table.NoClip or _G.Clip then
+                                for _, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
+                                    if v:IsA("BasePart") then
+                                        v.CanCollide = false
+                                    end
+                                end
+                            end
+                        end
+                    )
+                end
+            )
+        end
+    )
+    print("11")
+
+    
+    print("15")
+
+    function AutoHaki()
+        if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+        end
+    end
+
+    function AutoSuperHaki()
+        -- Verifica se a variável global SafeRepeatLFV está ativa
+        spawn(
+            function()
+                while true do
+                    if (_G.Setting_table.Haki) then
+                        AutoHaki()
+                    end
+                    wait(1)
+                end
+            end
+        )
+    end
+    AutoSuperHaki()
+
+    function NameMelee()
+        for i, v in next, game:GetService("Players").LocalPlayer.Backpack:GetChildren() do
+            if v:IsA("Tool") and v.ToolTip == "Melee" then
+                return v.Name
+            end
+        end
+        for i, v in next, game:GetService("Players").LocalPlayer.Character:GetChildren() do
+            if v:IsA("Tool") and v.ToolTip == "Melee" then
+                return v.Name
+            end
+        end
+
+        return false
+    end
+    print("14")
+
+    function NameSword()
+        for i, v in next, game:GetService("Players").LocalPlayer.Backpack:GetChildren() do
+            if v:IsA("Tool") and v.ToolTip == "Sword" then
+                return v.Name
+            end
+        end
+        for i, v in next, game:GetService("Players").LocalPlayer.Character:GetChildren() do
+            if v:IsA("Tool") and v.ToolTip == "Sword" then
+                return v.Name
+            end
+        end
+        return false
+    end
+
+    function NameGun()
+        dick = game.Players.LocalPlayer.Backpack or game.Players.LocalPlayer.Character
+        for i, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+            if v:IsA("Tool") and v.ToolTip == "Gun" then
+                return v.Name
+            end
+        end
+        for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if v:IsA("Tool") and v.ToolTip == "Gun" then
+                return v.Name
+            end
+        end
+        return false
+    end
+    print("12")
+
+    while not NameMelee() do
+        wait(1)
+    end
+    print("14")
+
+    ReloadList = function()
+        spawn(
+            function()
+                if (NameGun()) then
+                    EquipWeapon(NameGun())
+                end
+                wait(0.01)
+                if (NameSword()) then
+                    EquipWeapon(NameSword())
+                end
+                wait(0.01)
+                if (NameMelee()) then
+                    EquipWeapon(NameMelee())
+                end
+                wait(0.01)
+                if (game:GetService("Players").LocalPlayer.Data.DevilFruit.Value) then
+                    EquipWeapon(game:GetService("Players").LocalPlayer.Data.DevilFruit.Value)
+                end
+                wait(0.1)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+
+                -- Desequipar o item atual
+                humanoid:UnequipTools()
+            end
+        )
+    end
+    ReloadList()
+print("13333")
+--================== End ==================
+    print()
+
+    -- =========================== Save System ;-; ===========================
+    if true then
+        _G.Check_Save_Setting = "CheckSaveSetting2"
+
+        JsonEncode = function(msg)
+            return game:GetService("HttpService"):JSONEncode(msg)
+        end
+
+        JsonDecode = function(msg)
+            return game:GetService("HttpService"):JSONDecode(msg)
+        end
+
+        isValidJSON = function(jsonString)
+            local success, decoded =
+                pcall(
+                function()
+                    return game:GetService("HttpService"):JSONDecode(jsonString)
+                end
+            )
+            return success
+        end
+
+        Check_Setting = function(Name)
+            if not isfolder("Bloxxy Saves") then
+                makefolder("Bloxxy Saves")
+            end
+            if not isfile("Bloxxy Saves/" .. Name .. ".json") then
+                writefile("Bloxxy Saves/" .. Name .. ".json", JsonEncode(_G.Setting_table))
+            end
+        end
+
+        Reload_Setting = function(Name)
+            _G.Check_Save_Setting = "CheckSaveSetting2"
+        end
+
+        Get_Setting = function(Name)
+            if isfolder("Bloxxy Saves") and isfile("Bloxxy Saves/" .. Name .. ".json") then
+                local jsonString = readfile("Bloxxy Saves/" .. Name .. ".json")
+
+                if isValidJSON(jsonString) then
+                    _G.Setting_table = JsonDecode(jsonString)
+                    if tostring(_G.Setting_table) == "nil" then
+                        _G.Setting_table = {}
+                    end
+                    return _G.Setting_table
+                else
+                    -- Se não for um JSON válido, apagar e criar um novo
+                    print("Arquivo JSON inválido, criando um novo...")
+                    writefile("Bloxxy Saves/" .. Name .. ".json", JsonEncode(_G.Setting_table))
+                end
+            else
+                Check_Setting(Name)
+            end
+        end
+
+        Update_Setting = function(Name)
+            if isfolder("Bloxxy Saves") and isfile("Bloxxy Saves/" .. Name .. ".json") then
+                writefile("Bloxxy Saves/" .. Name .. ".json", JsonEncode(_G.Setting_table))
+            else
+                Check_Setting(Name)
+            end
+        end
+        print("???")
+
+        Reload_Setting(_G.Check_Save_Setting)
+        Check_Setting(_G.Check_Save_Setting)
+        Get_Setting(_G.Check_Save_Setting)
+        spawn(
+            function()
+                while true do
+                    wait(1)
+                    Update_Setting(_G.Check_Save_Setting)
+                end
+            end
+        )
+    end
+
+    --================== Menu =====================
+    if true then
+print("What")
+
+        -- Criação da interface com a RedzLib
+        local redzlib =
+            loadstring(
+            game:HttpGet("https://raw.githubusercontent.com/MyMidnightOFC/TheBloxxy/refs/heads/main/REDzHUB_V2")
+        )()
+
+        local Window =
+            redzlib:MakeWindow(
+            {
+                Title = "MyMidnight Team",
+                SubTitle = "BloxFruits Super Script!",
+                SaveFolder = "testando | redz lib v5.lua"
+            }
+        )
+
+        Window:AddMinimizeButton(
+            {
+                Button = {
+                    Image = "rbxassetid://15298567397"
+                }
+            }
+        )
+        if (_G.Setting_table.AutoMinimize) then
+            Window:Minimize()
+        end
+
+        Main = Window:MakeTab({"Main", "home"})
+        Players = Window:MakeTab({"Players", "swords"})
+        Utilities = Window:MakeTab({"Utilities", "wrench"})
+        Save = Window:MakeTab({"Auto Itens", "database"})
+        Script = Window:MakeTab({"Script", "hammer"})
+        Teleport = Window:MakeTab({"Teleport", "locate-fixed"})
+        Secure = Window:MakeTab({"Security", "lock"})
+        Shop = Window:MakeTab({"SuperShop", "shopping-cart"})
+    end
+
+    --================== Main =====================
+    if true then
+        Main:AddDiscordInvite(
+            {
+                Name = "Bloxxy2.0 | Community ( NewLink )",
+                Description = "* Webhook, * SouceCode, * Pulblic Chat, * Sugestion, * ReportBugs, * Others Scripts, ...",
+                Logo = "https://www.roblox.com/asset/?id=9723979220",
+                Invite = "https://tinyurl.com/BloxxyServerOficial"
+            }
+        )
+
+        Main:AddSection({"Window Settings"})
+
+        Main:AddToggle(
+            {
+                Name = "Auto Minimze",
+                Default = _G.Setting_table.AutoMinimize or false,
+                Callback = function(Value)
+                    _G.Setting_table.AutoMinimize = Value
+                end
+            }
+        )
+
+        Main:AddDropdown(
+            {
+                Name = "Menu icon",
+                Options = {"Swords", "Apple", "Anchor", "Angry", "Joystick", "Info", "File-question"},
+                Default = _G.Setting_table.MenuIcon or "Swords",
+                MultSelect = false,
+                Callback = function(Value)
+                    pcall(
+                        function()
+                            _G.Setting_table.MenuIcon = Value
+
+                            ID = GetIDIconWithName(Value)
+                            AMinimizeButton(ID)
+                        end
+                    )
+                end
+            }
+        )
+
+        Main:AddDropdown(
+            {
+                Name = "Menu font-size <font color='rgb(60, 250, 60)'>( Need reload )</font>",
+                Description = "Sets the font size of some elements.",
+                Options = {"9", "10", "11", "12", "13"},
+                Default = _G.Setting_table.FontSize or "10",
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.FontSize = Value
+                end
+            }
+        )
+
+        Main:AddButton(
+            {
+                Name = "Recommended Settings...",
+                Description = "Configure the script with information ready for use!!",
+                Callback = function(Value)
+                end
+            }
+        )
+    end
+
+    --================== Secured =====================
+    if true then
+        Secure:AddSlider(
+            {
+                Name = "HP - SafeMode <font color='rgb(50, 250, 60)'>( >3500 )</font>",
+                Description = "When your life is less than this number, safe mode will be activated!!",
+                MinValue = 100,
+                MaxValue = 13000,
+                Default = _G.Setting_table.HP_SafeMode or 4500,
+                Increase = 100,
+                Callback = function(Value)
+                    _G.Setting_table.HP_SafeMode = Value
+                end
+            }
+        )
+
+        Secure:AddToggle(
+            {
+                Name = "SafeMode <font color='rgb(50, 250, 60)'>( Recommended )</font>",
+                Default = _G.Setting_table.SafeMode or false,
+                Callback = function(Value)
+                    _G.Setting_table.SafeMode = Value
+                    _G.GlobalSafeMode = Value
+
+                    if (Value) then
+                        spawn(
+                            function()
+                                while _G.GlobalSafeMode do
+                                    wait(0.001)
+                                    if _G.GlobalSafeMode and not _G.PlayerDeth then
+                                        local player = game.Players.LocalPlayer
+                                        local character = player and player.Character
+                                        if character and character:FindFirstChild("Humanoid") then
+                                            local humanoid = character.Humanoid
+                                            local health = humanoid.Health
+
+                                            if (health > 10) and (health - _G.Setting_table.HP_SafeMode) < 0 then
+                                                _G.Safe_Mode_Value = true
+                                                game:GetService("ReplicatedStorage").Remotes.CommE:FireServer(
+                                                    "Ken",
+                                                    true
+                                                )
+                                            else
+                                                _G.Safe_Mode_Value = false
+                                            end
+                                        end
+                                    elseif _G.PlayerDeth then
+                                        _G.Safe_Mode_Value = false
+                                    end
+                                end
+                            end
+                        )
+                    else
+                        _G.Safe_Mode_Value = false
+                    end
+                end
+            }
+        )
+
+        Secure:AddSection({"Admin..."})
+
+        Secure:AddSlider(
+            {
+                Name = "PlayerView - Time",
+                MinValue = 2,
+                MaxValue = 350,
+                Default = _G.Setting_table.Sens1 or 65,
+                Increase = 1,
+                Callback = function(Value)
+                    _G.Setting_table.Sens1 = Value
+                    _G.MonitoringTime = Value
+                end
+            }
+        )
+
+        Secure:AddSlider(
+            {
+                Name = "PlayerView - Sens1",
+                MinValue = 1,
+                MaxValue = 15,
+                Default = _G.Setting_table.Sens2 or 7,
+                Increase = 1,
+                Callback = function(Value)
+                    _G.Setting_table.Sens2 = Value
+                    _G.SensitivitySpeed = Value / 10
+                end
+            }
+        )
+
+        Secure:AddSlider(
+            {
+                Name = "PlayerView - Sens2",
+                MinValue = 1,
+                MaxValue = 15,
+                Default = _G.Setting_table.Sens3 or 5,
+                Increase = 1,
+                Callback = function(Value)
+                    _G.Setting_table.Sens3 = Value
+                    _G.SensitivityDistance = Value / 10
+                end
+            }
+        )
+        
+        Secure:AddSection({"Teleport"})
+
+        Secure:AddButton(
+            {
+                Name = "Teleport To Safe! (<font color='rgb(250, 250, 60)'>TempleOfTime</font>)",
+                Description = "( IF YOU ARE PVP AGAINST ANOTHER SCRIPT )",
+                Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                        "requestEntrance",
+                        Vector3.new(28286, 14897, 103)
+                    )
+                    wait(0.1)
+                    local character = game:GetService("Players").LocalPlayer.Character
+                    character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(275, 100, -150)
+                end
+            }
+        )
+
+        Secure:AddButton(
+            {
+                Name = "Teleport To Temple of Time",
+                Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
+                    for i = 1, 3 do
+                        task.wait()
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                            "requestEntrance",
+                            Vector3.new(28286, 14897, 103)
+                        )
+                    end
+                end
+            }
+        )
+
+        Secure:AddButton(
+            {
+                Name = "Teleport To Mansion",
+                Callback = function()
+                    if _G.Disabled then
+                        return
+                    end
+
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                        "requestEntrance",
+                        Vector3.new(-12471.169921875, 374.94024658203, -7551.677734375)
+                    )
+                end
+            }
+        )
+
+        Secure:AddButton(
+            {
+                Name = "Give-Me Bloxxy ADM",
+                Callback = function()
+                    _G.BloxxyADM = true
+                end
+            }
+        )
+    end
+
+    --================== Script =====================
+    if true then
+        Script:AddToggle(
+            {
+                Name = "NoClip",
+                Description = "Allows the user to pass through walls and escape easily.",
+                Default = false,
+                Callback = function(Value)
+                    _G.Setting_table.NoClip = Value
+                    _G.NOCLIP = Value
+                end
+            }
+        )
+
+        Script:AddSlider(
+            {
+                Name = "Speed - Super Angel",
+                MinValue = 50,
+                MaxValue = 250,
+                Default = _G.Setting_table.SafeMode_Speed or 90,
+                Increase = 1,
+                Callback = function(Value)
+                    _G.Setting_table.SafeMode_Speed = (Value)
+                end
+            }
+        )
+
+        Script:AddToggle(
+            {
+                Name = "Super Angel <font color='rgb(50, 250, 30)'>( + Speed )</font>",
+                Description = "Allows you to move in any direction, even in the air.",
+                Default = _G.Setting_table.Agility or false,
+                Callback = function(Value)
+                    _G.Setting_table.Agility = (Value)
+                    if (Value) then
+                        -- Loop contínuo para controlar a movimentação do jogador baseado no analógico
+                        spawn(
+                            function()
+                                while _G.Setting_table.Agility do
+                                    wait()
+                                    pcall(
+                                        function()
+                                            local player = game.Players.LocalPlayer
+                                            local character = player.Character
+                                            if character then
+                                                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                                                local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                                                if humanoidRootPart and humanoid then
+                                                    local moveDirection = humanoid.MoveDirection
+
+                                                    if moveDirection.Magnitude > 0  and not _G.Disabled then
+                                                        local newVelocity =
+                                                            Vector3.new(
+                                                            moveDirection.X * _G.Setting_table.SafeMode_Speed,
+                                                            humanoidRootPart.Velocity.Y,
+                                                            moveDirection.Z * _G.Setting_table.SafeMode_Speed
+                                                        )
+                                                        humanoidRootPart.Velocity = newVelocity
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    )
+                                end
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        Script:AddToggle(
+            {
+                Name = "Walk On Water",
+                Default = _G.Setting_table.WalkWater or false,
+                Description = "Prevents the user from touching the water and taking damage!!",
+                Callback = function(Value)
+                    _G.Setting_table.WalkWater = Value
+                    task.spawn(
+                        function()
+                            local Map = workspace:WaitForChild("Map", 9e9)
+
+                            while _G.Setting_table.WalkWater do
+                                task.wait(0.1)
+                                Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 113, 1000)
+                            end
+                            Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 80, 1000)
+                        end
+                    )
+                end
+            }
+        )
+
+        Script:AddSection({"Risky"})
+
+        Script:AddToggle(
+            {
+                Name = "FastAttack",
+                Default = _G.Setting_table.FastAttack or false,
+                Callback = function(Value)
+                    _G.Setting_table.FastAttack = Value
+                end
+            }
+        )
+
+        if (_G.CompatibilitySolara) then
+            FastAttackToggle:Visible(false)
+        end
+
+        StunTY =
+            Script:AddDropdown(
+            {
+                Name = "NoStun Type",
+                Options = {"V1", "V2", "V4"},
+                Default = _G.Setting_table.StunType or {"V4"},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.StunType = Value
+                end
+            }
+        )
+
+        Script:AddToggle(
+            {
+                Name = "NoStun ( <font color='rgb(30, 250, 30)'>Recommended</font> )",
+                Description = "The User can always move freely, but it can interfere when using combos.",
+                Default = _G.Setting_table.Stun or false,
+                Callback = function(Value)
+                    _G.Setting_table.Stun = Value
+                    StunTY:Visible(not Value)
+                    local z = _G.Setting_table.StunType
+
+                    if z == "V1" or z == "V2" or z == "V4" then
+                        spawn(
+                            function()
+                                pcall(
+                                    function()
+                                        game:GetService("RunService").RenderStepped:Connect(
+                                            function()
+                                                if _G.Setting_table.Stun then
+                                                    pcall(
+                                                        function()
+                                                            if (_G.LostGame) then
+                                                                return
+                                                            end
+
+                                                            local player = game.Players.LocalPlayer
+                                                            player.Character.Stun.Value = 0
+                                                            player.Character.Humanoid.Sit = false
+                                                            player.Character.Busy.Value = false
+                                                        end
+                                                    )
+                                                end
+                                            end
+                                        )
+                                    end
+                                )
+                            end
+                        )
+                    end
+
+                    if z == "V2" then
+                        IsHundredNoStunVar2 = false
+                        IsHundredNoStunVar1 = false
+                    end
+
+                    if z == "V2" or z == "V4" then
+                        spawn(
+                            function()
+                                while _G.Setting_table.Stun do
+
+                                    wait()
+                                    if z == "V4" then
+                                        IsHundredNoStunVar2 = true
+                                        IsHundredNoStunVar1 = true
+                                    end
+                                    pcall(
+                                        function()
+                                            local player = game.Players.LocalPlayer
+                                            local character = player.Character
+                                            if character then
+                                                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                                                local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                                                if humanoidRootPart and humanoid then
+                                                    local moveDirection = humanoid.MoveDirection
+
+                                                    if
+                                                        (character.Stun.Value > 0 or character.Busy.Value) and
+                                                            not IsHundredNoStunVar1
+                                                     then
+                                                        if not LockTimer then
+                                                            LockTimer = true
+                                                            IsHundredNoStunVar2 = true
+                                                            spawn(
+                                                                function()
+                                                                    wait(4)
+                                                                    IsHundredNoStunVar2 = false
+                                                                    LockTimer = false
+                                                                end
+                                                            )
+                                                        end
+                                                    end
+
+                                                    if not (IsHundredNoStunVar1) then
+                                                        StunnedFunction = function()
+                                                            IsHundredNoStunVar2 = true
+                                                            spawn(
+                                                                function()
+                                                                    wait(4)
+                                                                    IsHundredNoStunVar2 = false
+                                                                end
+                                                            )
+                                                        end
+                                                    else
+                                                        StunnedFunction = nil
+                                                    end
+
+                                                    local bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
+                                                    if bodyVelocity then
+                                                        if
+                                                            (game.Players.LocalPlayer.Character:FindFirstChildOfClass(
+                                                                "Tool"
+                                                            ).Name == NameMelee())
+                                                         then
+                                                            for i, v in next, game:GetService("Players").LocalPlayer.PlayerGui.Main.Skills[
+                                                                NameMelee()
+                                                            ]:GetChildren() do
+                                                                if v:IsA("Frame") and v.Name == "Z" then
+                                                                    if
+                                                                        (v.Name ~= "Template" and
+                                                                            v.Title.TextColor3 == Color3.new(1, 1, 1) and
+                                                                            v.Cooldown.Size == UDim2.new(1, 0, 1, -1))
+                                                                     then
+                                                                        IsHundredNoStunVar2 = false
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+
+                                                        if (IsHundredNoStunVar2) and not (_G.U723) and not _G.Disabled then
+                                                            bodyVelocity.P = 0
+                                                            bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+                                                        end
+
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    )
+                                end
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        local Section =
+            Script:AddSection(
+            {
+                Name = "More"
+            }
+        )
+
+        Script:AddButton(
+            {
+                Name = "Join Pirates Team",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
+                end
+            }
+        )
+
+        Script:AddButton(
+            {
+                Name = "Join Marine Team",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+                end
+            }
+        )
+
+        Script:AddButton(
+            {
+                Name = "Rejoin Server!!",
+                Callback = function()
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+                end
+            }
+        )
+    end
+
+    --================== Utilities =====================
+    if true then
+        Utilities:AddSection({"Super Button ( Mobile )"})
+
+        function RemoveToggleButton()
+            if toggleButton then
+                toggleButton:Destroy()
+                toggleButton = false
+            end
+        end
+
+        function AddToggleButton()
+            
+            if not toggleButton then
+                toggleButton = Instance.new("TextButton")
+
+                toggleButton.Text = "Blox Tools"
+                toggleButton.Size = UDim2.new(0, 120, 0, 55) -- Tamanho maior e mais retangular
+                toggleButton.Position = UDim2.new(1, -125, 0, 100) -- Posicionamento mais visível no canto superior direito
+                toggleButton.AnchorPoint = Vector2.new(1, 0)
+                toggleButton.BackgroundTransparency = 0.25 -- Leve transparência para um visual mais moderno
+                toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 48) -- Cor de fundo mais escura para dar um estilo flat
+                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- Texto branco para contraste
+                toggleButton.TextSize = 18 -- Tamanho do texto maior para melhor visibilidade
+                toggleButton.Font = Enum.Font.GothamBold -- Fonte Gotham para um ar mais clean e moderno
+                toggleButton.BorderSizePixel = 0 -- Sem borda para um visual flat
+
+                local uiCorner = Instance.new("UICorner")
+                uiCorner.CornerRadius = UDim.new(0.1, 0) -- Bordas levemente arredondadas
+                uiCorner.Parent = toggleButton
+
+                local uiStroke = Instance.new("UIStroke")
+                uiStroke.Thickness = 1.5 -- Espessura fina para manter o visual elegante
+                uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Borda em tom cinza escuro
+                uiStroke.Transparency = 0.35 -- Borda semi-transparente para suavidade
+                uiStroke.Parent = toggleButton
+
+                local lastTouchTime = 0
+local touchCount = 0
+local touchDelay = 0.320  -- 400ms entre toques
+
+toggleButton.MouseEnter:Connect(function()
+    toggleButton:TweenSize(UDim2.new(0, 130, 0, 45), "Out", "Quad", 0.2, true) -- Aumenta ao passar o mouse
+    toggleButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60) -- Leve alteração de cor
+    uiStroke.Color = Color3.fromRGB(120, 120, 120) -- Clareia a borda ao passar o mouse
+end)
+
+toggleButton.MouseLeave:Connect(function()
+    toggleButton:TweenSize(UDim2.new(0, 120, 0, 40), "Out", "Quad", 0.2, true) -- Volta ao tamanho normal
+    toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 48) -- Cor de fundo original
+    uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Volta à cor original da borda
+end)
+
+toggleButton.MouseButton1Down:Connect(function()
+    local currentTime = tick()
+
+    -- Verifica se o toque ocorreu dentro do tempo de 400ms
+    if currentTime - lastTouchTime <= touchDelay then
+        touchCount = touchCount + 1
+    else
+        touchCount = 1  -- Se o tempo entre toques for maior que 400ms, conta como um novo toque
+    end
+
+    lastTouchTime = currentTime
+
+    -- Se for o segundo ou mais toques dentro do tempo de 400ms, chama a função X
+    if touchCount >= 2 then
+        ActionSuperButton(SuperButtonNumberAction2)  -- Função X
+        touchCount = 0  -- Reseta a contagem após a execução
+    end
+end)
+
+toggleButton.MouseButton1Up:Connect(function()
+    -- Se foi apenas um toque (não teve múltiplos toques dentro de 400ms)
+    if touchCount == 1 then
+        wait(touchDelay)  -- Aguarda o tempo de 400ms para garantir que não será considerado como toque múltiplo
+        if touchCount == 1 then
+            ActionSuperButton(SuperButtonNumberAction)  -- Função Y
+        end
+    end
+end)
+
+
+                toggleButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+            end
+
+
+
+        end
+
+        function PlayUseSong()
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://9120139331"
+            sound.Parent = game:GetService("SoundService")
+            sound.Volume = 4
+            sound:Play()
+        end
+
+        function ActionSuperButton(t)
+            if t == 0 then
+                PlayUseSong()
+                launchPlayer()
+            end
+
+            if t == 1 then
+                TPTBP()
+            end
+
+            if t == 2 then
+                local player = game.Players.LocalPlayer
+                local character = player and player.Character
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+                wait(0.05)
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+                wait(0.05)
+                character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+            end
+
+            if t == 3 then
+                if (_G.SelectedItemButtom) then
+                    if containsItem(_G.WeaponList, _G.SelectedItemButtom) then
+                        EquipWeapon(_G.SelectedItemButtom)
+                        PlayUseSong()
+                        NotificationMenuGame("I'm ready!! ( XD )")
+                    else
+                        NotificationMenuGame("???")
+                    end
+                else
+                    NotificationMenuGame("First it is necessary to calibrate the item...", "You can do this in the menu where you activated the button.")
+                end
+            end
+
+            if t == 4 then
+                MinkV7Toggle:Set((not _G.MinkV7))
+            end
+
+            if t == 5 then
+                _G.LockPlayer = not _G.LockPlayer
+
+                if not _G.LockPlayer then
+                    NotificationMenuGame("Unlock Player")
+                else
+                    NotificationMenuGame("LOCKED PLAYER!!!")
+                end
+            end
+        end
+
+        _G.LockPlayer = false
+        List = {
+            "Super Boost",
+            "Where is he? ( Player )",
+            "Manual SafeMode",
+            "Hold an Item",
+            "Change MinkV7",
+            "Lock Player"
+        }
+
+        
+
+       A = Utilities:AddButton({
+            Name = "Select Item. <font color='rgb(250, 250, 50)'>( Nothing )</font>",
+            Callback = function()
+            tool = tostring(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name)
+              _G.SelectedItemButtom = tool
+              _G.Setting_table.A = tostring(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name)
+              A:Set("Select Item. <font color='rgb(60, 250, 60)'>( " .. _G.SelectedItemButtom .. " )</font>")
+              NotificationMenuGame((tool))
+            end
+        })
+
+        if (_G.Setting_table.A) then
+            _G.SelectedItemButtom = _G.Setting_table.A
+            A:Set("Select Item. <font color='rgb(60, 250, 60)'>( " .. _G.SelectedItemButtom .. " )</font>")
+        end
+
+        Utilities:AddDropdown({
+            Name = "Power of Impulse. ( <font color='rgb(50, 250, 30)'>Super Button</font> )",
+            Options = {"1", "1.25", "1.5", "1.8", "2", "2.5", "3"},
+            Default = _G.Setting_table.Impulse or {"1.8"},
+            MultSelect = false,
+            Callback = function(Value)
+                _G.Setting_table.Impulse = (Value)
+                _G.ForceImpulse = tonumber(Value)
+            end
+          })
+
+        Utilities:AddToggle(
+            {
+                Name = "Insert Button ( <font color='rgb(50, 250, 0)'>GUI</font> )",
+                Description = "A button is added to perform some action! with one click!",
+                Default = _G.Setting_table.InsertButtom or false,
+                Callback = function(Value)
+                    _G.Setting_table.InsertButtom = Value
+                    pcall(
+                        function()
+                            if Value then
+                                AddToggleButton()
+                            else
+                                RemoveToggleButton()
+                            end
+                        end
+                    )
+                end
+            }
+        )
+
+        Utilities:AddDropdown(
+            {
+                Name = "Primary Execution",
+                Options = List,
+                Default = _G.Setting_table.PrimaryExecution or {"Suprise"},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.PrimaryExecution = Value
+                    L = List
+                    SuperButtonNumberAction = findIndex(Value, L) - 1
+                end
+            }
+        )
+
+        Utilities:AddDropdown(
+            {
+                Name = "Secondary Execution",
+                Options = List,
+                Default = _G.Setting_table.SecondaryExecution or {"Suprise"},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.Setting_table.SecondaryExecution = Value
+                    L = List
+                    SuperButtonNumberAction2 = findIndex(Value, L) - 1
+                end
+            }
+        )
+
+        Utilities:AddSection(
+            {
+                Name = "Utilities"
+            }
+        )
+
+        Utilities:AddButton(
+            {
+                Name = "Invisible!",
+                Description = "( ALLOWS YOU TO BECOME <font color='rgb(50, 250, 30)'>INVISIBLE</font> WHILE IT IS NOT <font color='rgb(250, 50, 30)'>IN YOUR HANDS.</font> )",
+                Callback = function()
+                    game:GetService("Players").LocalPlayer.Character.LowerTorso:Destroy()
+                end
+            }
+        )
+
+        Utilities:AddToggle(
+            {
+                Name = "Auto Haki!",
+                Description = "Activate Haki automatically when deactivated.",
+                Default = _G.Setting_table.Haki or true,
+                Callback = function(Value)
+                    _G.Setting_table.Haki = (Value)
+                end
+            }
+        )
+
+        Utilities:AddToggle(
+            {
+                Name = "Auto AwekiningV4! ( <font color='rgb(50, 250, 60)'>NEW</font> )",
+                Default = _G.Setting_table.AwekiningV4 or false,
+                Callback = function(Value)
+                    _G.Setting_table.AwekiningV4 = Value
+
+                    if Value then
+                        while _G.Setting_table.AwekiningV4 do
+                            wait(0.1)
+                            local player = game.Players.LocalPlayer
+                            local character = player.Character
+                            if character.RaceEnergy.Value >= 1 and not character.RaceTransformed.Value then
+                                local virtualInput = game:GetService("VirtualInputManager")
+                                virtualInput:SendKeyEvent(true, "Y", false, game)
+                                virtualInput:SendKeyEvent(false, "Y", false, game)
+                            end
+                        end
+                    end
+                end
+            }
+        )
+
+        function JumpForceFunction(J)
+            _G.jumpPower = _G.Setting_table.Jump or 50
+
+            -- Função para forçar o JumpPower do LocalPlayer
+            local function forceJumpPower(humanoid)
+                humanoid.JumpPower = _G.jumpPower
+                humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
+                    function()
+                        if humanoid.JumpPower ~= _G.jumpPower then
+                            humanoid.JumpPower = _G.jumpPower
+                        end
+                    end
+                )
+            end
+
+            -- Referência ao jogador local
+            local player = game.Players.LocalPlayer
+
+            -- Conectar a função quando o personagem do jogador local for adicionado
+            player.CharacterAdded:Connect(
+                function(character)
+                    local humanoid = character:WaitForChild("Humanoid")
+                    forceJumpPower(humanoid)
+                end
+            )
+
+            -- Caso o personagem do jogador local já esteja carregado
+            if player.Character then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    forceJumpPower(humanoid)
+                end
+            end
+
+            -- Função para atualizar o JumpPower do LocalPlayer
+            local function updateJumpPower()
+                if player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.JumpPower = _G.jumpPower
+                    end
+                end
+            end
+
+            -- Atualizar o JumpPower do LocalPlayer constantemente
+            game:GetService("RunService").Stepped:Connect(
+                function()
+                    updateJumpPower()
+                end
+            )
+        end
+
+        Utilities:AddSlider(
+            {
+                Name = "Super Jump - Height ( <font color='rgb(50, 250, 30)'>Recomended</font> )",
+                MinValue = 40,
+                MaxValue = 500,
+                Default = _G.Setting_table.Jump or 60,
+                Increase = 2,
+                Callback = function(Value)
+                    _G.Setting_table.Jump = (Value)
+                    _G.jumpPower = Value
+                end
+            }
+        )
+
+       
+
+        JumpForceFunction()
+
+        Utilities:AddToggle(
+            {
+                Name = "Auto Geppo V2!",
+                Default = _G.Setting_table.Geppo or false,
+                Callback = function(Value)
+                    _G.Setting_table.Geppo = (Value)
+
+                    function onJumpRequest()
+                        game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(
+                            "Jumping"
+                        )
+                    end
+
+                    if Value then
+                        connection = game:GetService("UserInputService").JumpRequest:connect(onJumpRequest)
+                    end
+
+                    if not Value then
+                        pcall(
+                            function()
+                                connection:Disconnect()
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        function MinkV7Function()
+            spawn(
+                function()
+                    while _G.MinkV7 do
+                        wait()
+                        local character = player.Character
+                        if character then
+                            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                            local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                            if humanoidRootPart and humanoid then
+                                -- Obtém a direção de movimento desejada pelo jogador
+                                local moveDirection = humanoid.MoveDirection
+
+                                if moveDirection.Magnitude > 0 then
+                                    -- Aplica uma pequena velocidade na direção de movimento, preservando a velocidade no eixo Y
+                                    local newVelocity =
+                                        Vector3.new(
+                                        moveDirection.X * 380,
+                                        humanoidRootPart.Velocity.Y,
+                                        moveDirection.Z * 380
+                                    )
+                                    humanoidRootPart.Velocity = newVelocity
+                                end
+                            end
+                        end
+                    end
+                end
+            )
+        end
+
+        MinkV7Toggle =
+            Utilities:AddToggle(
+            {
+                Name = "<font color='rgb(50, 250, 30)'>Mink V7!</font>",
+                Description = "That's really, really fast...",
+                Default = false,
+                Callback = function(Value)
+                    _G.MinkV7 = Value
+                    if Value then
+                        MinkV7Function()
+                    end
+                end
+            }
+        )
+
+        
+
+        Utilities:AddToggle(
+            {
+                Name = "Super LiteMode ( <font color='rgb(50, 250, 60)'>+FPS</font> )",
+                Default = _G.Setting_table.FPS or false,
+                Callback = function(Value)
+                    _G.Setting_table.FPS = Value
+                    if Value then
+                        pcall(
+                            function()
+                                local g = game
+                                local w = g.Workspace
+                                local l = g.Lighting
+                                local t = w.Terrain
+
+                                -- Configurações do terreno e iluminação
+                                t.WaterWaveSize = 0
+                                t.WaterWaveSpeed = 0
+                                t.WaterReflectance = 0
+                                t.WaterTransparency = 0
+                                l.GlobalShadows = false
+                                l.FogEnd = 9e9
+                                l.Brightness = 0
+                                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+                                -- Otimizações para performance
+                                for _, v in pairs(g:GetDescendants()) do
+                                    if
+                                        v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("CornerWedgePart") or
+                                            v:IsA("TrussPart") or
+                                            v:IsA("MeshPart")
+                                     then
+                                        v.Material = Enum.Material.Plastic
+                                        v.Reflectance = 0
+                                        v.CastShadow = false
+                                    elseif v:IsA("Decal") or v:IsA("Texture") then
+                                        v.Transparency = 0
+                                    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                                        v.Lifetime = NumberRange.new(0, 0)
+                                        v.Transparency = NumberSequence.new(0)
+                                    elseif v:IsA("Explosion") then
+                                        v.BlastPressure = 1
+                                        v.BlastRadius = 1
+                                    elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                                        v.Enabled = false
+                                    end
+                                end
+
+                                -- Desativando efeitos visuais no Lighting
+                                for _, e in pairs(l:GetChildren()) do
+                                    if
+                                        e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or
+                                            e:IsA("BloomEffect") or
+                                            e:IsA("DepthOfFieldEffect")
+                                     then
+                                        e.Enabled = false
+                                    end
+                                end
+
+                                -- Removendo elementos de água na câmera (se existirem)
+                                for _, v in pairs(w.Camera:GetDescendants()) do
+                                    if v.Name == "Water" then
+                                        v.Transparency = 1
+                                        v.Material = Enum.Material.Plastic
+                                    end
+                                end
+
+                                -- Removendo partículas e efeitos de ataques (pedaços do chão)
+                                for _, obj in pairs(w:GetDescendants()) do
+                                    if
+                                        obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or
+                                            obj:IsA("Fire")
+                                     then
+                                        obj:Destroy()
+                                    elseif obj:IsA("Explosion") then
+                                        obj.BlastPressure = 1
+                                        obj.BlastRadius = 1
+                                    end
+                                end
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        Utilities:AddToggle(
+            {
+                Name = "Auto Remove Damage V2!! ( <font color='rgb(60, 250, 60)'>Fixed, Improved</font> )",
+                Default = _G.Setting_table.Dam or false,
+                Callback = function(Value)
+                    _G.Setting_table.Dam = Value
+                    ReplicatedStorage.Assets.GUI.DamageCounter.Enabled = not (Value)
+                end
+            }
+        )
+
+        Utilities:AddToggle(
+            {
+                Name = "Auto Remove Fog!",
+                Default = _G.Setting_table.Fog or false,
+                Callback = function(Value)
+                    _G.Setting_table.Fog = (Value)
+
+                    pcall(
+                        function()
+                            local lighting = game.Lighting
+                            lighting.FogEnd = 100000
+                            for _, v in pairs(lighting:GetDescendants()) do
+                                if v:IsA("Atmosphere") then
+                                    v:Destroy()
+                                end
+                            end
+                        end
+                    )
+                end
+            }
+        )
+
+
+        Utilities:AddToggle(
+            {
+                Name = "Super Graphics ( <font color='rgb(250, 50, 60)'>-FPS</font> )",
+                Default = _G.Setting_table.FPS3 or false,
+                Callback = function(Value)
+                    _G.Setting_table.FPS2 = Value
+                    if Value then
+                        local Lighting = game:GetService("Lighting")
+                        local player = game.Players.LocalPlayer
+                        local camera = game.Workspace.CurrentCamera
+
+                        -- Ajustes Iniciais de Iluminação
+                        Lighting.Brightness = 1.6
+                        Lighting.GlobalShadows = true
+                        Lighting.EnvironmentDiffuseScale = 1
+                        Lighting.EnvironmentSpecularScale = 0.7
+                        Lighting.ClockTime = 14 -- Horário inicial
+
+                        -- Correção de Cor para Mudança de Hora
+                        local colorCorrection = Instance.new("ColorCorrectionEffect")
+                        colorCorrection.Parent = Lighting
+
+                        -- Configurações para Raios Solares
+                        local sunRays = Instance.new("SunRaysEffect")
+                        sunRays.Intensity = 1
+                        sunRays.Spread = 1
+                        sunRays.Parent = Lighting
+
+                        -- Brilho suave para destaques
+                        local bloom = Instance.new("BloomEffect")
+                        bloom.Intensity = 0.15
+                        bloom.Size = 20
+                        bloom.Threshold = 1
+                        bloom.Parent = Lighting
+
+                        -- Alteração gradual da cor ao longo do dia
+                        local function updateLightingColor(hour)
+                            if hour >= 6 and hour < 12 then
+                                -- Manhã: tons mais frios
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(245, 245, 255), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.6
+                            elseif hour >= 12 and hour < 17 then
+                                -- Meio-dia: luz neutra
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 250, 240), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.8
+                            elseif hour >= 17 and hour < 18 then
+                                -- Entardecer: tons alaranjados
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 210, 160), 0.02)
+                                sunRays.Intensity = 0.05
+                                Lighting.Brightness = 1.4
+                            else
+                                -- Noite: tom azulado e luz suave
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(180, 200, 255), 0.02)
+                                sunRays.Intensity = 0.03
+                                Lighting.Brightness = 1.2
+                            end
+                        end
+
+                        -- Atualização de Iluminação e Hora com Transições Suaves
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local hour = Lighting.ClockTime
+                            updateLightingColor(hour)
+                        end)
+
+                        -- Função para aplicar reflexo realista à água
+                        local function applyWaterEffects()
+                            for _, waterPart in pairs(game.Workspace:GetDescendants()) do
+                                if waterPart:IsA("BasePart") and waterPart.Material == Enum.Material.Water then
+                                    waterPart.Reflectance = 0.8
+                                    waterPart.Transparency = 0.1
+                                end
+                            end
+                        end
+
+                        applyWaterEffects()
+
+                        -- Borrão de Movimento Dinâmico para Todos os Movimentos, incluindo a Câmera
+                        local motionBlur = Instance.new("BlurEffect")
+                        motionBlur.Size = 0
+                        motionBlur.Parent = Lighting
+
+                        local lastCameraPosition = camera.CFrame.Position
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local speed = (player.Character and player.Character.HumanoidRootPart.Velocity.Magnitude) or 0
+                            local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
+
+                            -- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
+                            local blurAmount = math.clamp(((speed / 2 ) + (cameraSpeed * 2)) / 30, 0, 10)
+                            motionBlur.Size = blurAmount
+
+                            lastCameraPosition = camera.CFrame.Position
+                        end)
+
+
+                        local g = game
+
+                        for _, v in pairs(g:GetDescendants()) do
+
+                            if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                                v.Lifetime = NumberRange.new(2.5, 2.5)
+
+                            end
+                        end
+
+
+                    end
+                end
+            }
+        )
+      
+    end
+
+    --================== Players =====================
+    if true then
+        Players:AddSection({"Players"})
+
+        Players:AddToggle(
+            {
+                Name = "Teleport <font color='rgb(50, 250, 30)'>( Slow )</font>",
+                Description = "Take it to the player...",
+                Default = false,
+                Callback = function(Value)
+                    if _G.SelectPly then
+                        _G.TeleportPly = Value
+                        pcall(
+                            function()
+                                repeat
+                                    topos(game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.CFrame)
+                                    wait()
+                                until _G.TeleportPly == false
+                                StopTween(_G.TeleportPly)
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        Players:AddToggle(
+            {
+                Name = "Teleport <font color='rgb(250, 50, 30)'>( Bypass, Warn )</font>",
+                Description = "Take it to the player...",
+                Default = false,
+                Callback = function(Value)
+                    if _G.SelectPly then
+                        _G.TeleportPly = Value
+                        pcall(
+                            function()
+                                repeat
+                                    topos(game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.CFrame)
+                                    wait()
+                                until _G.TeleportPly == false
+                                StopTween(_G.TeleportPly)
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        Players:AddToggle(
+            {
+                Name = "Spectate",
+                Description = "Move the camera like the player.",
+                Default = false,
+                Callback = function(Value)
+                    if _G.SelectPly then
+                        SpectatePlys = Value
+                        local plr1 = game:GetService("Players").LocalPlayer.Character.Humanoid
+                        local plr2 = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+                        repeat
+                            wait(0.5)
+                            pcall(
+                                function()
+                                    game:GetService("Workspace").Camera.CameraSubject =
+                                        game:GetService("Players"):FindFirstChild(_G.SelectPly).Character.Humanoid
+                                end
+                            )
+                        until SpectatePlys == false
+                        game:GetService("Workspace").Camera.CameraSubject =
+                            game:GetService("Players").LocalPlayer.Character.Humanoid
+                    end
+                end
+            }
+        )
+
+        function ReloadPlayersList()
+            Playerslist = {}
+            table.insert(Playerslist, "Nothing")
+            for i, v in pairs(game:GetService("Players"):GetChildren()) do
+                table.insert(Playerslist, v.Name)
+            end
+
+            DropdownPlayers:Set(Playerslist, true)
+        end
+
+        DropdownPlayers =
+            Players:AddDropdown(
+            {
+                Name = "Select Players",
+                Description = "Select your target to continue...",
+                Options = {""},
+                Default = "...",
+                Callback = function(Value)
+                    if not (Value == "Nothing") then
+                        _G.SelectPly = Value
+                    else
+                        _G.SelectPly = nil
+                    end
+                end
+            }
+        )
+        ReloadPlayersList()
+
+        local Button =
+            Players:AddButton(
+            {
+                Name = "Search Players!!",
+                Description = "Search for Players in the game and insert them into the list above.",
+                Callback = function()
+                    ReloadPlayersList()
+                end
+            }
+        )
+
+        local PlayersX = game:GetService("Players")
+        local LocalPlayer = PlayersX.LocalPlayer
+        local player = game.Players.LocalPlayer
+
+        Players:AddToggle(
+            {
+                Name = "Aimbot Skills ( <font color='rgb(30, 250, 30)'>80%</font> )",
+                Description = "Moves the aim of <font color='rgb(250, 60, 60)'>SOME</font> skills to the nearest or selected player!!",
+                Default = _G.Setting_table.AIMV1 or false,
+                Callback = function(Value)
+                    _G.Setting_table.AIMV1 = Value
+                    if Value then
+                        _G.OJO_VS["AIM"] = true
+                    else
+                        _G.OJO_VS["AIM"] = nil
+                    end
+
+
+                    _G.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
+                        if (_G.SelectedBall and _G.IsScriptRunning and _G.Setting_table.AIMV1) then
+                            getgenv().AimbotPos = _G.SelectedPosition
+                        else
+                            getgenv().AimbotPos = nil
+                        end
+
+                        
+                    end)
+
+
+                    if Value and not _G.VPO then
+                        OJO()
+                    end
+                    local F = function()
+                        if
+                            _G.SPLY and _G.SPLY.Character and
+                                _G.SPLY.Character:FindFirstChild("HumanoidRootPart")
+                         then
+                            if (_G.SelectedBall and _G.IsScriptRunning and _G.Setting_table.AIMV1) then
+                                getgenv().AimbotPos = _G.SelectedPosition
+                                return
+                            else
+                                getgenv().AimbotPos = nil
+                            end
+
+                            currentPosition = _G.SPLY.Character.HumanoidRootPart.Position
+                            newPosition = currentPosition
+                            getgenv().AimbotPos = newPosition
+                        end
+                    end
+
+                    if (Value) then
+                        ASV1_1 =
+                            game:GetService("RunService").RenderStepped:Connect(F)
+
+                        spawn(function()
+
+                            while (ASV1_1) do wait()
+                                F()
+                            end
+                        end)
+                    else
+                        pcall(
+                            function()
+                                if ASV1_1 then
+                                    _G.Heartbeat:Disconnect()
+                                    _G.Heartbeat = nil
+                                    ASV1_1:Disconnect()
+                                    ASV1_1 = nil
+                                end
+                                for i = 1, 10 do
+                                    getgenv().AimbotPos = nil
+                                    wait()
+                                end
+                            end
+                        )
+                    end
+                end
+            }
+        )
+
+        function createLine(v)
+            local C = v and Color3.fromRGB(250, 30, 0) or Color3.fromRGB(0, 250, 0)
+            if not _G.beam then
+                local head = player.Character and player.Character:WaitForChild("Head")
+                _G.headAttachment = Instance.new("Attachment", head)
+                _G.headAttachment.Position = Vector3.new(0, -2, 0)
+                _G.originAttachment = Instance.new("Attachment", workspace.Terrain)
+                _G.beam = Instance.new("Beam", head)
+                _G.beam.Attachment0 = _G.headAttachment
+                _G.beam.Attachment1 = _G.originAttachment
+                _G.beam.Color = ColorSequence.new(C)
+                _G.beam.Width0, _G.beam.Width1 = 1, 1
+                _G.beam.Transparency = NumberSequence.new(0.2)
+            end
+        end
+
+        function removeLine()
+            for _, v in pairs({"beam", "headAttachment", "originAttachment"}) do
+                if _G[v] then
+                    _G[v]:Destroy()
+                    _G[v] = nil
+                end
+            end
+        end
+
+        local Section = Players:AddSection({"Player Visual"})
+
+        Players:AddToggle(
+            {
+                Name = "Highlight V1 - <font color='rgb(50, 250, 30)'>Recommended</font>",
+                Description = "See the position of the players.",
+                Default = _G.Setting_table.LigthV1 or false,
+                Callback = function(Value)
+                    _G.Setting_table.LigthV1 = (Value)
+                    if Value then
+                        CreateHighlightV1()
+                        spawn(
+                            function()
+                                while _G.Setting_table.LigthV1 do
+                                    wait(1)
+                                    if _G.Setting_table.LigthV1 then
+                                        ReloadHighlightV1()
+                                    end
+                                end
+                            end
+                        )
+                    elseif _G.HighlightV1 then
+                        RemoveHighlightV1()
+                        _G.Highlight_L = false
+                    end
+                    _G.HighlightV1 = (Value)
+                end
+            }
+        )
+
+        Players:AddSlider(
+            {
+                Name = "Highlight Transparency <font color='rgb(50, 250, 30)'>( 0.2 )</font>",
+                MinValue = 0,
+                MaxValue = 10,
+                Default = _G.Setting_table.LigthOpacity or 2,
+                Increase = 1,
+                Callback = function(Value)
+                    _G.Setting_table.LigthOpacity = (Value)
+                    _G.HighlightV1T = Value / 10
+                    HighlightV2T = Value / 10
+                end
+            }
+        )
+
+        Players:AddToggle(
+            {
+                Name = "ESP Players <font color='rgb(30, 250, 30)'>( Very Good )</font>",
+                Description = "See the position of the players.",
+                Default = _G.Setting_table.EspPlayer or false,
+                Callback = function(Value)
+                    _G.Setting_table.EspPlayer = Value
+
+                    if (Value) then
+                        while _G.Setting_table.EspPlayer do
+                            wait(0.1)
+                            UpdateEspPlayer()
+                        end
+                    end
+                end
+            }
+        )
+
+        InvisibleToggleESPPlayers =
+            Players:AddButton(
+            {
+                Name = "ESP Player - Configurations"
+            }
+        )
+
+        ESPPlayerViewDistance = 0
+
+        MaxDistanceDropdown =
+            Players:AddDropdown(
+            {
+                Name = "Max Distance (<font color='rgb(255, 255, 50)'>ESP Players</font>)",
+                Description = "Improves player visualization...",
+                Options = {"100M", "500M", "800M", "1200M", "2400M", "4800M", "10000M", "20000M", "9999999M"},
+                Default = _G.Setting_table.ESPPLY_Distance or "...",
+                Callback = function(Value)
+                    _G.Setting_table.ESPPLY_Distance = (Value)
+                    value = Value:gsub("M", "")
+                    ESPPlayerViewDistance = tonumber(value)
+                end
+            }
+        )
+
+        ViewRewardToggle =
+            Players:AddToggle(
+            {
+                Name = "View Reward (<font color='rgb(255, 255, 50)'>ESP Players</font>)",
+                Description = "Displays the player's Bounty and Honor.",
+                Default = _G.Setting_table.Reward or true,
+                Callback = function(Value)
+                    _G.ESPPlayerViewExtra = Value
+                end
+            }
+        )
+
+        MaxDistanceDropdown:Visible(false)
+        ViewRewardToggle:Visible(false)
+
+        InvisibleToggleESPPlayers:Callback(MaxDistanceDropdown.Visible)
+        InvisibleToggleESPPlayers:Callback(ViewRewardToggle.Visible)
+    end
+
+    --================== Save =====================
+    if true then
+        Save:AddToggle(
+            {
+                Name = "V2 in all teleports <font color='rgb(50, 250, 60)'>( NEW )</font>",
+                Default = _G.Setting_table.TPV2 or false,
+                Description = "<font color='rgb(250, 250, 0)'>Makes small edits</font> to the <font color='rgb(30, 250, 0)'>teleport tools</font>, which make some <font color='rgb(250, 30, 0)'>difference</font>.",
+                Callback = function(Value)
+                    _G.Setting_table.TPV2 = Value
+                    _G.V2 = (Value)
+                    if Value then
+                        _G.OJO_VS["V2"] = true
+                    else
+                        _G.OJO_VS["V2"] = nil
+                    end
+
+                    _G.SVA = Value
+
+                    if Value then
+                        _G.OJO_SV["V2"] = true
+                    else
+                        _G.OJO_SV["V2"] = nil
+                    end
+
+                    if Value and not _G.VPO then
+                        OJO()
+                    end
+
+                    if Value and not _G.IsScriptRunning then
+                        SuperView()
+                    end
+
+                    while _G.Setting_table.TPV2 do
+                        wait(0.1)
+
+                        if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
+                            _G.SelectedPlayer = _G.SPLY
+                            ChangeTargetPlayer(_G.SPLY.Name)
+                        else
+                            _G.SelectedPlayer = game.Players.LocalPlayer
+                        end
+                    end
+                end
+            }
+        )
+
+        -- Tabelas para armazenar os itens e suas ações
+        local playerItems = {}
+        local playerItemActions = {}
+
+        -- Função para adicionar um item e sua ação à mochila do jogador
+        function addItemToInventory(player, item, action)
+            player = player or game:GetService("Players").LocalPlayer
+            local clonedItem = item:Clone() -- Clona o item original
+            table.insert(playerItems, item) -- Adiciona o item à tabela
+            table.insert(playerItemActions, action) -- Adiciona a ação à tabela de ações
+        end
+
+        -- Função para remover um item e sua ação
+        function removeItemFromInventory(itemName)
+            local inventory = player:WaitForChild("Backpack")
+
+            for i, item in ipairs(playerItems) do
+                if item.Name == itemName then
+                    table.remove(playerItems, i) -- Remove o item da tabela de itens
+                    table.remove(playerItemActions, i) -- Remove a ação correspondente
+                        if not (not inventory or not itemName) then
+                            local item = inventory:FindFirstChild(itemName)
+                            if item then
+                                item:Destroy()
+                            end
+                        end
+                    break
+                end
+            end
+        end
+
+        -- Função que restaura os itens e aplica suas ações
+        function restoreInventory(player)
+            player = player or game:GetService("Players").LocalPlayer
+            for i, item in ipairs(playerItems) do
+                local clonedItem = item:Clone() -- Clona o item
+
+                -- Ação correspondente ao item restaurado
+                local action = playerItemActions[i]
+                if action then
+                    clonedItem.Activated:Connect(action)
+                end
+                clonedItem.Parent = player.Backpack -- Reinsere o item na mochila do jogador
+            end
+        end
+
+        Save:AddSection(
+            {
+                Name = "Teleport Toll"
+            }
+        )
+
+        AutoTeleportToolToggle =
+            Save:AddToggle(
+            {
+                Name = "Auto Teleport Tool! <font color='rgb(50, 250, 30)'>( Hard )</font>",
+                Default = false,
+                Callback = function(Value)
+                    if not Value then
+                        return
+                    end
+
+                    local plr = game:GetService("Players").LocalPlayer
+                    local mouse = plr:GetMouse()
+                    local tool = Instance.new("Tool")
+                    tool.RequiresHandle = false
+                    tool.Name = "Teleport"
+                    tool.Activated:Connect(
+                        function()
+                            local root = plr.Character.HumanoidRootPart
+                            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+                            local offset = pos - root.Position
+                            root.CFrame = root.CFrame + offset
+                        end
+                    )
+                    tool.Parent = plr.Backpack
+                end
+            }
+        )
+
+        AutoTeleportToolV2Toggle =
+            Save:AddToggle(
+            {
+                Name = "Auto Teleport Tool V2! <font color='rgb(50, 250, 30)'>( Medium )</font>",
+                Default = false,
+                Callback = function(Value)
+                    if not Value then
+                        return
+                    end
+
+                    local Players = game:GetService("Players")
+                    local LocalPlayer = Players.LocalPlayer
+                    local Mouse = LocalPlayer:GetMouse()
+                    local UserInputService = game:GetService("UserInputService")
+
+                    local ItemUsed = false
+                    local IsDragging = false
+                    local TeleportTool = Instance.new("Tool")
+
+                    TeleportTool.RequiresHandle = false
+                    TeleportTool.Name = "Teleport V2"
+
+                    local function teleport()
+                        local Character = LocalPlayer.Character
+                        if Character then
+                            local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+                            if HumanoidRootPart then
+                                local Hit = Mouse.Hit
+                                local NewPosition = Hit.Position + Vector3.new(0, 2.5, 0)
+                                local Offset = NewPosition - HumanoidRootPart.Position
+                                HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + Offset
+                            end
+                        end
+                    end
+
+                    TeleportTool.Activated:Connect(
+                        function()
+                            ItemUsed = true
+                            _G.OrionLib:MakeNotification(
+                                {
+                                    Name = "Teleport V2 Ready!!",
+                                    Content = "The item has been used, click on the teleport location!",
+                                    Image = "rbxassetid://4483345998",
+                                    Time = 3
+                                }
+                            )
+                        end
+                    )
+
+                    UserInputService.InputBegan:Connect(
+                        function(input, gameProcessed)
+                            if not gameProcessed then
+                                if input.UserInputType == Enum.UserInputType.Touch then
+                                    IsDragging = false
+                                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                                    IsDragging = false
+                                end
+                            end
+                        end
+                    )
+
+                    UserInputService.InputChanged:Connect(
+                        function(input, gameProcessed)
+                            if not gameProcessed then
+                                if input.UserInputType == Enum.UserInputType.Touch then
+                                    IsDragging = true
+                                elseif input.UserInputType == Enum.UserInputType.MouseMovement then
+                                    IsDragging = true
+                                end
+                            end
+                        end
+                    )
+
+                    UserInputService.InputEnded:Connect(
+                        function(input, gameProcessed)
+                            if not gameProcessed then
+                                if
+                                    (input.UserInputType == Enum.UserInputType.Touch) or
+                                        (input.UserInputType == Enum.UserInputType.MouseButton1)
+                                 then
+                                    if not IsDragging and ItemUsed then
+                                        -- Executar código de teletransporte
+                                        teleport()
+                                        -- Resetar a variável após o uso
+                                        ItemUsed = false
+                                    end
+                                end
+                            end
+                        end
+                    )
+
+                    TeleportTool.Parent = LocalPlayer.Backpack
+                end
+            }
+        )
+
+        Save:AddSection(
+            {
+                Name = "Teleport With Action"
+            }
+        )
+
+        Save:AddSection(
+            {
+                Name = "Teleport With Action + Player"
+            }
+        )
+
+        if true then
+
+            _G.ActionList = {
+                ICE_COMBO = {
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Skull Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+                    {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
+                },
+                DragonGuitar = {
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Skull Guitar", key = "X", delay = 1.2, M = 55, T = 1},
+                },
+                ICE = {
+                    {item = "Ice-Ice", key = "V", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                },
+                SoulGuitar = {
+                    {item = "Skull Guitar", key = "X", delay = 1.2, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                },
+                Z_CDK = {
+                    {item = "Cursed Dual Katana", key = "Z", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1, S = 1},
+                },
+                V_DOUGH = {
+                    {item = "Dough-Dough", key = "V", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1, S = 3},
+                },
+                DragonTrident = {
+                    {item = "Dragon Trident", key = "X", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                }
+            }
+
+            -- Função para carregar o JSON e pegar a ação específica
+            function getActionFromJson(actionName)
+                -- Supondo que o JSON já está carregado como _G.ActionList
+                if _G.ActionList[actionName] then
+                    return _G.ActionList[actionName]
+                else
+                    -- Chama uma função alternativa caso a ação não seja encontrada
+                    NotificationMenuGame("Ação " .. actionName .. " não encontrada no JSON!")
+                    return nil
+                end
+            end
+
+            function addTeleportTool(actionName)
+                l = game.Players.LocalPlayer
+            
+                local plr = game:GetService("Players").LocalPlayer
+                local tool = Instance.new("Tool")
+                tool.RequiresHandle = false
+                tool.Name = actionName
+
+                -- Função principal a ser chamada quando a ferramenta é ativada
+                local function A()
+                    local success, result = pcall(function()
+                    local actions = getActionFromJson(actionName)
+                    if not actions then
+                        return
+                    end -- Se a ação não for encontrada, sai da função
+
+                    for _, action in ipairs(actions) do
+                        local weaponName = action.item
+                        local key = action.key
+                        local t = action.delay or 0.7
+                        local d = action.M or 400
+                        local T = action.T or 0
+                        local S = action.S or 0
+
+                        local distance =
+                            round(
+                            (game:GetService("Players").LocalPlayer.Character.Head.Position - _G.SPLY.Character.Head.Position).Magnitude /
+                                3
+                        )
+
+                        local root = plr.Character.HumanoidRootPart
+
+                        if (distance > d) then
+                            NotificationMenuGame("Jogador muito distante...")
+                            return
+                        end
+                        
+                        -- Posiciona o player (conforme seu código) e equipa a arma
+                        if _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and (T == 1) then
+                            if (_G.SelectedPosition and _G.SelectedBall and _G.IsScriptRunning) then
+                                root.CFrame = _G.SelectedPosition2
+                            else
+                                currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
+                                newPosition = currentPosition + Vector3.new(0, 2.5, 0)
+                                root.CFrame = newPosition
+                            end
+                        else
+                            if (T == 1) then
+                                NotificationMenuGame("Jogador não encontrado para a posição!")
+                                return
+                            end
+                        end
+
+                        
+
+                        if (distance > d) then
+                            root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
+                            NotificationMenuGame("Jogador muito distante...")
+                            return
+                        end
+
+                        -- Equipar e pressionar a tecla da ação
+                        if containsItem(_G.WeaponList, weaponName) then
+                            EquipWeapon(weaponName)
+                            while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name == weaponName) or
+                                not (game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Main").Skills.Visible) do
+                                wait()
+                            end
+                            -- Pressiona a tecla especificada
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                            wait(S)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+                            
+                            wait(t)
+                        else
+                            NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
+                            return
+                        end
+                    end
+                end)
+
+                if not success then
+                    NotificationMenuGame("error: " .. result)
+                end
+                end
+
+                tool.Activated:Connect(A)
+                addItemToInventory(nil, tool, A)
+                tool.Parent = plr.Backpack
+            end
+        end
+
+        -- Adicionando cada ferramenta
+        Save:AddToggle(
+            {
+                Name = "Teleport With X:Dragon Trident + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_DT_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_DT_Player = Value
+                    if not Value then
+                        removeItemFromInventory("DragonTrident")
+                        return
+                    end
+                    if Value then
+                        addTeleportTool("DragonTrident")
+                    end
+                end
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport With X:Skull Guitar + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_SG_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_SG_Player = Value
+                    if not Value then
+                        removeItemFromInventory("SoulGuitar")
+                        return
+                    end
+                    addTeleportTool("SoulGuitar")
+                end
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport With V:Ice + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_VI_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_VI_Player = Value
+                    if not Value then
+                        removeItemFromInventory("ICE")
+                        return
+                    end
+                    addTeleportTool("ICE")
+                end
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport With Z:CDK + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_ZCDK_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_ZCDK_Player = Value
+                    if not Value then
+                        removeItemFromInventory("Z_CDK")
+                        return
+                    end
+                    addTeleportTool("Z_CDK")
+                end
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport With V:Dough + Player! <font color='rgb(50, 250, 30)'>( Super EZ )</font>",
+                Default = _G.Setting_table.TP_VD_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_VD_Player = Value
+                    if not Value then
+                        removeItemFromInventory("V_DOUGH")
+                        return
+                    end
+                    addTeleportTool("V_DOUGH")
+                end
+            }
+        )
+
+        Save:AddSection(
+            {
+                Name = "Teleport With Action + Player ( Super )"
+            }
+        )
+
+        Save:AddToggle(
+            {
+                Name = "Teleport X:D-T + X:SoulGuitar + Ply! <font color='rgb(50, 250, 30)'>( ... )</font>",
+                Default = _G.Setting_table.TP_VI_XS_Player or false,
+                Callback = function(Value)
+                    _G.Setting_table.TP_VI_XS_Player = Value
+                    if not Value then
+                        removeItemFromInventory("DragonGuitar")
+                        return
+                    end
+                    addTeleportTool("DragonGuitar")
+                end
+            }
+        )
+    end
+
+
+    Save:AddButton(
+        {
+            Name = "TEST",
+            Callback = function()
+                addTeleportTool("ICE_COMBO")
+                addTeleportTool("ICE")
+                addTeleportTool("SoulGuitar")
+            end
+        }
+    )
+              
+
+
+    --================== Shop =====================
+    if true then
+        Shop:AddSection({"Fighting Style - V1"})
+
+        Shop:AddButton(
+            {
+                Name = "Buy Black Leg",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBlackLeg")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Electro",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectro")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Fishman Karate",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFishmanKarate")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Dragon Claw",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                        "BlackbeardReward",
+                        "DragonClaw",
+                        "1"
+                    )
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                        "BlackbeardReward",
+                        "DragonClaw",
+                        "2"
+                    )
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Superhuman",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySuperhuman")
+                end
+            }
+        )
+
+        local Section =
+            Shop:AddSection(
+            {
+                Name = "V2 Styles"
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Death Step",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDeathStep")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Sharkman Karate",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate", true)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Electric Claw",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectricClaw")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Dragon Talon",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDragonTalon")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy GodHuman",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy BuySanguineArt",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySanguineArt")
+                end
+            }
+        )
+        Shop:AddSection(
+            {
+                Name = "Other"
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Reset Stats!",
+                Callback = function()
+                    FireRemote("BlackbeardReward", "Refund", "1")
+                    FireRemote("BlackbeardReward", "Refund", "2")
+                end
+            }
+        )
+
+        Shop:AddSection(
+            {
+                Name = "Races"
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Race Rerol!",
+                Callback = function()
+                    FireRemote("BlackbeardReward", "Reroll", "1")
+                    FireRemote("BlackbeardReward", "Reroll", "2")
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Ghoul Race!",
+                Callback = function()
+                    local args = {
+                        [1] = "Ectoplasm",
+                        [2] = "BuyCheck",
+                        [3] = 4
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                    local args = {
+                        [1] = "Ectoplasm",
+                        [2] = "Change",
+                        [3] = 4
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                end
+            }
+        )
+
+        Shop:AddButton(
+            {
+                Name = "Buy Cyborg Race!",
+                Callback = function()
+                    local args = {
+                        [1] = "CyborgTrainer",
+                        [2] = "Buy"
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                end
+            }
+        )
+    end
+
+    --================== Teleport =====================
+    if true then
+        Teleport:AddSection(
+            {
+                Name = "Universe of the seas"
+            }
+        )
+
+        Teleport:AddButton(
+            {
+                Name = "Teleport To Old World!",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
+                end
+            }
+        )
+
+        Teleport:AddButton(
+            {
+                Name = "Teleport To Second Sea!",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
+                end
+            }
+        )
+
+        Teleport:AddButton(
+            {
+                Name = "Teleport To Third Sea!",
+                Callback = function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
+                end
+            }
+        )
+
+        Teleport:AddButton(
+            {
+                Name = "Server HOP",
+                Callback = function()
+                    Hop()
+                end
+            }
+        )
+
+        Teleport:AddSection({"Teleport"})
+
+        _G.SelectIsland = ""
+        local IslandsList = {}
+
+        -- Definir lista de ilhas por SEA
+        if SEA == "1" then
+            IslandsList = {
+                "WindMill",
+                "Marine",
+                "Middle Town",
+                "Jungle",
+                "Pirate Village",
+                "Desert",
+                "Snow Island",
+                "MarineFord",
+                "Colosseum",
+                "Sky Island 1",
+                "Sky Island 2",
+                "Sky Island 3",
+                "Prison",
+                "Magma Village",
+                "Under Water Island",
+                "Fountain City"
+            }
+        elseif SEA == "2" then
+            IslandsList = {
+                "The Cafe",
+                "Frist Spot",
+                "Dark Area",
+                "Flamingo Mansion",
+                "Flamingo Room",
+                "Green Zone",
+                "Zombie Island",
+                "Two Snow Mountain",
+                "Punk Hazard",
+                "Cursed Ship",
+                "Ice Castle",
+                "Forgotten Island",
+                "Ussop Island"
+            }
+        elseif SEA == "3" then
+            IslandsList = {
+                "Mansion",
+                "Port Town",
+                "Great Tree",
+                "Castle On The Sea",
+                "Hydra Island",
+                "Floating Turtle",
+                "Haunted Castle",
+                "Ice Cream Island",
+                "Peanut Island",
+                "Cake Island",
+                "Candy Cane Island",
+                "Tiki Outpost"
+            }
+        end
+
+        -- Dropdown de seleção de ilhas
+        local LocationSelectDropdown =
+            Teleport:AddDropdown(
+            {
+                Name = "Select a Location",
+                Options = IslandsList,
+                Description = "(Average speed of 370 KM/h.)",
+                Default = {"..."},
+                MultSelect = false,
+                Callback = function(Value)
+                    _G.SelectIsland = Value
+                end
+            }
+        )
+
+        -- Função para teletransportar
+        function TeleportToIsland(Island)
+            teleportCoords = {}
+
+            -- Definir as coordenadas de teleporte para o SEA 1
+            if SEA == "1" then
+                -- Definir as coordenadas de teleporte para o SEA 2
+                teleportCoords = {
+                    ["WindMill"] = CFrame.new(889, 17, 1434),
+                    ["Marine"] = CFrame.new(-2728, 25, 2056),
+                    ["Middle Town"] = CFrame.new(-688, 15, 1585),
+                    ["Desert"] = CFrame.new(4849, 30, -1175),
+                    ["Snow Island"] = CFrame.new(1298, 87, -1344),
+                    ["Pirate Village"] = CFrame.new(-1173, 45, 3837),
+                    ["Jungle"] = CFrame.new(-1614, 37, 146),
+                    ["Prison"] = CFrame.new(4870, 6, 736),
+                    ["MarineFord"] = CFrame.new(-4810, 21, 4359),
+                    ["Colosseum"] = CFrame.new(-1535, 7, -3014),
+                    ["Sky Island 1"] = CFrame.new(-4814, 718, -2551),
+                    ["Sky Island 2"] = CFrame.new(-4652, 873, -1754),
+                    ["Sky Island 3"] = CFrame.new(-7895, 5547, -380),
+                    ["Magma Village"] = CFrame.new(-5290, 9, 8349),
+                    ["Under Water Island"] = CFrame.new(61163.8515625, 11.6796875, 1819.7841796875),
+                    ["Fountain City"] = CFrame.new(5048, 3.74, 4164)
+                }
+            elseif SEA == "2" then
+                -- Definir as coordenadas de teleporte para o SEA 3
+                teleportCoords = {
+                    ["The Cafe"] = CFrame.new(-382, 73, 290),
+                    ["Frist Spot"] = CFrame.new(-11, 29, 2771),
+                    ["Dark Area"] = CFrame.new(3494, 13, -3259),
+                    ["Flamingo Mansion"] = CFrame.new(-317, 331, 597),
+                    ["Flamingo Room"] = CFrame.new(2285, 15, 905),
+                    ["Green Zone"] = CFrame.new(-2258, 73, -2696),
+                    ["Zombie Island"] = CFrame.new(-5552, 194, -776),
+                    ["Two Snow Mountain"] = CFrame.new(752, 408, -5277),
+                    ["Punk Hazard"] = CFrame.new(-5897, 18, -5096),
+                    ["Cursed Ship"] = CFrame.new(923.2125, 125.0852, 32852.8320),
+                    ["Ice Castle"] = CFrame.new(5505, 40, -6178),
+                    ["Forgotten Island"] = CFrame.new(-3050, 240, -10178),
+                    ["Ussop Island"] = CFrame.new(4816, 8, 2863)
+                }
+            elseif SEA == "3" then
+                teleportCoords = {
+                    ["Mansion"] = CFrame.new(-12471.169921875, 374.94024658203, -7551.677734375),
+                    ["Port Town"] = CFrame.new(-334, 7, 5300),
+                    ["Castle On The Sea"] = CFrame.new(-5073, 315, -3153),
+                    ["Hydra Island"] = CFrame.new(5749, 610, -254),
+                    ["Great Tree"] = CFrame.new(2681, 1682, -7190),
+                    ["Floating Turtle"] = CFrame.new(-12528, 332, -8658),
+                    ["Haunted Castle"] = CFrame.new(-9517, 142, 5528),
+                    ["Ice Cream Island"] = CFrame.new(-902, 79, -10988),
+                    ["Peanut Island"] = CFrame.new(-2062, 50, -10232),
+                    ["Cake Island"] = CFrame.new(-1897, 14, -11576),
+                    ["Candy Cane Island"] = CFrame.new(-1038, 10, -14076),
+                    ["Tiki Outpost"] = CFrame.new(-16224, 9, 439)
+                }
+            end
+
+            -- Executa o teleporte
+            if teleportCoords[Island] then
+                topos(teleportCoords[Island])
+            else
+                warn("Localização inválida ou não encontrada.")
+            end
+        end
+
+        if SEA == "1" and teleportCoords[Island] then
+            topos(teleportCoords[Island])
+        elseif SEA == "2" then
+            -- Adicionar teleporte para Sea 2
+            if Island == "The Cafe" then
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                    "requestEntrance",
+                    Vector3.new(-317, 331, 597)
+                )
+                wait(0.1)
+                topos(CFrame.new(-382, 73, 290))
+            end
+        elseif SEA == "3" then
+        -- Adicionar teleporte para Sea 3
+        end
+    end
+
+    -- Toggle para teletransportar
+    _G.TeleportToIslandToggle =
+        Teleport:AddToggle(
+        {
+            Name = "Teleport Now!!",
+            Default = false,
+            Callback = function(Value)
+                _G.TeleportIsland = Value
+                if Value and _G.SelectIsland ~= "" then
+                    repeat
+                        wait()
+                        TeleportToIsland(_G.SelectIsland)
+                    until not _G.TeleportIsland
+                    StopTween(_G.TeleportIsland)
+                end
+            end
+        }
+    )
+end
+
+--================== Deth System =====================
+if true then
+    local player = game.Players.LocalPlayer
+
+    local function onPlayerDeath()
+        _G.PlayerDeth = true
+    end
+
+    local function setupDeathDetection(character)
+        local humanoid = character:WaitForChild("Humanoid")
+
+        humanoid.Died:Connect(
+            function()
+                onPlayerDeath()
+            end
+        )
+    end
+
+    if player.Character then
+        setupDeathDetection(player.Character)
+    end
+
+    player.CharacterAdded:Connect(
+        function(character)
+            setupDeathDetection(character)
+            wait(1)
+            _G.PlayerDeth = false
+            wait(1)
+            restoreInventory()
+            ReloadList()
+        end
+    )
+end
+
+
+
+
+
+
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local tempoLimite = 1
+local segurando = false
+local tempoPressionado = 0
+local conexaoAtual = nil
+
+local function funcao1()
+    print("Função 1 executada!")
+end
+
+local function funcao2()
+    print("Função 2 executada!")
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.U and not gameProcessed then
+        segurando = true
+        tempoPressionado = 0
+        conexaoAtual = RunService.RenderStepped:Connect(function(deltaTime)
+            if not (_G.Setting_table.InsertButtom) then
+                return
+            end
+
+            if segurando then
+                tempoPressionado = tempoPressionado + deltaTime
+                if tempoPressionado >= tempoLimite then
+                    segurando = false
+                    ActionSuperButton(SuperButtonNumberAction2)
+                    if conexaoAtual then
+                        conexaoAtual:Disconnect()
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if not (_G.Setting_table.InsertButtom) then
+        return
+    end
+    
+    if input.KeyCode == Enum.KeyCode.U and segurando then
+        segurando = false
+        if tempoPressionado < tempoLimite then
+            ActionSuperButton(SuperButtonNumberAction)
+        end
+        if conexaoAtual then
+            conexaoAtual:Disconnect()
+        end
+    end
+end)
+
+
+
+-- Serviço do Roblox para chat
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Função que será executada ao detectar a mensagem
+local function onChatMessageReceived(message)
+    if message:lower() == "/054y" then
+        if not (_G.BloxxyADM) then
+            return
+        end
+        
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()
+
+        local function createAuraEffect(X)
+            local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+            -- Função auxiliar para criar partículas com propriedades específicas
+            local function createParticle(properties)
+                local particle = Instance.new("ParticleEmitter")
+                for prop, value in pairs(properties) do
+                    particle[prop] = value
+                end
+                particle.Parent = humanoidRootPart
+                return particle
+            end
+
+            -- Partículas amarelo-vermelho vibrante
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                },
+                LightEmission = 2,
+                Rate = 5000,
+                Speed = NumberRange.new(1, 2),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(1, 0)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                }
+            })
+
+           
+
+            -- Partículas de faíscas multicoloridas com movimento randômico
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+                },
+                LightEmission = 1,
+                Rate = 6000,
+                Speed = NumberRange.new(3, 5),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new(0.7),
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                VelocitySpread = 180
+            })
+
+            -- Partículas de anéis multicoloridos
+            createParticle({
+                Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+                },
+                LightEmission = 2,
+                Rate = 1000,
+                Speed = NumberRange.new(0, 1),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 5),
+                    NumberSequenceKeypoint.new(1, 0)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0.5),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                Rotation = NumberRange.new(0, 360),
+                RotSpeed = NumberRange.new(-50, 50)
+            })
+
+            -- Partículas tipo poeira dourada
+            createParticle({
+                Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+                LightEmission = 1.5,
+                Rate = 8000,
+                Speed = NumberRange.new(0.5, 1),
+                Lifetime = NumberRange.new(0.5, 1.5),
+                Size = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0.3),
+                    NumberSequenceKeypoint.new(1, 0.1)
+                },
+                Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                },
+                VelocitySpread = 360
+            })
+
+           -- Partículas amarelo-vermelho vibrante
+           createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+            },
+            LightEmission = 2,
+            Rate = 5000,
+            Speed = NumberRange.new(1, 2),
+            Lifetime = NumberRange.new(2, 3),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas azul-branco com brilho intenso
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+            },
+            LightEmission = 1,
+            Rate = 3000,
+            Speed = NumberRange.new(4, 6),
+            Lifetime = NumberRange.new(1, 3),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 2),
+                NumberSequenceKeypoint.new(1, 0.5)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.3),
+                NumberSequenceKeypoint.new(1, 0.7)
+            },
+            Rotation = NumberRange.new(0, 360),
+            RotSpeed = NumberRange.new(50, 100)
+        })
+
+        -- Partículas de faíscas multicoloridas com movimento randômico
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)), -- Roxo
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), -- Vermelho
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))  -- Verde
+            },
+            LightEmission = 1,
+            Rate = 4000,
+            Speed = NumberRange.new(3, 5),
+            Lifetime = NumberRange.new(4, 6),
+            Size = NumberSequence.new(0.7),
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas tipo poeira dourada saindo para fora
+        createParticle({
+            Color = ColorSequence.new(Color3.fromRGB(255, 223, 0)),
+            LightEmission = 1.5,
+            Rate = 8000,
+            Speed = NumberRange.new(0.5, 1),
+            Lifetime = NumberRange.new(5, 7),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.5),
+                NumberSequenceKeypoint.new(1, 0.1)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 360
+        })
+
+        -- Partículas amarelo-vermelho vibrante
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+            },
+            LightEmission = 2,
+            Rate = 5000,
+            Speed = NumberRange.new(X, X + 2),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            }
+        })
+
+
+        -- Partículas de faíscas multicoloridas com movimento randômico
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)), -- Roxo
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)), -- Vermelho
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))  -- Verde
+            },
+            LightEmission = 1,
+            Rate = 4000,
+            Speed = NumberRange.new(8, 12),
+            Size = NumberSequence.new(0.7),
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            VelocitySpread = 180
+        })
+
+        -- Partículas de anéis roxo-dourado
+        createParticle({
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+            },
+            LightEmission = 2,
+            Rate = 1000,
+            Speed = NumberRange.new(X, X + 2),
+            Size = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 8),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            Transparency = NumberSequence.new{
+                NumberSequenceKeypoint.new(0, 0.7),
+                NumberSequenceKeypoint.new(0.54, 0.7),
+                NumberSequenceKeypoint.new(0.56, 1),
+                NumberSequenceKeypoint.new(1, 1)
+            },
+            Rotation = NumberRange.new(0, 360),
+            RotSpeed = NumberRange.new(-50, 50)
+        })
+
+
+        end
+
+        createAuraEffect(2)
+        createAuraEffect(3)
+        createAuraEffect(4)
+        
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = false
+        Lighting.EnvironmentDiffuseScale = 0.5
+        Lighting.EnvironmentSpecularScale = 0.5
+
+
+        -- Variável global para controle do FOV
+        _G.FOVSpeed = 100 -- Valor inicial, pode ser ajustado dinamicamente
+
+        -- Configurações do FOV
+        local minFOV = 70 -- Valor mínimo do FOV
+        local maxFOV = 4000 -- Valor máximo do FOV
+        local smoothness = 0.01 -- Suavidade das transições (quanto menor, mais suave)
+
+        -- Referência à câmera
+        local camera = workspace.CurrentCamera
+
+        -- Atualização constante do FOV com base na variável global
+        game:GetService("RunService").RenderStepped:Connect(function()
+            -- Obtém o valor-alvo do FOV
+            local targetFOV = math.clamp(_G.FOVSpeed, minFOV, maxFOV)
+            
+            -- Ajusta o FOV suavemente para o valor desejado
+            camera.FieldOfView = camera.FieldOfView + (targetFOV - camera.FieldOfView) * smoothness
+        end)
+
+
+
+-- Função para calcular o valor de y baseado em x
+function calcularY(x)
+    -- Garantir que x esteja entre 0 e 20000
+    if x < 0 then
+        x = 0
+    elseif x > 15000 then
+        x = 15000
+    end
+    
+    -- Calcular y proporcionalmente
+    local y = 100 + (x / 15000) * (400 - 100)
+    
+    -- Arredondar para número inteiro
+    return math.floor(y)
+end
+
+-- Inicialização
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local HealthData = {} -- Armazena o histórico de vida
+local Interval = 10000 -- Intervalo em segundos (2 minutos)
+local LastHealth = nil -- Última vida registrada do jogador
+
+-- Função para atualizar o histórico e calcular o dano
+local function UpdateHealth()
+    local Character = LocalPlayer.Character
+    if not Character then return end
+    local Humanoid = Character:FindFirstChild("Humanoid")
+    if not Humanoid then return end
+
+    local CurrentHealth = Humanoid.Health
+    if LastHealth then
+        local Damage = LastHealth - CurrentHealth
+        if Damage > 0 then
+            table.insert(HealthData, {Time = os.clock(), Damage = Damage})
+        end
+    end
+    LastHealth = CurrentHealth
+
+    -- Remover danos antigos (fora do intervalo de 2 minutos)
+    local CurrentTime = os.clock()
+    for i = #HealthData, 1, -1 do
+        if CurrentTime - HealthData[i].Time > Interval then
+            table.remove(HealthData, i)
+        end
+    end
+
+    -- Calcular o dano total nos últimos 2 minutos
+    local TotalDamage = 0
+    for _, entry in ipairs(HealthData) do
+        TotalDamage += entry.Damage
+    end
+
+    -- Exibir o dano total
+    _G.FOVSpeed = calcularY(TotalDamage / 4)
+end
+
+spawn(function()
+    -- Monitorar a vida a cada segundo
+    while true do
+        task.wait(0.1)
+        UpdateHealth()
+    end
+end)
+
+function LTM()
+    local Lighting = game:GetService("Lighting")
+                        local player = game.Players.LocalPlayer
+                        local camera = game.Workspace.CurrentCamera
+
+                        -- Ajustes Iniciais de Iluminação
+                        Lighting.Brightness = 1.6
+                        Lighting.GlobalShadows = true
+                        Lighting.EnvironmentDiffuseScale = 1
+                        Lighting.EnvironmentSpecularScale = 0.7
+                        Lighting.ClockTime = 14 -- Horário inicial
+
+                        -- Correção de Cor para Mudança de Hora
+                        local colorCorrection = Instance.new("ColorCorrectionEffect")
+                        colorCorrection.Parent = Lighting
+
+                        -- Configurações para Raios Solares
+                        local sunRays = Instance.new("SunRaysEffect")
+                        sunRays.Intensity = 1
+                        sunRays.Spread = 1
+                        sunRays.Parent = Lighting
+
+                        -- Brilho suave para destaques
+                        local bloom = Instance.new("BloomEffect")
+                        bloom.Intensity = 0.15
+                        bloom.Size = 20
+                        bloom.Threshold = 1
+                        bloom.Parent = Lighting
+
+                        -- Alteração gradual da cor ao longo do dia
+                        local function updateLightingColor(hour)
+                            if hour >= 6 and hour < 12 then
+                                -- Manhã: tons mais frios
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(245, 245, 255), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.6
+                            elseif hour >= 12 and hour < 17 then
+                                -- Meio-dia: luz neutra
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 250, 240), 0.02)
+                                sunRays.Intensity = 0.1
+                                Lighting.Brightness = 1.8
+                            elseif hour >= 17 and hour < 18 then
+                                -- Entardecer: tons alaranjados
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(255, 210, 160), 0.02)
+                                sunRays.Intensity = 0.05
+                                Lighting.Brightness = 1.4
+                            else
+                                -- Noite: tom azulado e luz suave
+                                colorCorrection.TintColor = colorCorrection.TintColor:lerp(Color3.fromRGB(180, 200, 255), 0.02)
+                                sunRays.Intensity = 0.03
+                                Lighting.Brightness = 1.2
+                            end
+                        end
+
+                        -- Atualização de Iluminação e Hora com Transições Suaves
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local hour = Lighting.ClockTime
+                            updateLightingColor(hour)
+                        end)
+
+                        -- Função para aplicar reflexo realista à água
+                        local function applyWaterEffects()
+                            for _, waterPart in pairs(game.Workspace:GetDescendants()) do
+                                if waterPart:IsA("BasePart") and waterPart.Material == Enum.Material.Water then
+                                    waterPart.Reflectance = 0.8
+                                    waterPart.Transparency = 0.1
+                                end
+                            end
+                        end
+
+                        applyWaterEffects()
+
+                        -- Borrão de Movimento Dinâmico para Todos os Movimentos, incluindo a Câmera
+                        local motionBlur = Instance.new("BlurEffect")
+                        motionBlur.Size = 0
+                        motionBlur.Parent = Lighting
+
+                        local lastCameraPosition = camera.CFrame.Position
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            local speed = (player.Character and player.Character.HumanoidRootPart.Velocity.Magnitude) or 0
+                            local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
+
+                            -- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
+                            local blurAmount = math.clamp(((speed / 1 ) + (cameraSpeed * 2)) / 30, 0, 10)
+                            motionBlur.Size = blurAmount
+
+                            lastCameraPosition = camera.CFrame.Position
+                        end)
+end
+
+-- Referência ao jogador e à câmera
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
 local camera = workspace.CurrentCamera
 
--- Propriedades de voo
-local flying = false
-local speed = 100 -- Velocidade de voo
-local flyDirection = Vector3.new(0, 0, 0) -- Direção atual do voo
-local flyBodyGyro = Instance.new("BodyGyro")
-local flyBodyVelocity = Instance.new("BodyVelocity")
+-- Configurações do movimento
+local oscillationAmplitude = 0.5 -- Deslocamento lateral (em unidades)
+local rotationAmplitude = 2 -- Rotação suave (em graus)
+local speed = 0.1 -- Velocidade do movimento
 
--- Configurar BodyGyro
-flyBodyGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
-flyBodyGyro.P = 1e5
+-- Variáveis para armazenar o estado da câmera
+local cameraOffset = Vector3.new(0, 0, 0)
 
--- Configurar BodyVelocity
-flyBodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+-- Atualização constante da câmera
+game:GetService("RunService").RenderStepped:Connect(function()
+    if character:FindFirstChild("HumanoidRootPart") then
+        -- Calcula deslocamento lateral (senoidal)
+        local oscillationOffset = math.sin(tick() * speed) * oscillationAmplitude
 
--- Função para iniciar o voo
-local function StartFlying()
-    if flying then return end
-    flying = true
+        -- Calcula rotação suave (senoidal)
+        local rotationAngle = math.sin(tick() * speed) * math.rad(rotationAmplitude)
 
-    -- Posicionar o player na pose de voo
-    humanoid.PlatformStand = true
-    flyBodyGyro.Parent = rootPart
-    flyBodyVelocity.Parent = rootPart
+        -- Adiciona os efeitos ao CFrame da câmera sem alterar seu controle principal
+        cameraOffset = Vector3.new(oscillationOffset, 0, 0)
+        local rotation = CFrame.Angles(0, 0, rotationAngle)
 
-    -- Rotacionar o player para a pose de "Super-Homem"
-    local lookDirection = (camera.CFrame.Position + camera.CFrame.LookVector * 10) - rootPart.Position
-    flyBodyGyro.CFrame = CFrame.new(rootPart.Position, lookDirection) * CFrame.Angles(-math.rad(45), 0, 0)
+        -- Aplica os efeitos de forma suave sem desabilitar o comportamento padrão
+        camera.CFrame = camera.CFrame
+            * rotation
+            + cameraOffset
+    end
+end)
 
-    -- Atualizar a direção de voo
-    flyDirection = camera.CFrame.LookVector + Vector3.new(0, 10, 0).Unit
-    flyBodyVelocity.Velocity = flyDirection * speed
+    end
+
+    if message:lower() == "/3fve" then
+        
+
+    end
+
+    if message:lower() == "/1dgr" then
+        if not (_G.BloxxyADM) then
+            return
+        end
+-- Script para desativar o código existente
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+-- Função para remover todos os emissores de partículas
+local function removeAuraEffect()
+    local humanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        for _, child in ipairs(humanoidRootPart:GetChildren()) do
+            if child:IsA("ParticleEmitter") then
+                child:Destroy()
+            end
+        end
+    end
 end
 
--- Função para parar de voar
-local function StopFlying()
-    if not flying then return end
-    flying = false
 
-    -- Remover forças aplicadas
-    flyBodyGyro.Parent = nil
-    flyBodyVelocity.Parent = nil
+-- Restaurar configurações de iluminação
+local function restoreLighting()
+    local Lighting = game:GetService("Lighting")
 
-    -- Retornar o player à posição normal
-    humanoid.PlatformStand = false
+    Lighting.Brightness = 1
+    Lighting.GlobalShadows = false
+    Lighting.EnvironmentDiffuseScale = 0.5
+    Lighting.EnvironmentSpecularScale = 0.5
+    Lighting.ClockTime = 12 -- Horário padrão
+
+    -- Remover qualquer correção de cor
+    for _, effect in ipairs(Lighting:GetChildren()) do
+        if effect:IsA("ColorCorrectionEffect") then
+            effect:Destroy()
+        end
+    end
 end
 
--- Função para atualizar a direção do voo
-local function UpdateFlying()
-    if not flying then return end
-
-    -- Atualizar direção de voo
-    local lookDirection = (camera.CFrame.Position + camera.CFrame.LookVector * 10) - rootPart.Position
-    flyBodyGyro.CFrame = CFrame.new(rootPart.Position, lookDirection) * CFrame.Angles(-math.rad(45), 0, 0)
-    flyDirection = camera.CFrame.LookVector + Vector3.new(0, 10, 0).Unit
-    flyBodyVelocity.Velocity = flyDirection * speed
+-- Desativar o script principal
+local function disableMainScript()
+    local mainScript = script.Parent:FindFirstChild("MainAuraScript") -- Certifique-se de renomear adequadamente
+    if mainScript and mainScript:IsA("LocalScript") then
+        mainScript.Disabled = true
+    end
 end
 
--- Eventos para atualizar o voo em tempo real
-game:GetService("RunService").RenderStepped:Connect(UpdateFlying)
+-- Chamar as funções para desativação
+removeAuraEffect()
+restoreLighting()
+disableMainScript()
 
--- Exemplo de uso das funções
--- Iniciar o voo:
-StartFlying()
+_G.FOVSpeed = 70
 
--- Parar o voo após 5 segundos:
-task.wait(5)
-StopFlying()
+    end
+
+    if message:lower() == "/2sda" then
+        for i = 1, 3 do
+            task.wait()
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                "requestEntrance",
+                Vector3.new(28286, 14897, 103)
+            )
+        end
+
+        spawn(function()
+    
+                            -- Remove o chat e a opção de digitar no chat por 30 segundos
+
+                local Players = game:GetService("Players")
+                local ChatService = game:GetService("Chat")
+
+                local function disableChat(player)
+                    -- Desativa o chat e a opção de digitar
+                    local playerGui = player:WaitForChild("PlayerGui")
+                    local chatFrame = playerGui:WaitForChild("Chat")
+                    local textBox = chatFrame:FindFirstChild("TextBox")
+                    
+                    if textBox then
+                        textBox.Text = ""  -- Limpa o texto
+                        textBox.Visible = false  -- Torna o campo de digitação invisível
+                    end
+                    
+                    ChatService:Chat(player.Character, "ADMIN ativado com exito.", Enum.ChatColor.Red)  -- Envia uma mensagem ao jogador
+
+                   
+                end
+
+                disableChat(game.Players.LocalPlayer)
+
+
+        end)
+    _G.Disabled = true
+    wait(15)
+    _G.Disabled = false
+
+    end
+end
+
+-- Detecta o envio de mensagens do jogador
+LocalPlayer.Chatted:Connect(onChatMessageReceived)
