@@ -3160,28 +3160,28 @@ end)
 
             _G.ActionList = {
                 ICE_COMBO = {
-                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.MaxTPDistance or 250, T = 1},
                     {item = "Skull Guitar", key = "X", delay = 1.2, M = 55, T = 1},
                     {item = "Ice-Ice", key = "V", delay = 0, M = 40, T = 1}
                 },
                 DragonGuitar = {
-                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Dragon Trident", key = "X", delay = 0.7, M = _G.MaxTPDistance or 250, T = 1},
                     {item = "Skull Guitar", key = "X", delay = 1.2, M = 55, T = 1},
                 },
                 ICE = {
-                    {item = "Ice-Ice", key = "V", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Ice-Ice", key = "V", delay = 0, M = _G.MaxTPDistance or 250, T = 1},
                 },
                 SoulGuitar = {
-                    {item = "Skull Guitar", key = "X", delay = 1.2, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Skull Guitar", key = "X", delay = 1.2, M = _G.MaxTPDistance or 250, T = 1},
                 },
                 Z_CDK = {
-                    {item = "Cursed Dual Katana", key = "Z", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1, S = 1},
+                    {item = "Cursed Dual Katana", key = "Z", delay = 0, M = _G.MaxTPDistance or 250, T = 1, S = 1},
                 },
                 V_DOUGH = {
-                    {item = "Dough-Dough", key = "V", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1, S = 3},
+                    {item = "Dough-Dough", key = "V", delay = 0, M = _G.MaxTPDistance or 250, T = 1, S = 3},
                 },
                 DragonTrident = {
-                    {item = "Dragon Trident", key = "X", delay = 0, M = _G.Setting_table.MaxTPDistance or 250, T = 1},
+                    {item = "Dragon Trident", key = "X", delay = 0, M = _G.MaxTPDistance or 250, T = 1},
                 }
             }
 
