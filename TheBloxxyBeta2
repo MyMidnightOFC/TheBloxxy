@@ -1977,13 +1977,13 @@ local touchCount = 0
 local touchDelay = 0.320  -- 400ms entre toques
 
 toggleButton.MouseEnter:Connect(function()
-    toggleButton:TweenSize(UDim2.new(0, 130, 0, 45), "Out", "Quad", 0.2, true) -- Aumenta ao passar o mouse
+    toggleButton:TweenSize(UDim2.new(0, 135, 0, 65), "Out", "Quad", 0.2, true) -- Aumenta ao passar o mouse
     toggleButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60) -- Leve alteração de cor
     uiStroke.Color = Color3.fromRGB(120, 120, 120) -- Clareia a borda ao passar o mouse
 end)
 
 toggleButton.MouseLeave:Connect(function()
-    toggleButton:TweenSize(UDim2.new(0, 120, 0, 40), "Out", "Quad", 0.2, true) -- Volta ao tamanho normal
+    toggleButton:TweenSize(UDim2.new(0, 120, 0, 55), "Out", "Quad", 0.2, true) -- Volta ao tamanho normal
     toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 48) -- Cor de fundo original
     uiStroke.Color = Color3.fromRGB(80, 80, 80) -- Volta à cor original da borda
 end)
