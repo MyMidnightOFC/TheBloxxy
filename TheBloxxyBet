@@ -1607,7 +1607,7 @@ end
 
 if 1 then
     local redzlib =
-        loadstring(game:HttpGet("https://19d48a5f-0709-41cb-9d38-1347a6db43a2-00-9w47oouc4azo.janeway.replit.dev/R"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/MyMidnightOFC/TheBloxxy/refs/heads/main/REDzHubV4"))()
 
     local Window =
         redzlib:MakeWindow(
