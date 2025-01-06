@@ -1,10 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
 _G.OrionLib = OrionLib
 
-function print()
-
-end
-
 -- ========================== General System ===========================
 if 1 then
     local placeId = game.PlaceId
@@ -124,63 +120,6 @@ if 1 then
         local Camera = workspace.CurrentCamera
         local Player = game.Players.LocalPlayer
         local Character = Player.Character or Player.CharacterAdded:Wait()
-
-        function JumpForceFunction(J)
-            _G.jumpPower = _G.jumpPower or 50
-
-            -- Função para forçar o JumpPower do LocalPlayer
-            local function forceJumpPower(humanoid)
-                humanoid.JumpPower = _G.jumpPower
-                humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
-                    function()
-                        if humanoid.JumpPower ~= _G.jumpPower then
-                            humanoid.JumpPower = _G.jumpPower
-                        end
-                    end
-                )
-            end
-
-            -- Referência ao jogador local
-            local player = game.Players.LocalPlayer
-
-            -- Conectar a função quando o personagem do jogador local for adicionado
-            player.CharacterAdded:Connect(
-                function(character)
-                    local humanoid = character:WaitForChild("Humanoid")
-                    forceJumpPower(humanoid)
-                end
-            )
-
-            -- Caso o personagem do jogador local já esteja carregado
-            if player.Character then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    forceJumpPower(humanoid)
-                end
-            end
-
-            -- Função para atualizar o JumpPower do LocalPlayer
-            local function updateJumpPower()
-                if player.Character then
-                    local humanoid = player.Character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.JumpPower = _G.jumpPower
-                    end
-                end
-            end
-
-            -- Atualizar o JumpPower do LocalPlayer constantemente
-            game:GetService("RunService").Stepped:Connect(
-                function()
-                    updateJumpPower()
-                end
-            )
-        end
-        if not _G.jumpPower then
-            _G.jumpPower = 150
-            JumpForceFunction()
-        end
-        _G.jumpPower = 150
 
         spawn(
             function()
@@ -723,7 +662,12 @@ if 1 then
                 )
             end
 
-            local conexao = RunService.RenderStepped:Connect(function() ConstParticles() end)
+            local conexao =
+                RunService.RenderStepped:Connect(
+                function()
+                    ConstParticles()
+                end
+            )
 
             while _G.ACT do
                 wait()
@@ -821,7 +765,214 @@ if 1 then
         ativarPoder()
     end
 
+    function ActiveTP()
+        print("YESSSS")
+        -- Variáveis
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local camera = workspace.CurrentCamera
+        local mouse = player:GetMouse()
+
+        -- Criar a esfera
+        sphere = Instance.new("Part")
+        sphere.Shape = Enum.PartType.Ball
+        sphere.Size = Vector3.new(17, 17, 17) -- Tamanho original
+        sphere.Material = Enum.Material.Neon
+        sphere.Color = Color3.new(0, 0, 1) -- Cor inicial azul
+        sphere.Transparency = 0.8 -- Deixar mais transparente
+        sphere.Anchored = true
+        sphere.CanCollide = false
+        sphere.Parent = workspace
+
+        -- Criar a iluminação da esfera
+        local light = Instance.new("PointLight")
+        light.Brightness = 0 -- Luz mais suave
+        light.Range = 50 -- Aumentar o alcance da luz
+        light.Color = Color3.new(0, 0, 1) -- Cor inicial azul
+        light.Parent = sphere
+
+        -- Função para ajustar a posição da esfera
+        local function adjustSpherePosition(forwardPosition)
+            if _G.Gear > 1 then
+                LineLine = -2000
+            else
+                LineLine = -100
+            end
+
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {character, sphere}
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+            local rayOrigin = Vector3.new(forwardPosition.X, forwardPosition.Y + 250, forwardPosition.Z)
+            local rayDirection = Vector3.new(0, LineLine, 0)
+            local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+            if raycastResult then
+                local groundPosition = raycastResult.Position
+                -- Ajusta para que metade da esfera fique no chão
+                return Vector3.new(forwardPosition.X, groundPosition.Y + (sphere.Size.Y / 2) + 5, forwardPosition.Z)
+            else
+                return forwardPosition
+            end
+        end
+
+        -- Função para mover a esfera suavemente
+        local function moveSphereToPosition(targetPosition)
+            local speed = 2000 -- Velocidade reduzida para mais fluidez
+            local currentPosition = sphere.Position
+            local direction = (targetPosition - currentPosition).Unit
+            local distance = (targetPosition - currentPosition).Magnitude
+
+            -- Atualizar a posição gradualmente
+            if distance > 0.1 then
+                local moveStep = math.min(speed, distance)
+                sphere.Position = currentPosition + direction * moveStep
+            else
+                sphere.Position = targetPosition
+            end
+        end
+
+        -- Função para fazer a esfera mudar de cor gradualmente
+        local lastColorChangeTime = tick()
+        local colorChangeSpeed = 2 -- Controlar a velocidade de mudança de cor
+        local currentColor = sphere.Color
+        local targetColor = Color3.fromHSV(1, 1, 1) -- Cor alvo aleatória para a mudança
+
+        local function changeColorGradually()
+            sphere.Color = targetColor
+            light.Color = targetColor
+        end
+
+        spawn(
+            function()
+                while true do
+                    for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
+                        targetColor = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+                        wait(0.02) -- Tempo entre cada passo da transição
+                    end
+                end
+            end
+        )
+
+        if _G.Gear > 1 then
+            BollDistance = 250
+        else
+            BollDistance = 140
+        end
+        -- Atualizar posição da esfera constantemente
+        game:GetService("RunService").Heartbeat:Connect(
+            function()
+                if character and character.PrimaryPart and camera then
+                    local rootPart = character.PrimaryPart
+                    local cameraDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+
+                    local forwardPosition =
+                        Vector3.new(
+                        rootPart.Position.X + (cameraDirection.X * BollDistance), -- Distância aumentada para 70 unidades
+                        rootPart.Position.Y,
+                        rootPart.Position.Z + (cameraDirection.Z * BollDistance) -- Distância aumentada para 70 unidades
+                    )
+
+                    -- Ajustar a posição da esfera com base no terreno
+                    local adjustedPosition = adjustSpherePosition(forwardPosition)
+
+                    -- Mover a esfera para a nova posição suavemente
+                    moveSphereToPosition(adjustedPosition)
+
+                    if _G.Gear > 1 then
+                        -- Mudar a cor da esfera gradualmente
+                        changeColorGradually()
+                    end
+                end
+            end
+        )
+
+        if not toggleButton then
+            local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+            _G.Gear = _G.Gear or 0
+            -- Criar o Frame para simular a borda
+            borderFrame = Instance.new("Frame")
+            borderFrame.Size = UDim2.new(0, 60, 0, 60) -- Um pouco maior que o botão
+            borderFrame.Position = UDim2.new(1, -125, 0, 90)
+            borderFrame.AnchorPoint = Vector2.new(1, 0)
+            borderFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Cor inicial da borda
+            borderFrame.BackgroundTransparency = 0.85
+            borderFrame.BorderSizePixel = 0 -- Sem borda própria
+            borderFrame.Parent = screenGui
+
+            -- Tornar o Frame circular
+            local borderCorner = Instance.new("UICorner")
+            borderCorner.CornerRadius = UDim.new(1, 0)
+            borderCorner.Parent = borderFrame
+
+            -- Criar o botão dentro do Frame
+            toggleButton = Instance.new("TextButton")
+            toggleButton.Text = "🚀" -- Emoji
+            toggleButton.Size = UDim2.new(0, 50, 0, 50) -- Menor que o Frame
+            toggleButton.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centralizado no Frame
+            toggleButton.AnchorPoint = Vector2.new(0.5, 0.5)
+            toggleButton.BackgroundTransparency = 0.75
+            toggleButton.BackgroundColor3 = Color3.fromRGB(22, 22, 23) -- Cor de fundo
+            toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            toggleButton.TextSize = 20
+            toggleButton.Font = Enum.Font.GothamBold
+            toggleButton.Parent = borderFrame
+
+            -- Tornar o botão circular
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(1, 0)
+            buttonCorner.Parent = toggleButton
+
+            if _G.Gear > 1 then
+                -- Serviço de animação para a borda
+                local tweenService = game:GetService("TweenService")
+                local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
+
+                local goal = {BackgroundColor3 = Color3.fromRGB(0, 255, 0)} -- Cor verde
+                local tween = tweenService:Create(borderFrame, tweenInfo, goal)
+                tween:Play()
+            end
+
+            -- Animações no botão
+            toggleButton.MouseEnter:Connect(
+                function()
+                    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                end
+            )
+
+            toggleButton.MouseLeave:Connect(
+                function()
+                    toggleButton.BackgroundColor3 = Color3.fromRGB(22, 22, 23)
+                end
+            )
+
+            toggleButton.MouseButton1Click:Connect(
+                function()
+                    if character and character.PrimaryPart and not _G.PowerTP then
+                        _G.PowerTP = true
+                        toggleButton.TextSize = 25
+                        toggleButton.Text = "🕗" -- Emoji
+                        toggleButton.Active = false
+                        borderFrame.BackgroundTransparency = 0.92
+                        toggleButton.BackgroundTransparency = 0.87
+
+                        character:SetPrimaryPartCFrame(CFrame.new(sphere.Position))
+
+                        wait(5 - _G.Gear)
+                        _G.PowerTP = false
+                        toggleButton.Text = "🚀" -- Emoji
+                        borderFrame.BackgroundTransparency = 0.75
+                        toggleButton.Active = true
+                        toggleButton.BackgroundTransparency = 0.65
+                        toggleButton.TextSize = 20
+                    end
+                end
+            )
+        end
+    end
+
     function CreateBar()
+        _G.Gear = _G.SettingTable2.Gear or 1
         local player = game.Players.LocalPlayer
         local screenGui = Instance.new("ScreenGui")
         local playerGui = player:WaitForChild("PlayerGui")
@@ -872,6 +1023,70 @@ if 1 then
         percentText.TextStrokeTransparency = 0.9
         percentText.Active = true
 
+        -- Criação do texto na tela do jogador local
+        local player = game.Players.LocalPlayer
+        local playerGui = player:WaitForChild("PlayerGui") -- Garante que o PlayerGui está carregado
+
+        -- Criar um ScreenGui
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "CuteTextGui"
+        screenGui.Parent = playerGui
+
+        -- Criar um TextLabel
+        textLabel = Instance.new("TextLabel")
+        textLabel.Parent = screenGui
+        textLabel.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
+        textLabel.Position = UDim2.new(0.35, 0, 0, 8) -- Posição central no topo da tela
+        textLabel.BackgroundTransparency = 1 -- Sem fundo
+        textLabel.TextColor3 = Color3.new(0, 1, 0) -- Texto verde
+        textLabel.TextStrokeTransparency = 0 -- Contorno no texto
+        textLabel.Text = "GEAR FIVE" -- Texto exibido
+        textLabel.Font = Enum.Font.FredokaOne -- Fonte fofinha
+        textLabel.TextSize = 18 -- Tamanho fixo da fonte
+
+        textLabel2 = Instance.new("TextLabel")
+        textLabel2.Parent = screenGui
+        textLabel2.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
+        textLabel2.Position = UDim2.new(0.35, -10000, 0, 8) -- Posição central no topo da tela
+        textLabel2.BackgroundTransparency = 1 -- Sem fundo
+        textLabel2.TextColor3 = Color3.new(1, 0, 0) -- Texto verde
+        textLabel2.TextStrokeTransparency = 0 -- Contorno no texto
+        textLabel2.Text = "+0" -- Texto exibido
+        textLabel2.Font = Enum.Font.FredokaOne -- Fonte fofinha
+        textLabel2.TextSize = 15 -- Tamanho fixo da fonte
+
+        -- Criar um TextLabel
+        textLabel3 = Instance.new("TextLabel")
+        textLabel3.Parent = screenGui
+        textLabel3.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
+        textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+        textLabel3.BackgroundTransparency = 1 -- Sem fundo
+        textLabel3.TextColor3 = Color3.new(1, 1, 0) -- Texto verde
+        textLabel3.TextStrokeTransparency = 0 -- Contorno no texto
+        textLabel3.Text = "+0" -- Texto exibido
+        textLabel3.Font = Enum.Font.FredokaOne -- Fonte fofinha
+        textLabel3.TextSize = 15 -- Tamanho fixo da fonte
+
+        if _G.Gear == 5 then
+            textLabel.Text = "ULTRA GEAR"
+        end
+
+        if _G.Gear == 4 then
+            textLabel.Text = "SUPER GEAR"
+        end
+
+        if _G.Gear == 3 then
+            textLabel.Text = "THIRD GEAR"
+        end
+
+        if _G.Gear == 2 then
+            textLabel.Text = "SECOND GEAR"
+        end
+
+        if _G.Gear == 1 then
+            textLabel.Text = "BEGINNER"
+        end
+
         percentText.MouseButton1Click:Connect(
             function()
                 if _G.Race then
@@ -880,9 +1095,9 @@ if 1 then
                     _G.ActiveRace = true
                     _G.Race = false
                     _G.ACT = true
-                    _G.VelcityPower = 370
                     X = 0.01
                     _G.PowerPogress = 0
+                    ActiveTP()
                     ActivePower()
                 end
             end
@@ -898,6 +1113,96 @@ if 1 then
         X = 0.2
         Reset = true
         local resetDelay = 15
+
+        function ChecksJump(x)
+            local alvoX = 10000
+            local alvoY = 400
+            local minimoY = 100
+            local distancia = math.abs(x - alvoX)
+            local fator = math.min(distancia / alvoX, 1)
+
+            if x > alvoY then
+                x = alvoY
+            else
+                x = minimoY + (alvoY - minimoY) * (1 - fator)
+            end
+
+            return x
+        end
+
+        function ChecksVelocity(x)
+            local baseX = 0
+            local baseY = 280
+            local taxa = 0.02
+
+            if x > baseX then
+                return baseY + (x - baseX) * taxa
+            else
+                return baseY
+            end
+        end
+        spawn(
+            function()
+                function CheckVelocityY()
+                    if not _G.ActiveRace then
+                        return
+                    end
+
+                    _G.MyDamage = _G.MyDamage or 1
+
+                    textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
+                    textLabel3.Position = UDim2.new(0.35, 100, 0, 8) -- Posição central no topo da tela
+
+                    V = 6
+                    if _G.Gear > 3 then
+                        V = 4
+                    if _G.Gear > 4 then
+                        V = 2
+                    end
+                    end
+
+                    if _G.Gear > 2 then
+                        _G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 420) / V)
+
+                        if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
+                            XX = (_G.VelcityPower / 2) + _G.SettingTable.SafeMode_Speed
+                        else
+                            XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                        end
+                        
+                        textLabel2.Text = "+" .. math.floor(XX) .. " →"
+                    else
+                        textLabel2.Text = ""
+                        _G.VelcityPower = nil
+                    end
+
+                    H = 0.9
+                    if _G.Gear < 4 then
+                        H = 1.5
+                    end
+
+                    if _G.Gear > 4 then
+                        H = 0.6
+                    end
+
+                    _G.JumpPowerPower = math.floor(ChecksJump(_G.MyDamage) / H)
+
+                    if _G.JumpPowerPower and _G.SettingTable.Jump then
+                        YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+                    else
+                        YY = _G.JumpPowerPower or _G.SettingTable.Jump
+                    end
+
+                    textLabel3.Text = "+" .. math.floor(YY) .. " ↑"
+                end
+
+                while true do
+                    wait()
+                    CheckVelocityY()
+                end
+            end
+        )
+        print("1")
 
         local function getBarColor(percentage)
             local r, g, b
@@ -956,9 +1261,16 @@ if 1 then
                 NoMax = true
                 X = 0.2
                 _G.VelcityPower = nil
+                _G.VelcityPower = nil
+                _G.JumpPowerPower = nil
                 wait()
                 _G.PowerPogress = 0
-            end
+                toggleButton:Destroy()
+                borderFrame:Destroy()
+                sphere:Destroy()
+        textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+        textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+    end
         end
 
         function BarCountedX()
@@ -1023,7 +1335,11 @@ if 1 then
             end
         end
 
-        game:GetService("RunService").RenderStepped:Connect(function() BarCountedX() end)
+        game:GetService("RunService").RenderStepped:Connect(
+            function()
+                BarCountedX()
+            end
+        )
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
 
@@ -1101,25 +1417,14 @@ if 1 then
             end
         )
 
-        task.spawn(
-            function()
-                function DamageY()
-                    task.wait(checkInterval)
-                    cleanUpDamageLog()
-                    local totalDamage = getTotalDamage()
-                    _G.MyDamage = totalDamage
-                end
-
-                while true do wait()
-                    DamageY()
-                end
-            end
-        )
-
         _G.CombatTimer = 0
         spawn(
             function()
                 function Counter1Y()
+                    cleanUpDamageLog()
+                    local totalDamage = getTotalDamage()
+                    _G.MyDamage = totalDamage
+
                     InCombatDetect(playerGui)
                     if (_G.InCombat) then
                         _G.CombatTimer = _G.CombatTimer + 10
@@ -1138,12 +1443,9 @@ if 1 then
         spawn(
             function()
                 function DamageY()
-
-                    _G.MyDamage = _G.MyDamage or 0
+                    _G.MyDamage = _G.MyDamage or 1
                     if not _G.ActiveRace then
                         _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
-                    else
-                        damageLog = {}
                     end
                 end
 
@@ -1774,7 +2076,11 @@ if 1 then
         end
 
         local function updateSphereColor(sphere)
-            game:GetService("RunService").RenderStepped:Connect(function() ChangeColorX() end)
+            game:GetService("RunService").RenderStepped:Connect(
+                function()
+                    ChangeColorX()
+                end
+            )
         end
 
         -- Função para calcular a média de um histórico de valores
@@ -1840,7 +2146,11 @@ if 1 then
                 end
             end
 
-            game:GetService("RunService").RenderStepped:Connect(function() MonitorX() end)
+            game:GetService("RunService").RenderStepped:Connect(
+                function()
+                    MonitorX()
+                end
+            )
         end
 
         -- Função para atualizar o jogador monitorado
@@ -1895,7 +2205,7 @@ if 1 then
 
             while true do
                 wait(0.5)
-               OJOY()
+                OJOY()
             end
         end
     )
@@ -2073,7 +2383,11 @@ if 1 then
             end
         end
 
-        RunService.RenderStepped:Connect(function() CheckPlayerX() end)
+        RunService.RenderStepped:Connect(
+            function()
+                CheckPlayerX()
+            end
+        )
     end
 
     spawn(
@@ -2625,7 +2939,8 @@ if 1 then
             SelectPlayer_Timer = 1,
             SelectPlayer_Line_Width0 = 1,
             SelectPlayer_Line_Width1 = 2,
-            ForceImpulse = 1.8
+            ForceImpulse = 1.8,
+            Gear = 1
         } -- Initializes the global settings table
 
     -- Utility functions for JSON
@@ -2963,7 +3278,6 @@ if 1 then
 
     spawn(
         function()
-
             function UpdateListY()
                 Timer = Timer - 1
 
@@ -3075,7 +3389,12 @@ if 1 then
                         end
                     end
 
-                    connection = RunService.RenderStepped:Connect(function() TPX1() end)
+                    connection =
+                        RunService.RenderStepped:Connect(
+                        function()
+                            TPX1()
+                        end
+                    )
                 end
             end
         }
@@ -3119,7 +3438,11 @@ if true then
                         end
                     end
 
-                    RunService.RenderStepped:Connect(function() SafeModeX() end)
+                    RunService.RenderStepped:Connect(
+                        function()
+                            SafeModeX()
+                        end
+                    )
                 end
             )
         end
@@ -3795,11 +4118,79 @@ if true then
         }
     )
 
+
+    function JumpForceFunction(J)
+        _G.Gear = _G.Gear or 0
+        H = 0.9
+                    if _G.Gear < 4 then
+                        H = 1.5
+                    end
+
+                    if _G.Gear > 4 then
+                        H = 0.6
+                    end
+
+        if _G.JumpPowerPower and _G.SettingTable.Jump then
+            YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+        else
+            YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
+        end
+
+        -- Função para forçar o JumpPower do LocalPlayer
+        local function forceJumpPower(humanoid)
+            humanoid.JumpPower = _G.jumpPower
+            humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
+                function()
+                    if humanoid.JumpPower ~= YY then
+                        humanoid.JumpPower = YY
+                    end
+                end
+            )
+        end
+
+        -- Referência ao jogador local
+        local player = game.Players.LocalPlayer
+
+        -- Conectar a função quando o personagem do jogador local for adicionado
+        player.CharacterAdded:Connect(
+            function(character)
+                local humanoid = character:WaitForChild("Humanoid")
+                forceJumpPower(humanoid)
+            end
+        )
+
+        -- Caso o personagem do jogador local já esteja carregado
+        if player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                forceJumpPower(humanoid)
+            end
+        end
+
+        -- Função para atualizar o JumpPower do LocalPlayer
+        local function updateJumpPower()
+            if player.Character then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.JumpPower = _G.jumpPower
+                end
+            end
+        end
+
+        -- Atualizar o JumpPower do LocalPlayer constantemente
+        game:GetService("RunService").Stepped:Connect(
+            function()
+                updateJumpPower()
+            end
+        )
+    end
+
+
     Script:AddSlider(
         {
             Name = "Super Jump - Height ( <font color='rgb(50, 250, 30)'>Recomended</font> )",
             MinValue = 40,
-            MaxValue = 300,
+            MaxValue = 200,
             Default = _G.SettingTable.Jump or 60,
             Increase = 2,
             Callback = function(Value)
@@ -3866,7 +4257,11 @@ if true then
                                                 local moveDirection = humanoid.MoveDirection
 
                                                 if (moveDirection.Magnitude > 0 and not _G.MinkV7) then
-                                                    XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                                                    if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
+                                                        XX = (_G.VelcityPower / 2) + _G.SettingTable.SafeMode_Speed
+                                                    else
+                                                        XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                                                    end
 
                                                     local newVelocity =
                                                         Vector3.new(
@@ -3882,7 +4277,12 @@ if true then
                                     end
                                 )
                             end
-                            SkyConnection = RunService.RenderStepped:Connect(function() BoostAngelX() end)
+                            SkyConnection =
+                                RunService.RenderStepped:Connect(
+                                function()
+                                    BoostAngelX()
+                                end
+                            )
 
                             while _G.SettingTable.Agility do
                                 wait()
@@ -3968,7 +4368,7 @@ if true then
                                     _G.BoostY = false
                                 end
 
-                                if ( IsHundredNoStunVar2 ) then
+                                if (IsHundredNoStunVar2) then
                                     bodyVelocity.P = 0
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
                                     bodyVelocity:Destroy()
@@ -3986,8 +4386,12 @@ if true then
                             end
                         end)
                         ]]
-
-                        NoStunConnection = RunService.RenderStepped:Connect(function() NoStunX() end)
+                        NoStunConnection =
+                            RunService.RenderStepped:Connect(
+                            function()
+                                NoStunX()
+                            end
+                        )
 
                         while _G.SettingTable.Stun do
                             wait()
@@ -4482,74 +4886,6 @@ if true then
         }
     )
 
-    function JumpForceFunction(J)
-        _G.jumpPower = _G.SettingTable.Jump or 50
-
-        -- Função para forçar o JumpPower do LocalPlayer
-        local function forceJumpPower(humanoid)
-            humanoid.JumpPower = _G.jumpPower
-            humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
-                function()
-                    if humanoid.JumpPower ~= _G.jumpPower then
-                        humanoid.JumpPower = _G.jumpPower
-                    end
-                end
-            )
-        end
-
-        -- Referência ao jogador local
-        local player = game.Players.LocalPlayer
-
-        -- Conectar a função quando o personagem do jogador local for adicionado
-        player.CharacterAdded:Connect(
-            function(character)
-                local humanoid = character:WaitForChild("Humanoid")
-                forceJumpPower(humanoid)
-            end
-        )
-
-        -- Caso o personagem do jogador local já esteja carregado
-        if player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                forceJumpPower(humanoid)
-            end
-        end
-
-        -- Função para atualizar o JumpPower do LocalPlayer
-        local function updateJumpPower()
-            if player.Character then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.JumpPower = _G.jumpPower
-                end
-            end
-        end
-
-        -- Atualizar o JumpPower do LocalPlayer constantemente
-        game:GetService("RunService").Stepped:Connect(
-            function()
-                updateJumpPower()
-            end
-        )
-    end
-
-    Utilities:AddSlider(
-        {
-            Name = "Super Jump - Height ( <font color='rgb(50, 250, 30)'>Recomended</font> )",
-            MinValue = 40,
-            MaxValue = 250,
-            Default = _G.SettingTable.Jump or 60,
-            Increase = 2,
-            Callback = function(Value)
-                _G.SettingTable.Jump = (Value)
-                _G.jumpPower = Value
-            end
-        }
-    )
-
-    JumpForceFunction()
-
     function MinkV7Function()
         spawn(
             function()
@@ -4799,7 +5135,11 @@ if true then
                         updateLightingColor(hour)
                     end
 
-                    game:GetService("RunService").RenderStepped:Connect(function() UpdateColorDayX() end)
+                    game:GetService("RunService").RenderStepped:Connect(
+                        function()
+                            UpdateColorDayX()
+                        end
+                    )
 
                     -- Função para aplicar reflexo realista à água
                     local function applyWaterEffects()
@@ -4831,7 +5171,11 @@ if true then
                         lastCameraPosition = camera.CFrame.Position
                     end
 
-                    game:GetService("RunService").RenderStepped:Connect(function() BlurX() end)
+                    game:GetService("RunService").RenderStepped:Connect(
+                        function()
+                            BlurX()
+                        end
+                    )
 
                     local g = game
 
@@ -5218,7 +5562,11 @@ if true then
                 end
             end
 
-            RunService.RenderStepped:Connect(function() SkillFruitX() end)
+            RunService.RenderStepped:Connect(
+                function()
+                    SkillFruitX()
+                end
+            )
         end
     )
 
@@ -5264,8 +5612,9 @@ if true then
             _G.WeaponList = WeaponList_0
         end
 
-        while true do wait(1)
-          TollsY()
+        while true do
+            wait(1)
+            TollsY()
         end
     end
 
