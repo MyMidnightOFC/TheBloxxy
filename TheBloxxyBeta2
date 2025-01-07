@@ -869,7 +869,7 @@ if 1 then
         )
 
         if _G.Gear > 1 then
-            BollDistance = 220
+            BollDistance = 200
         else
             BollDistance = 140
         end
@@ -980,7 +980,7 @@ end
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 250, 50), 1, 4)
                        
-                        wait(math.max(5 - _G.Gear,0))
+                        wait(math.max(5 - _G.Gear,0.4))
                         _G.PowerTP = false
                         toggleButton.Text = "🚀" -- Emoji
                         borderFrame.BackgroundTransparency = 0.75
@@ -1183,7 +1183,7 @@ end)
                     X = 0.01
                     _G.PowerPogress = 0
                     ActiveTP()
-                    if _G.Gear > 1 then
+                    if _G.Gear > 1 and _G.Gear < 4 then
                         JumpBoostPower()
                     end
                     ActivePower()
@@ -1361,13 +1361,18 @@ end)
                 sphere:Destroy()
         textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
         textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
-        if _G.Gear > 1 then
+        if _G.Gear > 1 and _G.Gear < 4 then
             JumpBoost:Disconnect()
         end
     end
         end
 
         function BarCountedX()
+
+            if _G.PlayerDeth then
+                X = 5
+            end
+
             if (_G.PowerPogress > progress) then
                 progress = progress + X
             end
@@ -1375,6 +1380,8 @@ end)
             if (_G.PowerPogress < progress) then
                 progress = progress - X
             end
+
+
 
             progress = tonumber(string.format("%.3f", progress))
             if progress > maxProgress then
@@ -5670,9 +5677,6 @@ if true then
 
     local function onPlayerDeath()
         _G.PlayerDeth = true
-        if _G.ActiveRace then
-            _G.PowerPogress = 0
-        end
     end
 
     local function setupDeathDetection(character)
