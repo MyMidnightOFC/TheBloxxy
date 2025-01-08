@@ -1,6 +1,7 @@
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
 _G.OrionLib = OrionLib
 
+
 -- ========================== General System ===========================
 if 1 then
     local placeId = game.PlaceId
@@ -113,7 +114,7 @@ if 1 then
     local sound4 = Instance.new("Sound")
     sound4.SoundId = "rbxassetid://6859643048" -- ID do áudio
     sound4.Looped = false -- Define o loop
-    sound4.Volume = 1 -- Ajusta o volume (1 é o máximo)
+    sound4.Volume = 1.5 -- Ajusta o volume (1 é o máximo)
     sound4.Parent = game.Workspace -- Define o local onde o som será tocado
 
     local sound5 = Instance.new("Sound")
@@ -211,7 +212,7 @@ if 1 then
             )
         end
 
-         function criarExplosao(position, quantidade, parent, cor)
+        function criarExplosao(position, quantidade, parent, cor)
             for i = 1, quantidade do
                 local offset = Vector3.new(math.random(-8, 8), math.random(-8, 8), math.random(-8, 8))
                 criarParticula(position + offset, parent, 1, cor, 0.5, math.random(3, 5))
@@ -862,14 +863,17 @@ if 1 then
                 while true do
                     for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
                         targetColor = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
-                        wait(0.02) -- Tempo entre cada passo da transição
+                        task.wait(0.02) -- Tempo entre cada passo da transição
                     end
                 end
             end
         )
 
         if _G.Gear > 1 then
-            BollDistance = 200
+            BollDistance = 220
+            if _G.Gear > 4 then
+                BollDistance = _G.SettingTable2.Power_TP_Distance or 250
+            end
         else
             BollDistance = 140
         end
@@ -963,24 +967,24 @@ if 1 then
             toggleButton.MouseButton1Click:Connect(
                 function()
                     if character and character.PrimaryPart and not _G.PowerTP then
-                        _G.PowerTP = (_G.Gear < 5)
+                        _G.PowerTP = (_G.Gear < 5 or _G.Gear == 5)
                         toggleButton.TextSize = 25
                         toggleButton.Text = "🕗" -- Emoji
                         toggleButton.Active = false
                         borderFrame.BackgroundTransparency = 0.92
                         toggleButton.BackgroundTransparency = 0.87
-if _G.Gear > 1 then
-                        sound4:Play()
-else
-    sound5:Play()
-end
+                        if _G.Gear > 1 then
+                            sound4:Play()
+                        else
+                            sound5:Play()
+                        end
                         character:SetPrimaryPartCFrame(CFrame.new(sphere.Position))
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 250, 50), 1, 4)
-                       
-                        wait(math.max(5 - _G.Gear,0.4))
+
+                        wait(math.max(4.2 - _G.Gear, 0.05))
                         _G.PowerTP = false
                         toggleButton.Text = "🚀" -- Emoji
                         borderFrame.BackgroundTransparency = 0.75
@@ -996,59 +1000,66 @@ end
     function JumpBoostPower()
         print("kkk")
         local UserInputService = game:GetService("UserInputService")
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
 
--- Aguarda pelo Humanoid e HumanoidRootPart do personagem
-local humanoid = character:WaitForChild("Humanoid")
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        -- Aguarda pelo Humanoid e HumanoidRootPart do personagem
+        local humanoid = character:WaitForChild("Humanoid")
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Configurações de força e cooldown
-local forwardBoostForce = 400 -- Força para frente
-local upwardBoostForce = 200 -- Força para cima
-local boostCooldown = 0.2 -- Tempo de cooldown em segundos
-local lastBoostTime = 0 -- Marca o tempo do último boost
+        -- Configurações de força e cooldown
+        local forwardBoostForce = 400 -- Força para frente
+        local upwardBoostForce = 200 -- Força para cima
+        local boostCooldown = 0.2 -- Tempo de cooldown em segundos
+        local lastBoostTime = 0 -- Marca o tempo do último boost
 
--- Função para verificar se o jogador está no chão
-local function isOnGround()
-    return humanoid:GetState() == Enum.HumanoidStateType.Running or humanoid:GetState() == Enum.HumanoidStateType.Idle
-end
-
--- Função que realiza o boost
-local function applyBoost()
-    local currentTime = tick()
-    if currentTime - lastBoostTime < boostCooldown then return end -- Respeita o cooldown
-    if not isOnGround() then return end -- Apenas no chão
-
-    local camera = workspace.CurrentCamera
-    if camera and humanoidRootPart then
-        -- Calcula a direção do boost
-        local moveDirection = humanoid.MoveDirection
-        local boostDirection
-
-        if moveDirection.Magnitude > 0 then
-            -- Usa a direção do movimento se o jogador estiver andando
-            boostDirection = moveDirection.Unit
-        else
-            -- Usa a direção da câmera caso o jogador não esteja andando
-            boostDirection = camera.CFrame.LookVector
+        -- Função para verificar se o jogador está no chão
+        local function isOnGround()
+            return humanoid:GetState() == Enum.HumanoidStateType.Running or
+                humanoid:GetState() == Enum.HumanoidStateType.Idle
         end
 
-        -- Aplica o impulso combinando as forças
-        local boostVelocity = (boostDirection * forwardBoostForce) + Vector3.new(0, upwardBoostForce, 0)
-        humanoidRootPart.Velocity = humanoidRootPart.Velocity + boostVelocity
+        -- Função que realiza o boost
+        local function applyBoost()
+            local currentTime = tick()
+            if currentTime - lastBoostTime < boostCooldown then
+                return
+            end -- Respeita o cooldown
+            if not isOnGround() then
+                return
+            end -- Apenas no chão
 
-        -- Atualiza o tempo do último boost
-        lastBoostTime = currentTime
-    end
-end
-print("JUMP1")
+            local camera = workspace.CurrentCamera
+            if camera and humanoidRootPart then
+                -- Calcula a direção do boost
+                local moveDirection = humanoid.MoveDirection
+                local boostDirection
 
--- Conecta a função ao evento de pulo
-JumpBoost = UserInputService.JumpRequest:Connect(function()
-    applyBoost()
-end)
+                if moveDirection.Magnitude > 0 then
+                    -- Usa a direção do movimento se o jogador estiver andando
+                    boostDirection = moveDirection.Unit
+                else
+                    -- Usa a direção da câmera caso o jogador não esteja andando
+                    boostDirection = camera.CFrame.LookVector
+                end
 
+                -- Aplica o impulso combinando as forças
+                local boostVelocity = (boostDirection * forwardBoostForce) + Vector3.new(0, upwardBoostForce, 0)
+                humanoidRootPart.Velocity = humanoidRootPart.Velocity + boostVelocity
+
+                -- Atualiza o tempo do último boost
+                lastBoostTime = currentTime
+            end
+        end
+        print("JUMP1")
+
+        -- Conecta a função ao evento de pulo
+        JumpBoost =
+            UserInputService.JumpRequest:Connect(
+            function()
+                applyBoost()
+            end
+        )
     end
 
     function CreateBar()
@@ -1063,7 +1074,7 @@ end)
         barFrame.Name = "BarFrame"
         barFrame.Parent = screenGui
         barFrame.AnchorPoint = Vector2.new(0.5, 0)
-        barFrame.Position = UDim2.new(0.5, 0, 0, 10)
+        barFrame.Position = UDim2.new(0.5, 0, 0, -20)
         barFrame.Size = UDim2.new(0, 300, 0, 40)
         barFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         barFrame.BackgroundTransparency = 0.32
@@ -1134,6 +1145,7 @@ end)
         textLabel2.Text = "+0" -- Texto exibido
         textLabel2.Font = Enum.Font.FredokaOne -- Fonte fofinha
         textLabel2.TextSize = 15 -- Tamanho fixo da fonte
+        textLabel2.Transparency = 1
 
         -- Criar um TextLabel
         textLabel3 = Instance.new("TextLabel")
@@ -1146,6 +1158,7 @@ end)
         textLabel3.Text = "+0" -- Texto exibido
         textLabel3.Font = Enum.Font.FredokaOne -- Fonte fofinha
         textLabel3.TextSize = 15 -- Tamanho fixo da fonte
+        textLabel3.Transparency = 1
 
         if _G.Gear == 6 then
             textLabel.Text = "SUPERIOR GEAR"
@@ -1186,8 +1199,23 @@ end)
                     if _G.Gear > 1 and _G.Gear < 4 then
                         JumpBoostPower()
                     end
+
+                    textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
+                    textLabel3.Position = UDim2.new(0.35, 100, 0, 8) -- Posição central no topo da tela
+
+                    spawn(
+                        function()
+                            for i = 1, 0, -0.35 do
+                                textLabel2.Transparency = i
+                                textLabel2.BackgroundTransparency = 1
+                                textLabel3.Transparency = i
+                                textLabel3.BackgroundTransparency = 1
+                                wait()
+                            end
+                        end
+                    )
+
                     ActivePower()
-                    
                 end
             end
         )
@@ -1239,15 +1267,12 @@ end)
 
                     _G.MyDamage = _G.MyDamage or 1
 
-                    textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
-                    textLabel3.Position = UDim2.new(0.35, 100, 0, 8) -- Posição central no topo da tela
-
-                    V = 4
+                    V = 4.2
                     if _G.Gear > 3 then
-                        V = 2
-                    if _G.Gear > 4 then
-                        V = 1
-                    end
+                        V = 2.2
+                        if _G.Gear > 4 then
+                            V = 1.2
+                        end
                     end
 
                     if _G.Gear > 2 then
@@ -1258,7 +1283,8 @@ end)
                         else
                             XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
                         end
-                        
+
+                        _G.FOVSpeed = XX / 1.5
                         textLabel2.Text = "+" .. math.floor(XX) .. " →"
                     else
                         textLabel2.Text = ""
@@ -1271,7 +1297,7 @@ end)
                     end
 
                     if _G.Gear > 4 then
-                        H = 0.8
+                        H = 1
                     end
 
                     _G.JumpPowerPower = math.floor(ChecksJump(_G.MyDamage) / H)
@@ -1286,7 +1312,7 @@ end)
                 end
 
                 while true do
-                    wait()
+                    task.wait()
                     CheckVelocityY()
                 end
             end
@@ -1338,7 +1364,7 @@ end)
             barFrame.Position = UDim2.new(0.5, randomOffsetX, 0, -20 + randomOffsetY)
         end
 
-         function resetBar()
+        function resetBar()
             if Reset then
                 _G.ACT = false
                 _G.ActiveRace = false
@@ -1346,7 +1372,7 @@ end)
                 percentText.Text = "0%"
                 healthBar.Size = UDim2.new(0, 0, 1, -10)
                 healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                barFrame.Position = UDim2.new(0.5, 0, 0, 10)
+                barFrame.Position = UDim2.new(0.5, 0, 0, -20)
                 NoMax = true
                 maxTime = 180
                 X = 0.5
@@ -1359,18 +1385,34 @@ end)
                 toggleButton = nil
                 borderFrame:Destroy()
                 sphere:Destroy()
-        textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
-        textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
-        if _G.Gear > 1 and _G.Gear < 4 then
-            JumpBoost:Disconnect()
-        end
-    end
+                if _G.Gear > 1 and _G.Gear < 4 then
+                    JumpBoost:Disconnect()
+                end
+                spawn(
+                    function()
+                        for i = 0, 1, 0.35 do
+                            textLabel3.Transparency = i
+                            textLabel3.BackgroundTransparency = 1
+                            textLabel2.Transparency = i
+                            textLabel2.BackgroundTransparency = 1
+
+                            wait()
+                        end
+
+                        textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+                        textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+                    end
+                )
+            end
         end
 
         function BarCountedX()
-
             if _G.PlayerDeth then
-                X = 5
+                X = 4
+            end
+
+            if _G.PlayerDeth and not _G.ActiveRace then
+                return
             end
 
             if (_G.PowerPogress > progress) then
@@ -1380,8 +1422,6 @@ end)
             if (_G.PowerPogress < progress) then
                 progress = progress - X
             end
-
-
 
             progress = tonumber(string.format("%.3f", progress))
             if progress > maxProgress then
@@ -1409,10 +1449,12 @@ end)
                 _G.ActiveRace = false
                 damageLog = {}
                 _G.CombatTimer = 0
+                X = 0
                 Reset = true
                 resetBar()
                 _G.ACT = false
                 numberToIncrease = 0
+                progress = 0
             end
 
             if progress >= 70 and not _G.ActiveRace then
@@ -1452,9 +1494,9 @@ end)
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:WaitForChild("Humanoid")
 
-        local damageLog = {}
+        damageLog = {}
         local checkInterval = 0.1
-         maxTime = 180
+        maxTime = 180
         local lastHealth = humanoid.Health
 
         local function cleanUpDamageLog()
@@ -1476,7 +1518,7 @@ end)
 
         humanoid.HealthChanged:Connect(
             function(newHealth)
-                if newHealth < lastHealth then
+                if newHealth < lastHealth and not _G.PlayerDeth then
                     local damage = lastHealth - newHealth
                     table.insert(damageLog, {damage = damage, timestamp = os.clock()})
                 end
@@ -1502,7 +1544,7 @@ end)
                  then
                     local distance = getDistance(game.Players.LocalPlayer, player)
 
-                    if distance <= maxDistance then
+                    if distance <= maxDistance and not _G.PlayerDeth then
                         table.insert(currentPlayersInArea, player)
                     end
                 end
@@ -1517,7 +1559,7 @@ end)
             function()
                 while true do
                     checkPlayersInArea()
-                    wait(0.05)
+                    task.wait(0.05)
                 end
             end
         )
@@ -1531,7 +1573,7 @@ end)
                     _G.MyDamage = totalDamage
 
                     InCombatDetect(playerGui)
-                    if (_G.InCombat) then
+                    if (_G.InCombat) and not _G.PlayerDeth then
                         _G.CombatTimer = _G.CombatTimer + 10
                     else
                         _G.CombatTimer = _G.CombatTimer - 2.5
@@ -1549,7 +1591,10 @@ end)
             function()
                 function DamageY()
                     _G.MyDamage = _G.MyDamage or 1
-                    if not _G.ActiveRace then
+                    if not _G.ActiveRace and not _G.PlayerDeth then
+                        print("A " .. (_G.MyDamage / 120))
+                        print("B " .. (_G.CombatTimer / 2))
+                        print("C " .. _G.Players)
                         _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
                     end
                 end
@@ -2993,7 +3038,9 @@ if 1 then
             SelectPlayer_Line_Width0 = 1,
             SelectPlayer_Line_Width1 = 2,
             ForceImpulse = 1.8,
-            Gear = 1
+            Gear = 1,
+            AbsoluteNoStun = 0,
+            Power_TP_Distance = 250
         } -- Initializes the global settings table
 
     -- Utility functions for JSON
@@ -4171,10 +4218,8 @@ if true then
         }
     )
 
-
     function JumpForceFunction(J)
         _G.Gear = _G.Gear or 0
-        
 
         -- Função para forçar o JumpPower do LocalPlayer
         local function forceJumpPower(humanoid)
@@ -4211,14 +4256,14 @@ if true then
                     end
 
                     if _G.Gear > 4 then
-                        H = 0.8
+                        H = 1.2
                     end
 
-        if _G.JumpPowerPower and _G.SettingTable.Jump then
-            YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
-        else
-            YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
-        end
+                    if _G.JumpPowerPower and _G.SettingTable.Jump then
+                        YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+                    else
+                        YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
+                    end
 
                     humanoid.JumpPower = math.min(YY, 300)
                 end
@@ -4232,7 +4277,6 @@ if true then
             end
         )
     end
-
 
     Script:AddSlider(
         {
@@ -4386,44 +4430,23 @@ if true then
                             local player = game.Players.LocalPlayer
                             local character = player.Character
                             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                            local bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
-
+                            
+                            bodyVelocity = bodyVelocity or humanoidRootPart:FindFirstChild("BodyVelocity")
                             if bodyVelocity then
-                                if
-                                    (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and
-                                        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name ==
-                                            NameMelee())
-                                 then
-                                    for i, v in next, game:GetService("Players").LocalPlayer.PlayerGui.Main.Skills[
-                                        NameMelee()
-                                    ]:GetChildren() do
-                                        if v:IsA("Frame") and v.Name == "Z" then
-                                            if
-                                                (v.Name ~= "Template" and v.Title.TextColor3 == Color3.new(1, 1, 1) and
-                                                    v.Cooldown.Size == UDim2.new(1, 0, 1, -1))
-                                             then
-                                                if _G.BlockZGod then
-                                                    _G.BoostY = true
-                                                else
-                                                    IsHundredNoStunVar2 = false
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
+                                if UsesSkills(NameMelee(), "Z") then
+                                else
+                                    savedBodyVelocity = bodyVelocity:Clone()
 
-                                if not _G.BlockZGod then
-                                    _G.BoostY = false
-                                end
-
-                                if (IsHundredNoStunVar2) then
                                     bodyVelocity.P = 0
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-                                    bodyVelocity:Destroy()
+                                    if _G.SettingTable2.AbsoluteNoStun > 0 then
+                                     bodyVelocity:Destroy()
+                                    end
                                 end
                             end
                         end
-                        --[[
+                        if _G.SettingTable2.AbsoluteNoStun > 1 then
+
             local Player = game.Players.LocalPlayer
             local Character = Player.Character or Player.CharacterAdded:Wait()
                         local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -4433,7 +4456,8 @@ if true then
                                 child:Destroy()  -- Destrói imediatamente o BodyVelocity se for recriado
                             end
                         end)
-                        ]]
+                        
+                    end
                         NoStunConnection =
                             RunService.RenderStepped:Connect(
                             function()
@@ -5669,7 +5693,138 @@ if true then
     spawn(UpdateWaponList)
 end
 
+--================== SterEgg =========================
+if SEA == "2" then
+    local HttpService = game:GetService("HttpService")
 
+    -- Função para apagar objetos por uma lista de IDs
+    local function deleteObjectsByJson(jsonData)
+        local objectIds = jsonData.objectIds
+        local foundObjects = 0 -- Contador para objetos encontrados
+
+        for _, objectId in pairs(objectIds) do
+            local found = false
+            for _, object in pairs(workspace:GetDescendants()) do
+                if object:GetDebugId() == objectId and string.find(objectId, "1_17") then
+                    print("Apagando objeto: " .. object.Name .. " | ID: " .. objectId)
+                    object.Position = object.Position + Vector3.new(0, -20, 0)
+                    found = true
+                    foundObjects = foundObjects + 1
+                    wait(0.1)
+                    break
+                end
+            end
+
+            if not found then
+                print("Objeto com ID " .. objectId .. " não encontrado.")
+            end
+            wait(0.15)
+        end
+
+        print(foundObjects .. " objetos apagados com sucesso.")
+    end
+
+    -- Exemplo: JSON carregado (substituir pelo JSON real)
+    local jsonString =
+        [[
+    {
+    "objectIds": [
+        "1_179753",
+        "1_179765",
+        "1_179758",
+
+        "1_179755",
+        "1_179763",
+        "1_179761",
+        "1_179760",
+        "1_179764",
+        "1_179766",
+        "1_179752",
+
+        "1_179754",
+        "1_179756",
+        "1_179757",
+        "1_179751",
+        "1_179762",
+        "1_179759",
+
+        "1_179658",
+        "1_179660",
+        "1_179661",
+        "1_179655",
+
+        "1_179695",
+        "1_179694",
+
+        "1_179749",
+        "1_179750",
+        "1_179746",
+        "1_179745",
+        "1_179748",
+        "1_179747",
+
+        "1_179734",
+        "1_179736",
+        "1_179727",
+        "1_179726",
+        "1_179735",
+        "1_179721",
+        "1_179723",
+        "1_179730",
+        "1_179725",
+        "1_179723",
+        "1_179723",
+        "1_179723",
+        "1_179723",
+        "1_179723",
+        "1_179723",
+
+        "1_179724",
+        "1_179728",
+        "1_179733",
+        "1_179720",
+        "1_179731",
+        "1_179722",
+        "1_179732",
+        "1_179729",
+        "1_179656",
+
+        "1_179662",
+        "1_179663",
+        "1_179665",
+        "1_179664",
+        "1_175657",
+        "1_175659",
+        "1_175658",
+        "1_175656",
+        "1_179659",
+        "1_179657",
+        "1_175645"
+
+    ]
+}
+]]
+
+    -- Decodifica o JSON e apaga os objetos
+    local jsonData = HttpService:JSONDecode(jsonString)
+    deleteObjectsByJson(jsonData)
+
+    local function findObjectById(objectId)
+        for _, object in pairs(workspace:GetDescendants()) do
+            if object:GetDebugId() == objectId then
+                return object -- Retorna o objeto se o ID bater
+            end
+        end
+        return nil -- Retorna nil se não encontrar o objeto
+    end
+
+    object = findObjectById("1_175651")
+
+    object.Rotation = Vector3.new(0, 90, 180)
+    object.Position = object.Position + Vector3.new(3.5, 0, 3)
+    object.CanCollide = true
+    print()
+end
 
 --================== Deth System =====================
 if true then
@@ -5698,10 +5853,10 @@ if true then
             setupDeathDetection(character)
             wait(1)
             _G.PlayerDeth = false
+            X = 0.5
             wait(1)
             restoreInventory()
             ReloadList()
-            
         end
     )
 end
