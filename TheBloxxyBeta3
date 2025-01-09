@@ -1,0 +1,171 @@
+-- Configurações do clone
+local Transparency = true
+local NoClip = true
+ time = 6
+
+-- Variáveis globais
+local Player = game.Players.LocalPlayer
+local RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+local IsInvisible = false
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+RealCharacter.Archivable = true
+local FakeCharacter
+
+-- Função para criar o clone
+local function CreateClone()
+    -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
+
+    local b = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("BodyVelocity")
+
+    if b then
+        b.P = 0
+        b.MaxForce = Vector3.new(0, 0, 0)
+    end
+    
+    FakeCharacter = RealCharacter:Clone()
+
+    -- Remover propriedades indesejadas do clone
+    for _, v in pairs(FakeCharacter:GetDescendants()) do
+        if v:IsA("BodyVelocity") or v:IsA("BodyGyro") or v:IsA("BodyPosition") then
+            v:Destroy() -- Remove as propriedades indesejadas
+        end
+    end
+  
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(500000, 500000, 500000)  -- Força para impedir a gravidade
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)  -- Sem movimento inicial
+    bodyVelocity.Parent = FakeCharacter.HumanoidRootPart
+
+    
+    -- Posiciona o clone no mesmo lugar que o personagem real
+    FakeCharacter.Parent = workspace
+    FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
+    FakeCharacter.HumanoidRootPart.Anchored = false
+
+    -- Define a velocidade do clone para ser o dobro da velocidade do personagem real
+    FakeCharacter.Humanoid.WalkSpeed = RealCharacter.Humanoid.WalkSpeed * 2
+
+    -- Aplica a transparência ao clone
+    if Transparency then
+        for _, v in pairs(FakeCharacter:GetDescendants()) do
+            if v:IsA("BasePart") and v.Transparency < 1 then
+                v.Transparency = 0.85
+            end
+        end
+    end
+
+    -- Copia o Animator do personagem real para o clone
+    local RealAnimator = RealCharacter:FindFirstChildOfClass("Animator")
+    if RealAnimator then
+        local CloneAnimator = RealAnimator:Clone()
+        CloneAnimator.Parent = FakeCharacter
+    end
+
+    -- Desativa scripts locais no clone
+    for _, v in pairs(RealCharacter:GetChildren()) do
+        if v:IsA("LocalScript") then
+            local clone = v:Clone()
+            clone.Disabled = true
+            clone.Parent = FakeCharacter
+        end
+    end
+
+    -- Sincroniza a câmera com o clone
+    workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
+
+    -- Leva o personagem real para uma posição muito distante
+    local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 1e8, 0)
+    IsInvisible = true
+
+    spawn(function()
+    for i = 1, 90 do
+                if IsInvisible then
+    RealCharacter.HumanoidRootPart.CFrame = x
+                task.wait(0.1)
+                end
+    end
+
+        end)
+
+    task.wait(0.1)
+
+    -- Sincroniza o movimento e o voo do clone com a direção da câmera
+    game:GetService("RunService").RenderStepped:Connect(function()
+            local moveDirection2 = humanoid.MoveDirection
+
+
+            
+        if IsInvisible and moveDirection2.Magnitude > 0 then
+                bodyVelocity.Parent = nil
+
+            -- Move o clone na direção da câmera
+            local camera = workspace.CurrentCamera
+            local moveDirection = camera.CFrame.LookVector
+            FakeCharacter.HumanoidRootPart.Velocity = Vector3.new(moveDirection2.X, moveDirection.y, moveDirection2.Z).Unit * (FakeCharacter.Humanoid.WalkSpeed * 1.5)
+            elseif ( moveDirection2.Magnitude == 0) and IsInvisible then
+                bodyVelocity.Parent = FakeCharacter.HumanoidRootPart
+        end
+    end)
+
+end
+
+-- Função para teleportar o personagem real para a posição do clone e apagar o clone
+local function TeleportAndRemoveClone()
+    if IsInvisible then
+
+        
+        for _, v in pairs(FakeCharacter:GetDescendants()) do
+            if v:IsA("BasePart") and v.Transparency < 1 then
+                v.Transparency = 1
+            end
+        end
+
+        IsInvisible = false
+
+        for i = 1, 15 do
+            if not IsInvisible then
+
+            RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+            task.wait()
+            end
+        end
+
+        -- Remove o clone e foca a câmera de volta no personagem real
+        FakeCharacter:Destroy()
+        workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+        
+    end
+end
+
+-- Adiciona o item no inventário e configura a ativação do script
+local tool = Instance.new("Tool")
+tool.Name = "Invisibility Cloak"
+tool.RequiresHandle = false
+tool.Parent = Player.Backpack
+
+tool.Equipped:Connect(function()
+    if not IsInvisible then
+        CreateClone()
+    end
+end)
+
+tool.Unequipped:Connect(function()
+    if IsInvisible then
+        TeleportAndRemoveClone()
+    end
+end)
+
+-- Som opcional e notificação
+local Sound = Instance.new("Sound", game:GetService("SoundService"))
+Sound.SoundId = "rbxassetid://232127604"
+Sound:Play()
+
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Invisibility Cloak Ready",
+    Text = "Clique para ativar a invisibilidade",
+    Duration = 20,
+    Button1 = "Okay."
+})
