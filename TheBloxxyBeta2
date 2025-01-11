@@ -1,7 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
 _G.OrionLib = OrionLib
 
-
 -- ========================== General System ===========================
 if 1 then
     local placeId = game.PlaceId
@@ -16,7 +15,7 @@ if 1 then
 
     if (SEA == "") then
         while true do
-            wait()
+            task.wait()
         end
     end
 
@@ -90,13 +89,13 @@ if 1 then
 
     _G.PowerPogress = 0
     _G.ACT = true
-    EO = 0.5 -- EffectOtmization
+    EO = 0.2 -- EffectOtmization
     EO2 = 2 / EO -- EffectOtmization
 
     sound2 = Instance.new("Sound")
     sound2.SoundId = "rbxassetid://9125898975" -- ID do áudio
     sound2.Looped = true -- Define o loop
-    sound2.Volume = 2.5 -- Ajusta o volume (1 é o máximo)
+    sound2.Volume = 2 -- Ajusta o volume (1 é o máximo)
     sound2.Parent = game.Workspace -- Define o local onde o som será tocado
 
     local sound1 = Instance.new("Sound")
@@ -123,8 +122,14 @@ if 1 then
     sound5.Volume = 1 -- Ajusta o volume (1 é o máximo)
     sound5.Parent = game.Workspace -- Define o local onde o som será tocado
 
+    local sound6 = Instance.new("Sound")
+    sound6.SoundId = "rbxassetid://4562690876" -- ID do áudio
+    sound6.Looped = false -- Define o loop
+    sound6.Volume = 4 -- Ajusta o volume (1 é o máximo)
+    sound6.Parent = game.Workspace -- Define o local onde o som será tocado
+
     function ActivePower()
-        wait(0.2)
+        task.wait(0.2)
         -- Configurações gerais
         local TweenService = game:GetService("TweenService")
         local RunService = game:GetService("RunService")
@@ -138,20 +143,20 @@ if 1 then
             function()
                 -- Função para tocar o som
                 sound1:Play()
-                wait(1)
+                task.wait(1)
 
                 -- Função para tocar o som
                 sound2:Play()
             end
         )
-        wait(0.2)
+        task.wait(0.2)
 
         _G.Agility = true
 
         spawn(
             function()
                 function AgilityY()
-                    wait()
+                    task.wait()
                     pcall(
                         function()
                             local player = game.Players.LocalPlayer
@@ -178,7 +183,7 @@ if 1 then
                     )
                 end
                 while _G.Agility do
-                    wait()
+                    task.wait()
                     AgilityY()
                 end
             end
@@ -284,6 +289,8 @@ if 1 then
             local Character = Player.Character or Player.CharacterAdded:Wait()
 
             local function createAuraEffect()
+                local Player = game.Players.LocalPlayer
+                local Character = Player.Character or Player.CharacterAdded:Wait()
                 local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
                 -- Função auxiliar para criar partículas com propriedades específicas
@@ -444,6 +451,13 @@ if 1 then
                     end
 
                     -- Função para criar formas geométricas animadas
+                    PowerExplosion = 15
+                    PowerExplosionMultiplication = 1
+                    if _G.Gear > 5 then
+                        PowerExplosion = 20
+                        PowerExplosionMultiplication = 3
+                    end
+
                     function criarFormas(parent, quantidade, cor, velocidade, tamanho)
                         for i = 1, quantidade do
                             local part = Instance.new("Part")
@@ -455,7 +469,11 @@ if 1 then
                             part.Anchored = true
                             part.CFrame =
                                 humanoidRootPart.CFrame *
-                                CFrame.new(math.random(-15, 15), math.random(-15, 15), math.random(-15, 15)) *
+                                CFrame.new(
+                                    math.random(PowerExplosion * (-1), PowerExplosion),
+                                    math.random(PowerExplosion * (-1), PowerExplosion),
+                                    math.random(PowerExplosion * (-1), PowerExplosion)
+                                ) *
                                 CFrame.Angles(math.random(), math.random(), math.random())
 
                             local bodyVelocity = Instance.new("BodyVelocity")
@@ -489,7 +507,7 @@ if 1 then
                     -- Função para criar brilho de tela
                     local function criarBrilho()
                         local bloom = Instance.new("BloomEffect")
-                        bloom.Intensity = 4
+                        bloom.Intensity = 2
                         bloom.Threshold = 2.5
                         bloom.Size = 24
                         bloom.Parent = game.Lighting
@@ -527,11 +545,28 @@ if 1 then
                         local brilho = criarBrilho()
                         -- Explosão inicial massiva
                         criarParticulas2(workspace, 250, Color3.fromRGB(255, 0, 0), 40, 3)
-                        criarFormas(workspace, 80 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
-                        criarFormas(workspace, 70 * EO, Color3.fromRGB(255, 255, 255), 1, 4)
-                        criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
-                        criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
-
+                        criarFormas(workspace, 80 * EO * PowerExplosionMultiplication, Color3.fromRGB(0, 0, 255), 15, 2)
+                        criarFormas(
+                            workspace,
+                            70 * EO * PowerExplosionMultiplication,
+                            Color3.fromRGB(255, 255, 255),
+                            1,
+                            4
+                        )
+                        criarFormas(
+                            workspace,
+                            50 * EO * PowerExplosionMultiplication,
+                            Color3.fromRGB(255, 50, 50),
+                            1,
+                            4
+                        )
+                        criarFormas(
+                            workspace,
+                            50 * EO * PowerExplosionMultiplication,
+                            Color3.fromRGB(50, 50, 255),
+                            1,
+                            4
+                        )
                         -- Partículas contínuas ao redor do jogador
                         local particulasLoop = true
                         spawn(
@@ -540,16 +575,28 @@ if 1 then
                                     criarParticulas2(workspace, 20 * EO, Color3.fromRGB(0, 255, 255), 10, 1)
                                     criarFormas(workspace, 8 * EO, Color3.fromRGB(255, 0, 0), 15, 2)
                                     criarFormas(workspace, 8 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
-                                    wait(0.2)
+                                    if _G.Gear == 5 then
+                                        criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 250), 1, 2)
+                                        criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 255), 1, 2)
+                                        criarFormas(workspace, 5 * EO, Color3.fromRGB(40, 250, 0), 1, 2)
+                                        criarFormas(workspace, 5 * EO, Color3.fromRGB(250, 130, 0), 1, 2)
+                                    end
+
+                                    if _G.Gear == 6 then
+                                        criarFormas(workspace, 10 * EO, Color3.fromRGB(200, 0, 200), 1, 2)
+                                        criarFormas(workspace, 10 * EO, Color3.fromRGB(250, 0, 250), 1, 2)
+                                    end
+
+                                    task.wait(0.2)
                                 end
                             end
                         )
 
                         -- Após 10 segundos, finalizar o poder
                         while _G.ACT do
-                            wait()
+                            task.wait()
                         end
-                        wait(0.3)
+                        task.wait(0.3)
                         particulasLoop = false
 
                         -- Explosão final
@@ -558,7 +605,7 @@ if 1 then
                         criarFormas(workspace, 90 * EO, Color3.fromRGB(255, 50, 50), 30, 4)
                         criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 50, 255), 30, 4)
                         criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 250, 255), 30, 4)
-                        wait(3)
+                        task.wait(3)
                         brilho:Destroy()
                     end
 
@@ -578,14 +625,14 @@ if 1 then
                 workspace,
                 Color3.fromRGB(85, 255, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 100 * EO,
                 workspace,
                 Color3.fromRGB(255, 85, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 100 * EO,
@@ -683,21 +730,21 @@ if 1 then
             )
 
             while _G.ACT do
-                wait()
+                task.wait()
             end
 
             spawn(
                 function()
                     -- Função para tocar o som
                     sound3:Play()
-                    wait(0.5)
+                    task.wait(0.5)
                     if sound2 and sound2.SoundId == "rbxassetid://9125898975" then
                         sound2:Stop()
                         sound2:Destroy() -- Remove o objeto de som para liberar recursos
                     end
                 end
             )
-            wait(0.5)
+            task.wait(0.5)
             -- Flash final
             local flashFinal = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
             flashFinal.IgnoreGuiInset = true
@@ -726,35 +773,35 @@ if 1 then
                 workspace,
                 Color3.fromRGB(85, 255, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 90 * EO,
                 workspace,
                 Color3.fromRGB(255, 85, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 90 * EO,
                 workspace,
                 Color3.fromRGB(85, 85, 255)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 90 * EO,
                 workspace,
                 Color3.fromRGB(85, 255, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 90 * EO,
                 workspace,
                 Color3.fromRGB(255, 85, 85)
             )
-            wait(0.01)
+            task.wait(0.01)
             criarExplosao(
                 LocalPlayer.Character.HumanoidRootPart.Position,
                 90 * EO,
@@ -770,7 +817,7 @@ if 1 then
             disableAuraEffect()
             _G.jumpPower = 50
             _G.FOVSpeed = 70 -- Valor inicial, pode ser ajustado dinamicamente
-            wait(1.5)
+            task.wait(1.5)
             bloomEffect:Destroy()
         end
 
@@ -779,7 +826,6 @@ if 1 then
     end
 
     function ActiveTP()
-        print("YESSSS")
         -- Variáveis
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -838,13 +884,8 @@ if 1 then
             local direction = (targetPosition - currentPosition).Unit
             local distance = (targetPosition - currentPosition).Magnitude
 
-            -- Atualizar a posição gradualmente
-            if distance > 0.1 then
-                local moveStep = math.min(speed, distance)
-                sphere.Position = currentPosition + direction * moveStep
-            else
+           
                 sphere.Position = targetPosition
-            end
         end
 
         -- Função para fazer a esfera mudar de cor gradualmente
@@ -870,9 +911,9 @@ if 1 then
         )
 
         if _G.Gear > 1 then
-            BollDistance = 220
+            BollDistance = 200
             if _G.Gear > 4 then
-                BollDistance = _G.SettingTable2.Power_TP_Distance or 250
+                BollDistance = _G.SettingTable2.Power_TP_Distance or 200
             end
         else
             BollDistance = 140
@@ -984,7 +1025,7 @@ if 1 then
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 250, 50), 1, 4)
 
-                        wait(math.max(4.2 - _G.Gear, 0.05))
+                        task.wait(math.max(4.2 - _G.Gear, 0.05))
                         _G.PowerTP = false
                         toggleButton.Text = "🚀" -- Emoji
                         borderFrame.BackgroundTransparency = 0.75
@@ -997,8 +1038,347 @@ if 1 then
         end
     end
 
+    function FendaDimensional()
+        
+            NotificationMenuGame("{color1_Purple}<Universal Dimensional Rift>{color1_/}")
+
+        -- Adiciona os efeitos na Lighting
+        local Lighting = game:GetService("Lighting")
+
+        -- Criando os efeitos
+        local fendaColor = Instance.new("ColorCorrectionEffect")
+        fendaColor.Name = "FendaColor"
+        fendaColor.TintColor = Color3.fromRGB(230, 230, 230) -- Cor roxa mais clara
+        fendaColor.Saturation = 0 -- Saturação moderada
+        fendaColor.Contrast = 0 -- Contraste leve
+
+        local fendaBlur = Instance.new("BlurEffect")
+        fendaBlur.Name = "FendaBlur"
+        fendaBlur.Size = 0 -- Desfoque moderado
+
+        -- Adiciona os efeitos à Lighting
+        fendaColor.Parent = Lighting
+        fendaBlur.Parent = Lighting
+
+        -- Efeito pulsante leve
+        FendaDimensionalValue = true
+        function animateTintColor(effect, targetColor, duration)
+            local TweenService = game:GetService("TweenService")
+
+            local tweenInfo = TweenInfo.new(
+                duration, -- Duração da animação em segundos
+                Enum.EasingStyle.Quad, -- Tipo de suavização
+                Enum.EasingDirection.Out -- Direção da animação
+            )
+        
+            local goal = {
+                TintColor = targetColor, -- Alvo do TintColor
+            }
+        
+            local tween = TweenService:Create(effect, tweenInfo, goal)
+            tween:Play()
+        
+            return tween
+        end
+
+        spawn(function()
+            animateTintColor(fendaColor, Color3.fromRGB(180, 120, 255), 0.5)
+            task.wait(0.25)
+        fendaColor.Saturation = 1 -- Saturação moderada
+
+            while FendaDimensionalValue do
+                fendaColor.Saturation = 1.2
+                fendaBlur.Size = 2.5
+                for i, k in pairs(game.Players.LocalPlayer.PlayerGui.Notifications:GetDescendants()) do
+                    if k:IsA("TextLabel") then
+                        if string.find(k.Text, "Mar") or string.find(k.Text, "Sea") then
+                            k:Destroy()
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+
+            -- Remove os efeitos após o tempo
+            fendaColor.Saturation = 0
+            fendaColor.Contrast = 0
+            NotificationMenuGame("{color1_Green}<Moments Ago>{color1_/}")
+            fendaBlur:Destroy()
+            animateTintColor(fendaColor, Color3.fromRGB(255, 255, 255), 1) 
+            task.wait(0.5)
+            fendaColor:Destroy()
+        end)
+    end
+
+    function invisibleByMidnigth()
+        -- Configurações do clone
+        local Transparency = true
+        -- Variáveis globais
+        local Player = game.Players.LocalPlayer
+        RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+        IsInvisible = false
+        IsInvisible2 = false
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        RealCharacter.Archivable = true
+        local FakeCharacter
+
+        -- Função para criar o clone
+        local function CreateClone()
+            -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
+
+            local b =
+                game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("BodyVelocity")
+
+            if b then
+                b.P = 0
+                b.MaxForce = Vector3.new(0, 0, 0)
+            end
+
+            FakeCharacter = RealCharacter:Clone()
+
+            -- Remover propriedades indesejadas do clone
+            for _, v in pairs(FakeCharacter:GetDescendants()) do
+                if v:IsA("BodyVelocity") or v:IsA("BodyGyro") or v:IsA("BodyPosition") or v:IsA("ParticleEmitter") then
+                    v:Destroy() -- Remove as propriedades indesejadas
+                end
+            end
+
+            bodyVelocity2 = Instance.new("BodyVelocity")
+            bodyVelocity2.MaxForce = Vector3.new(500000, 500000, 500000) -- Força para impedir a gravidade
+            bodyVelocity2.Velocity = Vector3.new(0, 0, 0) -- Sem movimento inicial
+            bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
+
+            -- Posiciona o clone no mesmo lugar que o personagem real
+            FakeCharacter.Parent = workspace
+            FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
+            FakeCharacter.HumanoidRootPart.Anchored = false
+            FakeCharacter.HumanoidRootPart.Velocity = RealCharacter.HumanoidRootPart.Velocity.Unit * 4
+            local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 1e7, 0)
+
+            spawn(
+                function()
+                    criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
+                    criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
+                    RealCharacter.HumanoidRootPart.CFrame = x
+            FendaDimensional()
+
+                end
+            )
+            -- Leva o personagem real para uma posição muito distante
+            IsInvisible = true
+            spawn(
+                function()
+                    for i = 1, 90 do
+                        if IsInvisible then
+                            RealCharacter.HumanoidRootPart.CFrame = x
+                            task.wait(0.1)
+                        end
+                    end
+                end
+            )
+
+            sound5:Play()
+
+            -- Define a velocidade do clone para ser o dobro da velocidade do personagem real
+            FakeCharacter.Humanoid.WalkSpeed = RealCharacter.Humanoid.WalkSpeed * 2
+
+            -- Aplica a transparência ao clone
+            if Transparency then
+                for _, v in pairs(FakeCharacter:GetDescendants()) do
+                    if v:IsA("BasePart") and v.Transparency < 1 then
+                        v.Transparency = 0.9
+                    end
+                end
+            end
+
+            -- Copia o Animator do personagem real para o clone
+            local RealAnimator = RealCharacter:FindFirstChildOfClass("Animator")
+            if RealAnimator then
+                local CloneAnimator = RealAnimator:Clone()
+                CloneAnimator.Parent = FakeCharacter
+            end
+
+            -- Desativa scripts locais no clone
+            for _, v in pairs(RealCharacter:GetChildren()) do
+                if v:IsA("LocalScript") then
+                    local clone = v:Clone()
+                    clone.Disabled = true
+                    clone.Parent = FakeCharacter
+                end
+            end
+
+            -- Sincroniza a câmera com o clone
+            workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
+
+            -- Sincroniza o movimento e o voo do clone com a direção da câmera
+            DD =
+                game:GetService("RunService").RenderStepped:Connect(
+                function()
+                    local moveDirection2 = humanoid.MoveDirection
+
+                    if IsInvisible and moveDirection2.Magnitude > 0 then
+                        bodyVelocity2.Parent = nil
+
+                        -- Move o clone na direção da câmera
+                        local camera = workspace.CurrentCamera
+                        local moveDirection = camera.CFrame.LookVector
+
+                        -- Determinar se está indo para trás
+                        local isMovingBackward = moveDirection:Dot(moveDirection2) < 0
+
+                        -- Ajustar o valor de y
+                        local adjustedY = isMovingBackward and (moveDirection.Y * -1.2) or (moveDirection.Y * 1.4)
+                        local adjustedV = isMovingBackward and (1.6) or (1.8)
+
+                        FakeCharacter.HumanoidRootPart.Velocity =
+                            Vector3.new(moveDirection2.X, adjustedY + 0.35, moveDirection2.Z).Unit *
+                            (FakeCharacter.Humanoid.WalkSpeed * adjustedV)
+                    elseif (moveDirection2.Magnitude == 0) and IsInvisible and IsInvisible2 then
+                        bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
+                    end
+                end
+            )
+            task.wait(0.2)
+            IsInvisible2 = true
+        end
+
+        -- Função para teleportar o personagem real para a posição do clone e apagar o clone
+        local function TeleportAndRemoveClone()
+            if IsInvisible then
+                DD:Disconnect()
+                spawn(
+                    function()
+                        task.wait()
+                        InvisibilityCloak:Destroy()
+                    end
+                )
+
+                RealCharacter.HumanoidRootPart.Velocity = FakeCharacter.HumanoidRootPart.Velocity.Unit * 5
+
+                for _, v in pairs(FakeCharacter:GetDescendants()) do
+                    if v:IsA("BasePart") and v.Transparency < 1 then
+                        v.Transparency = 1
+                    end
+                end
+
+                IsInvisible = false
+                IsInvisible2 = false
+                FendaDimensionalValue = false
+
+                sound6:Play()
+
+                for i = 1, 15 do
+                    if not IsInvisible then
+                        RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+                        task.wait()
+                    end
+                end
+
+                -- Remove o clone e foca a câmera de volta no personagem real
+                FakeCharacter:Destroy()
+                workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+            end
+        end
+
+        CreateClone()
+
+        -- Adiciona o item no inventário e configura a ativação do script
+        InvisibilityCloak = Instance.new("Tool")
+        InvisibilityCloak.Name = "Invisibility Cloak"
+        InvisibilityCloak.RequiresHandle = false
+        InvisibilityCloak.Parent = Player.Backpack
+
+        InvisibilityCloak.Unequipped:Connect(
+            function()
+                if IsInvisible then
+                    TeleportAndRemoveClone()
+                end
+            end
+        )
+
+        task.wait(0.05)
+        game.Players.LocalPlayer.Character.Humanoid:EquipTool(InvisibilityCloak)
+    end
+
+    function GodCombatPower()
+        if not toggleButton2 then
+            local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+            _G.Gear = _G.Gear or 0
+            -- Criar o Frame para simular a borda
+            borderFrame2 = Instance.new("Frame")
+            borderFrame2.Size = UDim2.new(0, 55, 0, 55) -- Um pouco maior que o botão
+            borderFrame2.Position = UDim2.new(1, -100, 0, 35)
+            borderFrame2.AnchorPoint = Vector2.new(1, 0)
+            borderFrame2.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Cor inicial da borda
+            borderFrame2.BackgroundTransparency = 0.865
+            borderFrame2.BorderSizePixel = 0 -- Sem borda própria
+            borderFrame2.Parent = screenGui
+
+            -- Tornar o Frame circular
+            local borderCorner2 = Instance.new("UICorner")
+            borderCorner2.CornerRadius = UDim.new(1, 0)
+            borderCorner2.Parent = borderFrame2
+
+            -- Criar o botão dentro do Frame
+            toggleButton2 = Instance.new("TextButton")
+            toggleButton2.Text = "🪂" -- Emoji
+            toggleButton2.Size = UDim2.new(0, 45, 0, 45) -- Menor que o Frame
+            toggleButton2.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centralizado no Frame
+            toggleButton2.AnchorPoint = Vector2.new(0.5, 0.5)
+            toggleButton2.BackgroundTransparency = 0.8
+            toggleButton2.BackgroundColor3 = Color3.fromRGB(22, 22, 23) -- Cor de fundo
+            toggleButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
+            toggleButton2.TextSize = 20
+            toggleButton2.Font = Enum.Font.GothamBold
+            toggleButton2.Parent = borderFrame2
+
+            -- Tornar o botão circular
+            local buttonCorner2 = Instance.new("UICorner")
+            buttonCorner2.CornerRadius = UDim.new(1, 0)
+            buttonCorner2.Parent = toggleButton2
+
+            -- Serviço de animação para a borda
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
+
+            local goal = {BackgroundColor3 = Color3.fromRGB(0, 255, 0)} -- Cor verde
+            local tween = tweenService:Create(borderFrame2, tweenInfo, goal)
+            tween:Play()
+
+            -- Animações no botão
+            toggleButton2.MouseEnter:Connect(
+                function()
+                    toggleButton2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                end
+            )
+
+            toggleButton2.MouseLeave:Connect(
+                function()
+                    toggleButton2.BackgroundColor3 = Color3.fromRGB(22, 22, 23)
+                end
+            )
+
+            toggleButton2.MouseButton1Click:Connect(
+                function()
+                    if not IsInvisible then
+                        invisibleByMidnigth()
+                    else
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local humanoid = character:WaitForChild("Humanoid")
+
+                        -- Desequipar o item atual
+                        humanoid:UnequipTools()
+                    end
+                end
+            )
+        end
+    end
+
     function JumpBoostPower()
-        print("kkk")
         local UserInputService = game:GetService("UserInputService")
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -1162,10 +1542,12 @@ if 1 then
 
         if _G.Gear == 6 then
             textLabel.Text = "SUPERIOR GEAR"
+            textLabel.TextColor3 = Color3.new(1, 0, 1)
         end
 
         if _G.Gear == 5 then
             textLabel.Text = "ULTRA GEAR"
+            textLabel.TextColor3 = Color3.new(0, 1, 1)
         end
 
         if _G.Gear == 4 then
@@ -1196,8 +1578,13 @@ if 1 then
                     X = 0.01
                     _G.PowerPogress = 0
                     ActiveTP()
+
                     if _G.Gear > 1 and _G.Gear < 4 then
                         JumpBoostPower()
+                    end
+
+                    if _G.Gear > 5 then
+                        _G.NoStunPower = true
                     end
 
                     textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
@@ -1205,17 +1592,34 @@ if 1 then
 
                     spawn(
                         function()
-                            for i = 1, 0, -0.35 do
+                            for i = 1, 0, -0.1 do
                                 textLabel2.Transparency = i
                                 textLabel2.BackgroundTransparency = 1
                                 textLabel3.Transparency = i
                                 textLabel3.BackgroundTransparency = 1
-                                wait()
+                                task.wait()
                             end
                         end
                     )
 
+                    if _G.Gear > 4 then
+                        GodCombatPower()
+                        spawn(
+                            function()
+                                while _G.ActiveRace do
+                                    for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
+                                        textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+                                        task.wait(0.05) -- Tempo entre cada passo da transição
+                                    end
+                                end
+                                textLabel.TextColor3 = Color3.new(1, 0, 1)
+                            end
+                        )
+                    end
+
                     ActivePower()
+                elseif _G.ActiveRace then
+                   -- invisibleByMidnigth()
                 end
             end
         )
@@ -1227,7 +1631,7 @@ if 1 then
         local progress = 0
         local maxProgress = 100
         NoMax = true
-        X = 0.5
+        X = 1
         Reset = true
         local resetDelay = 15
 
@@ -1267,16 +1671,16 @@ if 1 then
 
                     _G.MyDamage = _G.MyDamage or 1
 
-                    V = 4.2
+                    V = 4.5
                     if _G.Gear > 3 then
-                        V = 2.2
+                        V = 2.5
                         if _G.Gear > 4 then
-                            V = 1.2
+                            V = 1.5
                         end
                     end
 
                     if _G.Gear > 2 then
-                        _G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 420) / V)
+                        _G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 450) / V)
 
                         if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
                             XX = (_G.VelcityPower / 2) + _G.SettingTable.SafeMode_Speed
@@ -1284,7 +1688,7 @@ if 1 then
                             XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
                         end
 
-                        _G.FOVSpeed = XX / 1.5
+                        _G.FOVSpeed = XX / 2
                         textLabel2.Text = "+" .. math.floor(XX) .. " →"
                     else
                         textLabel2.Text = ""
@@ -1368,6 +1772,7 @@ if 1 then
             if Reset then
                 _G.ACT = false
                 _G.ActiveRace = false
+                _G.Race = false
                 progress = 0
                 percentText.Text = "0%"
                 healthBar.Size = UDim2.new(0, 0, 1, -10)
@@ -1375,28 +1780,35 @@ if 1 then
                 barFrame.Position = UDim2.new(0.5, 0, 0, -20)
                 NoMax = true
                 maxTime = 180
-                X = 0.5
+                X = 1
                 _G.VelcityPower = nil
                 _G.VelcityPower = nil
                 _G.JumpPowerPower = nil
-                wait()
+                task.wait()
                 _G.PowerPogress = 0
                 toggleButton:Destroy()
                 toggleButton = nil
                 borderFrame:Destroy()
+
                 sphere:Destroy()
                 if _G.Gear > 1 and _G.Gear < 4 then
                     JumpBoost:Disconnect()
                 end
+                if _G.Gear > 4 then
+                    _G.NoStunPower = false
+                    toggleButton2:Destroy()
+                    toggleButton2 = nil
+                    borderFrame2:Destroy()
+                end
                 spawn(
                     function()
-                        for i = 0, 1, 0.35 do
+                        for i = 0, 1, 0.1 do
                             textLabel3.Transparency = i
                             textLabel3.BackgroundTransparency = 1
                             textLabel2.Transparency = i
                             textLabel2.BackgroundTransparency = 1
 
-                            wait()
+                            task.wait()
                         end
 
                         textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
@@ -1412,6 +1824,9 @@ if 1 then
             end
 
             if _G.PlayerDeth and not _G.ActiveRace then
+                if progress < 0 then
+                    progress = 0
+                end
                 return
             end
 
@@ -1439,6 +1854,20 @@ if 1 then
 
                 if NoMax then
                     NoMax = false
+                    if _G.Gear > 5 then
+                        spawn(
+                            function()
+                                while _G.Race do
+                                    for i = 0, 1, 0.005 do -- Incremento suave para criar a transição
+                                        textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+                                        task.wait() -- Tempo entre cada passo da transição
+                                    end
+                                end
+                                textLabel.TextColor3 = Color3.new(1, 0, 1)
+                            end
+                        )
+                    end
+
                     task.delay(resetDelay, resetBar)
                 end
             else
@@ -1574,14 +2003,14 @@ if 1 then
 
                     InCombatDetect(playerGui)
                     if (_G.InCombat) and not _G.PlayerDeth then
-                        _G.CombatTimer = _G.CombatTimer + 10
+                        _G.CombatTimer = _G.CombatTimer + 100
                     else
                         _G.CombatTimer = _G.CombatTimer - 2.5
                     end
                 end
 
                 while true do
-                    wait(0.5)
+                    task.wait(0.5)
                     Counter1Y()
                 end
             end
@@ -1600,7 +2029,7 @@ if 1 then
                 end
 
                 while true do
-                    wait()
+                    task.wait()
                     DamageY()
                 end
             end
@@ -1610,7 +2039,7 @@ if 1 then
     function EquipWeapon(ToolSe)
         if game.Players.LocalPlayer.Backpack:FindFirstChild(ToolSe) then
             Tool = game.Players.LocalPlayer.Backpack:FindFirstChild(ToolSe)
-            wait(.1)
+            task.wait(.1)
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(Tool)
         end
     end
@@ -1800,14 +2229,14 @@ if 1 then
                             while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name ==
                                 weaponName) or
                                 not (game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Main").Skills.Visible) do
-                                wait()
+                                task.wait()
                             end
                             -- Pressiona a tecla especificada
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
-                            wait(S)
+                            task.wait(S)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
 
-                            wait(t)
+                            task.wait(t)
                         else
                             NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
                             return
@@ -1854,9 +2283,9 @@ if 1 then
     function StopTween(target)
         if not target then
             _G.StopTween = true
-            wait()
+            task.wait()
             topos(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
+            task.wait()
             if game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip") then
                 game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip"):Destroy()
             end
@@ -2090,10 +2519,10 @@ if 1 then
                         end
 
                         while _G.highlightEnabled do
-                            wait(0.5)
+                            task.wait(0.5)
                             HiGHY()
                         end
-                        wait(1)
+                        task.wait(1)
                         for _, player in ipairs(Players:GetPlayers()) do
                             removeHighlight(player)
                         end
@@ -2302,7 +2731,7 @@ if 1 then
             end
 
             while true do
-                wait(0.5)
+                task.wait(0.5)
                 OJOY()
             end
         end
@@ -2444,7 +2873,7 @@ if 1 then
                 clearSelection()
                 -- Aguarda até o jogador reaparecer
                 repeat
-                    wait()
+                    task.wait()
                 until isPlayerAlive(LocalPlayer)
             end
 
@@ -2497,7 +2926,7 @@ if 1 then
             end
 
             while true do
-                wait(0.5)
+                task.wait(0.5)
                 OJOVSY()
             end
         end
@@ -2519,7 +2948,7 @@ if 1 then
                     if (_G.SettingTable.Haki) then
                         AutoHaki()
                     end
-                    wait(1)
+                    task.wait(1)
                 end
             end
         )
@@ -2981,7 +3410,7 @@ if 1 then
     end
 
     while not NameMelee() do
-        wait(1)
+        task.wait(1)
     end
 
     ReloadList = function()
@@ -2990,19 +3419,19 @@ if 1 then
                 if (NameGun()) then
                     EquipWeapon(NameGun())
                 end
-                wait(0.01)
+                task.wait(0.01)
                 if (NameSword()) then
                     EquipWeapon(NameSword())
                 end
-                wait(0.01)
+                task.wait(0.01)
                 if (NameMelee()) then
                     EquipWeapon(NameMelee())
                 end
-                wait(0.01)
+                task.wait(0.01)
                 if (game:GetService("Players").LocalPlayer.Data.DevilFruit.Value) then
                     EquipWeapon(game:GetService("Players").LocalPlayer.Data.DevilFruit.Value)
                 end
-                wait(0.01)
+                task.wait(0.01)
                 local player = game.Players.LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
                 local humanoid = character:WaitForChild("Humanoid")
@@ -3142,7 +3571,7 @@ if 1 then
     spawn(
         function()
             while true do
-                wait(1) -- Automatically saves every second
+                task.wait(1) -- Automatically saves every second
                 UpdateSetting(DefaultSaveName)
             end
         end
@@ -3205,7 +3634,7 @@ if 1 then
                 _G.SettingTable.Esp_Player = Value
 
                 while _G.SettingTable.Esp_Player do
-                    wait()
+                    task.wait()
                     UpdateEspPlayer()
                 end
             end
@@ -3226,7 +3655,7 @@ if 1 then
                     spawn(
                         function()
                             while _G.SettingTable.LigthV1 do
-                                wait(1)
+                                task.wait(1)
                                 if (_G.HighlightV1) then
                                     ReloadHighlightV1()
                                 end
@@ -3270,7 +3699,7 @@ if 1 then
                 spawn(
                     function()
                         while _G.SettingTable.AimbotV2 do
-                            wait()
+                            task.wait()
                             if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
                                 _G.SelectedPlayer = _G.SPLY
                                 ChangeTargetPlayer(_G.SPLY.Name)
@@ -3321,7 +3750,7 @@ if 1 then
                 spawn(
                     function()
                         while _G.SettingTable.AimbotV1 do
-                            wait()
+                            task.wait()
                             if Value and _G.SPLY then
                                 _G.SP = _G.SPLY
                             else
@@ -3394,14 +3823,14 @@ if 1 then
                         PlayerTimer:Set(
                             "Loading The Player List: <font color='rgb(230, 230, 50)'>(Reloading...)</font>"
                         )
-                        wait(0.5)
+                        task.wait(0.5)
                         ReloadPlayersList()
                     end
                 end
             end
 
             while true do
-                wait(0.85)
+                task.wait(0.85)
                 UpdateListY()
             end
         end
@@ -3418,7 +3847,7 @@ if 1 then
                     local plr1 = game:GetService("Players").LocalPlayer.Character.Humanoid
                     local plr2 = game:GetService("Players"):FindFirstChild(_G.SelectPly)
                     repeat
-                        wait(0.5)
+                        task.wait(0.5)
                         pcall(
                             function()
                                 game:GetService("Workspace").Camera.CameraSubject =
@@ -3447,7 +3876,7 @@ if 1 then
                         function()
                             repeat
                                 topos(game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.CFrame)
-                                wait()
+                                task.wait()
                             until _G.TeleportPly == false
                             StopTween(_G.TeleportPly)
                         end
@@ -3580,7 +4009,7 @@ if true then
                             end
 
                             while _G.GlobalSafeMode do
-                                wait(0.001)
+                                task.wait(0.001)
                                 GlobalSafeModeY()
                             end
                         end
@@ -3608,7 +4037,7 @@ if true then
                         "requestEntrance",
                         Vector3.new(28286, 14897, 103)
                     )
-                    wait(0.1)
+                    task.wait(0.1)
                     local character = game:GetService("Players").LocalPlayer.Character
                     character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(275, 100, -150)
                 end
@@ -3910,7 +4339,7 @@ if true then
                     "requestEntrance",
                     Vector3.new(-317, 331, 597)
                 )
-                wait(0.1)
+                task.wait(0.1)
                 topos(CFrame.new(-382, 73, 290))
                 return
             end
@@ -3955,7 +4384,7 @@ if true then
                 _G.TeleportIsland = Value
                 if Value and _G.SelectIsland ~= "" then
                     repeat
-                        wait()
+                        task.wait()
                         TeleportToIsland(_G.SelectIsland)
                     until not _G.TeleportIsland
                     StopTween(_G.TeleportIsland)
@@ -4377,7 +4806,7 @@ if true then
                             )
 
                             while _G.SettingTable.Agility do
-                                wait()
+                                task.wait()
                             end
                             SkyConnection:Disconnect()
                         end
@@ -4430,7 +4859,7 @@ if true then
                             local player = game.Players.LocalPlayer
                             local character = player.Character
                             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                            
+
                             bodyVelocity = bodyVelocity or humanoidRootPart:FindFirstChild("BodyVelocity")
                             if bodyVelocity then
                                 if UsesSkills(NameMelee(), "Z") then
@@ -4439,25 +4868,25 @@ if true then
 
                                     bodyVelocity.P = 0
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-                                    if _G.SettingTable2.AbsoluteNoStun > 0 then
-                                     bodyVelocity:Destroy()
+                                    if _G.SettingTable2.AbsoluteNoStun > 0 or _G.NoStunPower then
+                                        bodyVelocity:Destroy()
                                     end
                                 end
                             end
                         end
                         if _G.SettingTable2.AbsoluteNoStun > 1 then
+                            local Player = game.Players.LocalPlayer
+                            local Character = Player.Character or Player.CharacterAdded:Wait()
+                            local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-            local Player = game.Players.LocalPlayer
-            local Character = Player.Character or Player.CharacterAdded:Wait()
-                        local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-
-                        humanoidRootPart.ChildAdded:Connect(function(child)
-                            if child:IsA("BodyVelocity") and _G.SettingTable.Stun and IsHundredNoStunVar2 then
-                                child:Destroy()  -- Destrói imediatamente o BodyVelocity se for recriado
-                            end
-                        end)
-                        
-                    end
+                            humanoidRootPart.ChildAdded:Connect(
+                                function(child)
+                                    if child:IsA("BodyVelocity") and _G.SettingTable.Stun and IsHundredNoStunVar2 then
+                                        child:Destroy() -- Destrói imediatamente o BodyVelocity se for recriado
+                                    end
+                                end
+                            )
+                        end
                         NoStunConnection =
                             RunService.RenderStepped:Connect(
                             function()
@@ -4466,7 +4895,7 @@ if true then
                         )
 
                         while _G.SettingTable.Stun do
-                            wait()
+                            task.wait()
                         end
 
                         NoStunConnection:Disconnect()
@@ -4500,7 +4929,7 @@ if true then
             Callback = function(Value)
                 IslandESP = Value
                 while IslandESP do
-                    wait()
+                    task.wait()
                     UpdateIslandESP()
                 end
             end
@@ -4515,7 +4944,7 @@ if true then
                 DevilFruitESP = Value
                 _G.SettingTable.Fruits = Value
                 while DevilFruitESP do
-                    wait(0.1)
+                    task.wait(0.1)
                     UpdateBfEsp()
                 end
             end
@@ -4545,6 +4974,7 @@ if true then
                             l.FogEnd = 9e9
                             l.Brightness = 0
                             settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                            wait(0.05)
 
                             -- Otimizações para performance
                             for _, v in pairs(g:GetDescendants()) do
@@ -4561,11 +4991,6 @@ if true then
                                 elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
                                     v.Lifetime = NumberRange.new(0, 0)
                                     v.Transparency = NumberSequence.new(0)
-                                elseif v:IsA("Explosion") then
-                                    v.BlastPressure = 1
-                                    v.BlastRadius = 1
-                                elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                                    v.Enabled = false
                                 end
                             end
 
@@ -4585,16 +5010,6 @@ if true then
                                 if v.Name == "Water" then
                                     v.Transparency = 1
                                     v.Material = Enum.Material.Plastic
-                                end
-                            end
-
-                            -- Removendo partículas e efeitos de ataques (pedaços do chão)
-                            for _, obj in pairs(w:GetDescendants()) do
-                                if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") then
-                                    obj:Destroy()
-                                elseif obj:IsA("Explosion") then
-                                    obj.BlastPressure = 1
-                                    obj.BlastRadius = 1
                                 end
                             end
                         end
@@ -4756,7 +5171,7 @@ if true then
                 function()
                     -- Se foi apenas um toque (não teve múltiplos toques dentro de 400ms)
                     if touchCount == 1 then
-                        wait(touchDelay) -- Aguarda o tempo de 400ms para garantir que não será considerado como toque múltiplo
+                        task.wait(touchDelay) -- Aguarda o tempo de 400ms para garantir que não será considerado como toque múltiplo
                         if touchCount == 1 then
                             ActionSuperButton(SuperButtonNumberAction) -- Função Y
                         end
@@ -4950,7 +5365,7 @@ if true then
                     end
 
                     while _G.SettingTable.AwekiningV4 do
-                        wait(0.1)
+                        task.wait(0.1)
                         AwakeY()
                     end
                 end
@@ -4987,7 +5402,7 @@ if true then
                 end
 
                 while _G.MinkV7 do
-                    wait()
+                    task.wait()
                     MINKV7Y()
                 end
             end
@@ -5173,7 +5588,7 @@ if true then
                     bloom.Parent = Lighting
 
                     -- Alteração gradual da cor ao longo do dia
-                    local function updateLightingColor(hour)
+                    function updateLightingColor(hour)
                         if hour >= 6 and hour < 12 then
                             -- Manhã: tons mais frios
                             colorCorrection.TintColor =
@@ -5331,7 +5746,7 @@ if true then
                 end
 
                 while _G.SettingTable.TPV2 do
-                    wait(0.1)
+                    task.wait(0.1)
 
                     if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
                         _G.SelectedPlayer = _G.SPLY
@@ -5599,6 +6014,9 @@ if true then
             local RunService = game:GetService("RunService")
 
             function SkillFruitX()
+                if UsesSkills(NameMelee(), "Z") then
+                end
+
                 DF = game:GetService("Players").LocalPlayer.Data.DevilFruit.Value
                 if DF == "Dough-Dough" and UsesSkills(DF, "V") then
                     if not (Dough_V) then
@@ -5619,7 +6037,7 @@ if true then
                 if DF == "Dough-Dough" and UsesSkills(DF, "C") then
                     _G.CDOUGH = true
                 elseif _G.CDOUGH then
-                    wait(5)
+                    task.wait(5)
                     _G.BlockZGod = false
                 end
 
@@ -5685,145 +6103,12 @@ if true then
         end
 
         while true do
-            wait(1)
+            task.wait(1)
             TollsY()
         end
     end
 
     spawn(UpdateWaponList)
-end
-
---================== SterEgg =========================
-if SEA == "2" then
-    local HttpService = game:GetService("HttpService")
-
-    -- Função para apagar objetos por uma lista de IDs
-    local function deleteObjectsByJson(jsonData)
-        local objectIds = jsonData.objectIds
-        local foundObjects = 0 -- Contador para objetos encontrados
-
-        for _, objectId in pairs(objectIds) do
-            local found = false
-            for _, object in pairs(workspace:GetDescendants()) do
-                if object:GetDebugId() == objectId and string.find(objectId, "1_17") then
-                    print("Apagando objeto: " .. object.Name .. " | ID: " .. objectId)
-                    object.Position = object.Position + Vector3.new(0, -20, 0)
-                    found = true
-                    foundObjects = foundObjects + 1
-                    wait(0.1)
-                    break
-                end
-            end
-
-            if not found then
-                print("Objeto com ID " .. objectId .. " não encontrado.")
-            end
-            wait(0.15)
-        end
-
-        print(foundObjects .. " objetos apagados com sucesso.")
-    end
-
-    -- Exemplo: JSON carregado (substituir pelo JSON real)
-    local jsonString =
-        [[
-    {
-    "objectIds": [
-        "1_179753",
-        "1_179765",
-        "1_179758",
-
-        "1_179755",
-        "1_179763",
-        "1_179761",
-        "1_179760",
-        "1_179764",
-        "1_179766",
-        "1_179752",
-
-        "1_179754",
-        "1_179756",
-        "1_179757",
-        "1_179751",
-        "1_179762",
-        "1_179759",
-
-        "1_179658",
-        "1_179660",
-        "1_179661",
-        "1_179655",
-
-        "1_179695",
-        "1_179694",
-
-        "1_179749",
-        "1_179750",
-        "1_179746",
-        "1_179745",
-        "1_179748",
-        "1_179747",
-
-        "1_179734",
-        "1_179736",
-        "1_179727",
-        "1_179726",
-        "1_179735",
-        "1_179721",
-        "1_179723",
-        "1_179730",
-        "1_179725",
-        "1_179723",
-        "1_179723",
-        "1_179723",
-        "1_179723",
-        "1_179723",
-        "1_179723",
-
-        "1_179724",
-        "1_179728",
-        "1_179733",
-        "1_179720",
-        "1_179731",
-        "1_179722",
-        "1_179732",
-        "1_179729",
-        "1_179656",
-
-        "1_179662",
-        "1_179663",
-        "1_179665",
-        "1_179664",
-        "1_175657",
-        "1_175659",
-        "1_175658",
-        "1_175656",
-        "1_179659",
-        "1_179657",
-        "1_175645"
-
-    ]
-}
-]]
-
-    -- Decodifica o JSON e apaga os objetos
-    local jsonData = HttpService:JSONDecode(jsonString)
-    deleteObjectsByJson(jsonData)
-
-    local function findObjectById(objectId)
-        for _, object in pairs(workspace:GetDescendants()) do
-            if object:GetDebugId() == objectId then
-                return object -- Retorna o objeto se o ID bater
-            end
-        end
-        return nil -- Retorna nil se não encontrar o objeto
-    end
-
-    object = findObjectById("1_175651")
-
-    object.Rotation = Vector3.new(0, 90, 180)
-    object.Position = object.Position + Vector3.new(3.5, 0, 3)
-    object.CanCollide = true
-    print()
 end
 
 --================== Deth System =====================
@@ -5851,10 +6136,10 @@ if true then
     player.CharacterAdded:Connect(
         function(character)
             setupDeathDetection(character)
-            wait(1)
+            task.wait(1)
             _G.PlayerDeth = false
             X = 0.5
-            wait(1)
+            task.wait(1)
             restoreInventory()
             ReloadList()
         end
