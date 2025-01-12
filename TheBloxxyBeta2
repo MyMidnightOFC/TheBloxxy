@@ -35,6 +35,212 @@ if 1 then
         return jsonStr
     end
 
+    function FastAttackOn()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local RunService = game:GetService("RunService")
+        local Net = ReplicatedStorage.Modules.Net
+        local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+        local RegisterHit = Net:WaitForChild("RE/RegisterHit")
+        local LocalPlayer = Players.LocalPlayer
+
+        local COMBAT_CONFIG = {
+            enabled = true,
+            attacksPerTarget = 5,
+            maxTargets = 5,
+            baseRange = 100,
+            minDelay = 0.02,
+            maxDelay = 0.1,
+            hitDelay = 0,
+            randomization = {
+                range = {min = -2, max = 2},
+                timing = {min = -0.05, max = 0.05}
+            }
+        }
+
+        local function GetPrimaryPart(model)
+            return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart") or
+                model:FindFirstChild("Head")
+        end
+
+        local function IsValidTarget(target)
+            if not target then
+                return false
+            end
+
+            local humanoid = target:FindFirstChildOfClass("Humanoid")
+            if not humanoid or humanoid.Health <= 0 then
+                return false
+            end
+
+            local targetPlayer = Players:GetPlayerFromCharacter(target)
+            if targetPlayer and (targetPlayer.Team == LocalPlayer.Team and tostring(LocalPlayer.Team) == "Marines") then
+                return false
+            end
+
+            return true
+        end
+
+        local function GetPlayerTargets()
+            local targets = {}
+            local character = LocalPlayer.Character
+            if not character or not character.PrimaryPart then
+                return targets
+            end
+
+            local charPos = character.PrimaryPart.Position
+
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    local playerCharacter = player.Character
+                    if playerCharacter and IsValidTarget(playerCharacter) then
+                        local primaryPart = GetPrimaryPart(playerCharacter)
+                        if primaryPart then
+                            local distance = (primaryPart.Position - charPos).Magnitude
+                            local range =
+                                COMBAT_CONFIG.baseRange +
+                                math.random(
+                                    COMBAT_CONFIG.randomization.range.min,
+                                    COMBAT_CONFIG.randomization.range.max
+                                )
+
+                            if distance <= range then
+                                table.insert(
+                                    targets,
+                                    {
+                                        part = primaryPart,
+                                        distance = distance
+                                    }
+                                )
+                            end
+                        end
+                    end
+                end
+            end
+
+            return targets
+        end
+
+        local function GetNearbyTargets()
+            local character = LocalPlayer.Character
+            if not character or not character.PrimaryPart then
+                return {}
+            end
+
+            local charPos = character.PrimaryPart.Position
+            local targets = {}
+
+            -- Adiciona inimigos do jogo
+            for _, folder in ipairs({workspace.Enemies}) do
+                if folder then
+                    for _, entity in ipairs(folder:GetChildren()) do
+                        if entity ~= character and IsValidTarget(entity) then
+                            local primaryPart = GetPrimaryPart(entity)
+                            if primaryPart then
+                                local distance = (primaryPart.Position - charPos).Magnitude
+                                local range =
+                                    COMBAT_CONFIG.baseRange +
+                                    math.random(
+                                        COMBAT_CONFIG.randomization.range.min,
+                                        COMBAT_CONFIG.randomization.range.max
+                                    )
+                                if distance <= range then
+                                    table.insert(
+                                        targets,
+                                        {
+                                            part = primaryPart,
+                                            distance = distance
+                                        }
+                                    )
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Adiciona jogadores detectados com certeza
+            for _, playerTarget in ipairs(GetPlayerTargets()) do
+                table.insert(targets, playerTarget)
+            end
+
+            -- Ordena por distância
+            table.sort(
+                targets,
+                function(a, b)
+                    return a.distance < b.distance
+                end
+            )
+            return targets
+        end
+
+        local function PerformAttackSequence(targets)
+            if #targets == 0 then
+                return
+            end
+            RegisterAttack:FireServer()
+            for i = 1, math.min(#targets, COMBAT_CONFIG.maxTargets) do
+                local target = targets[i]
+                for _ = 1, COMBAT_CONFIG.attacksPerTarget do
+                    RegisterHit:FireServer(target.part)
+                    task.wait(COMBAT_CONFIG.hitDelay + math.random() * COMBAT_CONFIG.randomization.timing.max)
+                end
+            end
+        end
+
+        local lastAttackTime = 0
+        local function CombatLoop()
+            if not COMBAT_CONFIG.enabled then
+                return
+            end
+
+            local now = tick()
+            local baseDelay = math.random(COMBAT_CONFIG.minDelay * 100, COMBAT_CONFIG.maxDelay * 100) / 100
+
+            if now - lastAttackTime >= baseDelay then
+                local targets = GetNearbyTargets()
+                PerformAttackSequence(targets)
+                lastAttackTime = now
+            end
+        end
+
+        local combatConnection
+        local characterConnection
+
+        function Cleanup()
+            if combatConnection then
+                combatConnection:Disconnect()
+                combatConnection = nil
+            end
+            if characterConnection then
+                characterConnection:Disconnect()
+                characterConnection = nil
+            end
+        end
+
+        local function SetupCombat()
+            Cleanup()
+
+            combatConnection = RunService.Heartbeat:Connect(CombatLoop)
+        end
+
+        characterConnection =
+            LocalPlayer.CharacterAdded:Connect(
+            function()
+                task.wait(0.5)
+                SetupCombat()
+            end
+        )
+
+        SetupCombat()
+    end
+
+    function FastAttackOff()
+        if Cleanup then
+            Cleanup()
+        end
+    end
+
     function round(num)
         return math.floor(tonumber(num) + 0.5)
     end
@@ -884,8 +1090,7 @@ if 1 then
             local direction = (targetPosition - currentPosition).Unit
             local distance = (targetPosition - currentPosition).Magnitude
 
-           
-                sphere.Position = targetPosition
+            sphere.Position = targetPosition
         end
 
         -- Função para fazer a esfera mudar de cor gradualmente
@@ -1039,8 +1244,8 @@ if 1 then
     end
 
     function FendaDimensional()
-        
-            NotificationMenuGame("{color1_Purple}<Universal Dimensional Rift>{color1_/}")
+        NotificationMenuGame(" ")
+        NotificationMenuGame("{color1_Purple}<Universal Dimensional Rift>{color1_/}")
 
         -- Adiciona os efeitos na Lighting
         local Lighting = game:GetService("Lighting")
@@ -1048,7 +1253,7 @@ if 1 then
         -- Criando os efeitos
         local fendaColor = Instance.new("ColorCorrectionEffect")
         fendaColor.Name = "FendaColor"
-        fendaColor.TintColor = Color3.fromRGB(230, 230, 230) -- Cor roxa mais clara
+        fendaColor.TintColor = Color3.fromRGB(180, 120, 255) -- Cor roxa mais clara
         fendaColor.Saturation = 0 -- Saturação moderada
         fendaColor.Contrast = 0 -- Contraste leve
 
@@ -1065,49 +1270,51 @@ if 1 then
         function animateTintColor(effect, targetColor, duration)
             local TweenService = game:GetService("TweenService")
 
-            local tweenInfo = TweenInfo.new(
+            local tweenInfo =
+                TweenInfo.new(
                 duration, -- Duração da animação em segundos
                 Enum.EasingStyle.Quad, -- Tipo de suavização
                 Enum.EasingDirection.Out -- Direção da animação
             )
-        
+
             local goal = {
-                TintColor = targetColor, -- Alvo do TintColor
+                TintColor = targetColor -- Alvo do TintColor
             }
-        
+
             local tween = TweenService:Create(effect, tweenInfo, goal)
             tween:Play()
-        
+
             return tween
         end
 
-        spawn(function()
-            animateTintColor(fendaColor, Color3.fromRGB(180, 120, 255), 0.5)
-            task.wait(0.25)
-        fendaColor.Saturation = 1 -- Saturação moderada
+        spawn(
+            function()
+                fendaColor.Saturation = 1 -- Saturação moderada
 
-            while FendaDimensionalValue do
-                fendaColor.Saturation = 1.2
-                fendaBlur.Size = 2.5
-                for i, k in pairs(game.Players.LocalPlayer.PlayerGui.Notifications:GetDescendants()) do
-                    if k:IsA("TextLabel") then
-                        if string.find(k.Text, "Mar") or string.find(k.Text, "Sea") then
-                            k:Destroy()
+                while FendaDimensionalValue do
+                    fendaColor.Saturation = 1.2
+                    fendaBlur.Size = 2.5
+                    for i, k in pairs(game.Players.LocalPlayer.PlayerGui.Notifications:GetDescendants()) do
+                        if k:IsA("TextLabel") then
+                            if string.find(k.Text, "Mar") or string.find(k.Text, "Sea") then
+                                k:Destroy()
+                            end
                         end
                     end
+                    task.wait(0.1)
                 end
-                task.wait(0.1)
-            end
 
-            -- Remove os efeitos após o tempo
-            fendaColor.Saturation = 0
-            fendaColor.Contrast = 0
-            NotificationMenuGame("{color1_Green}<Moments Ago>{color1_/}")
-            fendaBlur:Destroy()
-            animateTintColor(fendaColor, Color3.fromRGB(255, 255, 255), 1) 
-            task.wait(0.5)
-            fendaColor:Destroy()
-        end)
+                -- Remove os efeitos após o tempo
+                fendaColor.Saturation = 0
+                fendaColor.Contrast = 0
+                NotificationMenuGame(" ")
+                NotificationMenuGame("{color1_Green}<Moments Ago>{color1_/}")
+                fendaBlur:Destroy()
+                animateTintColor(fendaColor, Color3.fromRGB(255, 255, 255), 1)
+                task.wait(0.5)
+                fendaColor:Destroy()
+            end
+        )
     end
 
     function invisibleByMidnigth()
@@ -1163,8 +1370,7 @@ if 1 then
                     criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
                     criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
                     RealCharacter.HumanoidRootPart.CFrame = x
-            FendaDimensional()
-
+                    FendaDimensional()
                 end
             )
             -- Leva o personagem real para uma posição muito distante
@@ -1309,8 +1515,8 @@ if 1 then
             _G.Gear = _G.Gear or 0
             -- Criar o Frame para simular a borda
             borderFrame2 = Instance.new("Frame")
-            borderFrame2.Size = UDim2.new(0, 55, 0, 55) -- Um pouco maior que o botão
-            borderFrame2.Position = UDim2.new(1, -100, 0, 35)
+            borderFrame2.Size = UDim2.new(0, 60, 0, 60) -- Um pouco maior que o botão
+            borderFrame2.Position = UDim2.new(1, -100, 0, 30)
             borderFrame2.AnchorPoint = Vector2.new(1, 0)
             borderFrame2.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Cor inicial da borda
             borderFrame2.BackgroundTransparency = 0.865
@@ -1325,10 +1531,10 @@ if 1 then
             -- Criar o botão dentro do Frame
             toggleButton2 = Instance.new("TextButton")
             toggleButton2.Text = "🪂" -- Emoji
-            toggleButton2.Size = UDim2.new(0, 45, 0, 45) -- Menor que o Frame
+            toggleButton2.Size = UDim2.new(0, 50, 0, 50) -- Menor que o Frame
             toggleButton2.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centralizado no Frame
             toggleButton2.AnchorPoint = Vector2.new(0.5, 0.5)
-            toggleButton2.BackgroundTransparency = 0.8
+            toggleButton2.BackgroundTransparency = 0.9
             toggleButton2.BackgroundColor3 = Color3.fromRGB(22, 22, 23) -- Cor de fundo
             toggleButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
             toggleButton2.TextSize = 20
@@ -1443,7 +1649,6 @@ if 1 then
     end
 
     function CreateBar()
-        _G.Gear = _G.SettingTable2.Gear or 1
         local player = game.Players.LocalPlayer
         local screenGui = Instance.new("ScreenGui")
         local playerGui = player:WaitForChild("PlayerGui")
@@ -1603,6 +1808,7 @@ if 1 then
                     )
 
                     if _G.Gear > 4 then
+                        FastAttackOn()
                         GodCombatPower()
                         spawn(
                             function()
@@ -1619,7 +1825,7 @@ if 1 then
 
                     ActivePower()
                 elseif _G.ActiveRace then
-                   -- invisibleByMidnigth()
+                -- invisibleByMidnigth()
                 end
             end
         )
@@ -1673,9 +1879,9 @@ if 1 then
 
                     V = 4.5
                     if _G.Gear > 3 then
-                        V = 2.5
+                        V = 3
                         if _G.Gear > 4 then
-                            V = 1.5
+                            V = 2
                         end
                     end
 
@@ -1799,6 +2005,7 @@ if 1 then
                     toggleButton2:Destroy()
                     toggleButton2 = nil
                     borderFrame2:Destroy()
+                    FastAttackOff()
                 end
                 spawn(
                     function()
@@ -1907,7 +2114,7 @@ if 1 then
             end
 
             if progress <= 70 and _G.ActiveRace then
-                X = 0.006
+                X = 0.002
             end
         end
 
@@ -3577,6 +3784,7 @@ if 1 then
         end
     )
 
+    _G.Gear = _G.SettingTable2.Gear or 1
     print("[Save System] Save system initialized successfully!")
 end
 
@@ -4722,7 +4930,225 @@ if true then
     )
 
     JumpForceFunction()
+    if not _G.Gear < 4 then
+        Script:AddToggle(
+            {
+                Name = "King-King <font color='rgb(50, 250, 30)'>( FastAttack, Power )</font>",
+                Default = _G.SettingTable.KingKing or false,
+                Callback = function(Value)
+                    _G.SettingTable.KingKing = Value
+                    if Value then
+                        FastAttackOn()
+                    else
+                        FastAttackOff()
+                    end
+                end
+            }
+        )
 
+        Script:AddToggle(
+            {
+                Name = "Invisible Toll <font color='rgb(50, 250, 30)'>( Power )</font>",
+                Default = _G.SettingTable.Invisible or false,
+                Callback = function(Value)
+                    _G.SettingTable.Invisible = Value
+                    if Value then
+                        -- Configurações do clone
+                        local Transparency = true
+                        -- Variáveis globais
+                        local Player = game.Players.LocalPlayer
+                        RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+                        IsInvisible = false
+                        IsInvisible2 = false
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character
+                        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                        RealCharacter.Archivable = true
+                        local FakeCharacter
+
+                        -- Função para criar o clone
+                        local function CreateClone()
+                            -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
+
+                            local b =
+                                game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild(
+                                "BodyVelocity"
+                            )
+
+                            if b then
+                                b.P = 0
+                                b.MaxForce = Vector3.new(0, 0, 0)
+                            end
+
+                            FakeCharacter = RealCharacter:Clone()
+
+                            -- Remover propriedades indesejadas do clone
+                            for _, v in pairs(FakeCharacter:GetDescendants()) do
+                                if
+                                    v:IsA("BodyVelocity") or v:IsA("BodyGyro") or v:IsA("BodyPosition") or
+                                        v:IsA("ParticleEmitter")
+                                 then
+                                    v:Destroy() -- Remove as propriedades indesejadas
+                                end
+                            end
+
+                            bodyVelocity2 = Instance.new("BodyVelocity")
+                            bodyVelocity2.MaxForce = Vector3.new(500000, 500000, 500000) -- Força para impedir a gravidade
+                            bodyVelocity2.Velocity = Vector3.new(0, 0, 0) -- Sem movimento inicial
+                            bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
+
+                            -- Posiciona o clone no mesmo lugar que o personagem real
+                            FakeCharacter.Parent = workspace
+                            FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
+                            FakeCharacter.HumanoidRootPart.Anchored = false
+                            FakeCharacter.HumanoidRootPart.Velocity = RealCharacter.HumanoidRootPart.Velocity.Unit * 4
+                            local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 1e7, 0)
+
+                            spawn(
+                                function()
+                                    criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
+                                    criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
+                                    RealCharacter.HumanoidRootPart.CFrame = x
+                                end
+                            )
+                            -- Leva o personagem real para uma posição muito distante
+                            IsInvisible = true
+                            spawn(
+                                function()
+                                    for i = 1, 90 do
+                                        if IsInvisible then
+                                            RealCharacter.HumanoidRootPart.CFrame = x
+                                            task.wait(0.1)
+                                        end
+                                    end
+                                end
+                            )
+
+                            sound5:Play()
+
+                            -- Define a velocidade do clone para ser o dobro da velocidade do personagem real
+                            FakeCharacter.Humanoid.WalkSpeed = RealCharacter.Humanoid.WalkSpeed * 2
+
+                            -- Aplica a transparência ao clone
+                            if Transparency then
+                                for _, v in pairs(FakeCharacter:GetDescendants()) do
+                                    if v:IsA("BasePart") and v.Transparency < 1 then
+                                        v.Transparency = 0.9
+                                    end
+                                end
+                            end
+
+                            -- Copia o Animator do personagem real para o clone
+                            local RealAnimator = RealCharacter:FindFirstChildOfClass("Animator")
+                            if RealAnimator then
+                                local CloneAnimator = RealAnimator:Clone()
+                                CloneAnimator.Parent = FakeCharacter
+                            end
+
+                            -- Desativa scripts locais no clone
+                            for _, v in pairs(RealCharacter:GetChildren()) do
+                                if v:IsA("LocalScript") then
+                                    local clone = v:Clone()
+                                    clone.Disabled = true
+                                    clone.Parent = FakeCharacter
+                                end
+                            end
+
+                            -- Sincroniza a câmera com o clone
+                            workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
+
+                            -- Sincroniza o movimento e o voo do clone com a direção da câmera
+                            DD =
+                                game:GetService("RunService").RenderStepped:Connect(
+                                function()
+                                    local moveDirection2 = humanoid.MoveDirection
+
+                                    if IsInvisible and moveDirection2.Magnitude > 0 then
+                                        bodyVelocity2.Parent = nil
+
+                                        -- Move o clone na direção da câmera
+                                        local camera = workspace.CurrentCamera
+                                        local moveDirection = camera.CFrame.LookVector
+
+                                        -- Determinar se está indo para trás
+                                        local isMovingBackward = moveDirection:Dot(moveDirection2) < 0
+
+                                        -- Ajustar o valor de y
+                                        local adjustedY =
+                                            isMovingBackward and (moveDirection.Y * -1.2) or (moveDirection.Y * 1.4)
+                                        local adjustedV = isMovingBackward and (1.6) or (1.8)
+
+                                        FakeCharacter.HumanoidRootPart.Velocity =
+                                            Vector3.new(moveDirection2.X, adjustedY + 0.35, moveDirection2.Z).Unit *
+                                            (FakeCharacter.Humanoid.WalkSpeed * adjustedV)
+                                    elseif (moveDirection2.Magnitude == 0) and IsInvisible and IsInvisible2 then
+                                        bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
+                                    end
+                                end
+                            )
+                            task.wait(0.2)
+                            IsInvisible2 = true
+                        end
+
+                        -- Função para teleportar o personagem real para a posição do clone e apagar o clone
+                        local function TeleportAndRemoveClone()
+                            if IsInvisible then
+                                DD:Disconnect()
+
+                                RealCharacter.HumanoidRootPart.Velocity =
+                                    FakeCharacter.HumanoidRootPart.Velocity.Unit * 5
+
+                                for _, v in pairs(FakeCharacter:GetDescendants()) do
+                                    if v:IsA("BasePart") and v.Transparency < 1 then
+                                        v.Transparency = 1
+                                    end
+                                end
+
+                                IsInvisible = false
+                                IsInvisible2 = false
+                                FendaDimensionalValue = false
+
+                                sound6:Play()
+
+                                for i = 1, 15 do
+                                    if not IsInvisible then
+                                        RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+                                        task.wait()
+                                    end
+                                end
+
+                                -- Remove o clone e foca a câmera de volta no personagem real
+                                FakeCharacter:Destroy()
+                                workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+                            end
+                        end
+
+                        CreateClone()
+
+                        -- Adiciona o item no inventário e configura a ativação do script
+                        InvisibilityCloak = Instance.new("Tool")
+                        InvisibilityCloak.Name = "Invisibility Tool"
+                        InvisibilityCloak.RequiresHandle = false
+                        InvisibilityCloak.Parent = Player.Backpack
+
+                        InvisibilityCloak.Unequipped:Connect(
+                            function()
+                                if IsInvisible then
+                                    TeleportAndRemoveClone()
+                                end
+                            end
+                        )
+
+                        task.wait(0.05)
+                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(InvisibilityCloak)
+                    else
+                        removeItemFromInventory("Invisibility Tool")
+                    end
+                end
+            }
+        )
+    end
     Script:AddToggle(
         {
             Name = "Infinite Jumps",
