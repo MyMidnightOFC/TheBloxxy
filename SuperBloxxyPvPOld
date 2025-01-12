@@ -5801,7 +5801,9 @@ if true then
         Increase = 1,
         Callback = function(Value)
             _G.SettingTable.Gear = Value
-            NotificationMenuGame("{color1_Green}Need Reload Script{color1_/}")
+            if not (Value == _G.Gear) then
+                NotificationMenuGame("{color1_Green}Need Reload Script{color1_/}")
+            end
         end
 
     }
