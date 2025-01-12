@@ -1,6 +1,10 @@
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
 _G.OrionLib = OrionLib
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+_G.OrionLib = OrionLib
 
+
+local success, err = pcall(function()
 -- ========================== General System ===========================
 if 1 then
     local placeId = game.PlaceId
@@ -46,15 +50,15 @@ if 1 then
 
         local COMBAT_CONFIG = {
             enabled = true,
-            attacksPerTarget = 5,
+            attacksPerTarget = 3,
             maxTargets = 5,
             baseRange = 100,
-            minDelay = 0.02,
-            maxDelay = 0.1,
-            hitDelay = 0,
+            minDelay = 0.07, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+            maxDelay = 0.12, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+            hitDelay = 0.025, -- << Some shit to make sure anti cheat won't reach and ping won't grow
             randomization = {
-                range = {min = -2, max = 2},
-                timing = {min = -0.05, max = 0.05}
+                range = {min = -3, max = 3}, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+                timing = {min = -0.05, max = 0.05} -- << Some shit to make sure anti cheat won't reach and ping won't grow
             }
         }
 
@@ -1316,8 +1320,8 @@ if 1 then
             end
         )
     end
-
-    function invisibleByMidnigth()
+ -- ===================== Invisile ====================
+    if true then
         -- Configurações do clone
         local Transparency = true
         -- Variáveis globais
@@ -1333,7 +1337,7 @@ if 1 then
         local FakeCharacter
 
         -- Função para criar o clone
-        local function CreateClone()
+        function CreateClone()
             -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
 
             local b =
@@ -1452,7 +1456,7 @@ if 1 then
         end
 
         -- Função para teleportar o personagem real para a posição do clone e apagar o clone
-        local function TeleportAndRemoveClone()
+        function TeleportAndRemoveClone()
             if IsInvisible then
                 DD:Disconnect()
                 spawn(
@@ -1488,6 +1492,11 @@ if 1 then
                 workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
             end
         end
+    end
+
+    function invisibleByMidnigth()
+        
+        local player = game.Players.LocalPlayer
 
         CreateClone()
 
@@ -1495,7 +1504,7 @@ if 1 then
         InvisibilityCloak = Instance.new("Tool")
         InvisibilityCloak.Name = "Invisibility Cloak"
         InvisibilityCloak.RequiresHandle = false
-        InvisibilityCloak.Parent = Player.Backpack
+        InvisibilityCloak.Parent = player.Backpack
 
         InvisibilityCloak.Unequipped:Connect(
             function()
@@ -1637,7 +1646,6 @@ if 1 then
                 lastBoostTime = currentTime
             end
         end
-        print("JUMP1")
 
         -- Conecta a função ao evento de pulo
         JumpBoost =
@@ -1882,6 +1890,9 @@ if 1 then
                         V = 3
                         if _G.Gear > 4 then
                             V = 2
+                        if _G.Gear > 5 then
+                            V = 1
+                        end
                         end
                     end
 
@@ -1927,7 +1938,6 @@ if 1 then
                 end
             end
         )
-        print("1")
 
         local function getBarColor(percentage)
             local r, g, b
@@ -2112,9 +2122,18 @@ if 1 then
             else
                 barFrame.Position = UDim2.new(0.5, 0, 0, -20)
             end
-
-            if progress <= 70 and _G.ActiveRace then
-                X = 0.002
+local g =_G.Gear
+if g > 0 then
+ p = 10
+if g > 2 then
+p = 30
+if g > 4 then
+p = 60
+end
+end
+end
+            if progress <= p and _G.ActiveRace then
+                X = 0.003
             end
         end
 
@@ -2228,9 +2247,6 @@ if 1 then
                 function DamageY()
                     _G.MyDamage = _G.MyDamage or 1
                     if not _G.ActiveRace and not _G.PlayerDeth then
-                        print("A " .. (_G.MyDamage / 120))
-                        print("B " .. (_G.CombatTimer / 2))
-                        print("C " .. _G.Players)
                         _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
                     end
                 end
@@ -2910,7 +2926,6 @@ if 1 then
             if targetPlayer then
                 updateTargetPlayer(targetPlayer)
             else
-                print("Jogador não encontrado: " .. newPlayerName)
                 -- Volta para o local player se o jogador não for encontrado
                 updateTargetPlayer(game.Players.LocalPlayer)
             end
@@ -3784,7 +3799,7 @@ if 1 then
         end
     )
 
-    _G.Gear = _G.SettingTable2.Gear or 1
+    _G.Gear = _G.SettingTable.Gear or _G.SettingTable2.Gear or 1
     print("[Save System] Save system initialized successfully!")
 end
 
@@ -4930,7 +4945,7 @@ if true then
     )
 
     JumpForceFunction()
-    if not _G.Gear < 4 then
+    if not (_G.Gear < 6) then
         Script:AddToggle(
             {
                 Name = "King-King <font color='rgb(50, 250, 30)'>( FastAttack, Power )</font>",
@@ -4953,198 +4968,8 @@ if true then
                 Callback = function(Value)
                     _G.SettingTable.Invisible = Value
                     if Value then
-                        -- Configurações do clone
-                        local Transparency = true
-                        -- Variáveis globais
-                        local Player = game.Players.LocalPlayer
-                        RealCharacter = Player.Character or Player.CharacterAdded:Wait()
-                        IsInvisible = false
-                        IsInvisible2 = false
-                        local player = game.Players.LocalPlayer
-                        local character = player.Character
-                        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-                        RealCharacter.Archivable = true
-                        local FakeCharacter
-
-                        -- Função para criar o clone
-                        local function CreateClone()
-                            -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
-
-                            local b =
-                                game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild(
-                                "BodyVelocity"
-                            )
-
-                            if b then
-                                b.P = 0
-                                b.MaxForce = Vector3.new(0, 0, 0)
-                            end
-
-                            FakeCharacter = RealCharacter:Clone()
-
-                            -- Remover propriedades indesejadas do clone
-                            for _, v in pairs(FakeCharacter:GetDescendants()) do
-                                if
-                                    v:IsA("BodyVelocity") or v:IsA("BodyGyro") or v:IsA("BodyPosition") or
-                                        v:IsA("ParticleEmitter")
-                                 then
-                                    v:Destroy() -- Remove as propriedades indesejadas
-                                end
-                            end
-
-                            bodyVelocity2 = Instance.new("BodyVelocity")
-                            bodyVelocity2.MaxForce = Vector3.new(500000, 500000, 500000) -- Força para impedir a gravidade
-                            bodyVelocity2.Velocity = Vector3.new(0, 0, 0) -- Sem movimento inicial
-                            bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
-
-                            -- Posiciona o clone no mesmo lugar que o personagem real
-                            FakeCharacter.Parent = workspace
-                            FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
-                            FakeCharacter.HumanoidRootPart.Anchored = false
-                            FakeCharacter.HumanoidRootPart.Velocity = RealCharacter.HumanoidRootPart.Velocity.Unit * 4
-                            local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 1e7, 0)
-
-                            spawn(
-                                function()
-                                    criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
-                                    criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
-                                    RealCharacter.HumanoidRootPart.CFrame = x
-                                end
-                            )
-                            -- Leva o personagem real para uma posição muito distante
-                            IsInvisible = true
-                            spawn(
-                                function()
-                                    for i = 1, 90 do
-                                        if IsInvisible then
-                                            RealCharacter.HumanoidRootPart.CFrame = x
-                                            task.wait(0.1)
-                                        end
-                                    end
-                                end
-                            )
-
-                            sound5:Play()
-
-                            -- Define a velocidade do clone para ser o dobro da velocidade do personagem real
-                            FakeCharacter.Humanoid.WalkSpeed = RealCharacter.Humanoid.WalkSpeed * 2
-
-                            -- Aplica a transparência ao clone
-                            if Transparency then
-                                for _, v in pairs(FakeCharacter:GetDescendants()) do
-                                    if v:IsA("BasePart") and v.Transparency < 1 then
-                                        v.Transparency = 0.9
-                                    end
-                                end
-                            end
-
-                            -- Copia o Animator do personagem real para o clone
-                            local RealAnimator = RealCharacter:FindFirstChildOfClass("Animator")
-                            if RealAnimator then
-                                local CloneAnimator = RealAnimator:Clone()
-                                CloneAnimator.Parent = FakeCharacter
-                            end
-
-                            -- Desativa scripts locais no clone
-                            for _, v in pairs(RealCharacter:GetChildren()) do
-                                if v:IsA("LocalScript") then
-                                    local clone = v:Clone()
-                                    clone.Disabled = true
-                                    clone.Parent = FakeCharacter
-                                end
-                            end
-
-                            -- Sincroniza a câmera com o clone
-                            workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
-
-                            -- Sincroniza o movimento e o voo do clone com a direção da câmera
-                            DD =
-                                game:GetService("RunService").RenderStepped:Connect(
-                                function()
-                                    local moveDirection2 = humanoid.MoveDirection
-
-                                    if IsInvisible and moveDirection2.Magnitude > 0 then
-                                        bodyVelocity2.Parent = nil
-
-                                        -- Move o clone na direção da câmera
-                                        local camera = workspace.CurrentCamera
-                                        local moveDirection = camera.CFrame.LookVector
-
-                                        -- Determinar se está indo para trás
-                                        local isMovingBackward = moveDirection:Dot(moveDirection2) < 0
-
-                                        -- Ajustar o valor de y
-                                        local adjustedY =
-                                            isMovingBackward and (moveDirection.Y * -1.2) or (moveDirection.Y * 1.4)
-                                        local adjustedV = isMovingBackward and (1.6) or (1.8)
-
-                                        FakeCharacter.HumanoidRootPart.Velocity =
-                                            Vector3.new(moveDirection2.X, adjustedY + 0.35, moveDirection2.Z).Unit *
-                                            (FakeCharacter.Humanoid.WalkSpeed * adjustedV)
-                                    elseif (moveDirection2.Magnitude == 0) and IsInvisible and IsInvisible2 then
-                                        bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
-                                    end
-                                end
-                            )
-                            task.wait(0.2)
-                            IsInvisible2 = true
-                        end
-
-                        -- Função para teleportar o personagem real para a posição do clone e apagar o clone
-                        local function TeleportAndRemoveClone()
-                            if IsInvisible then
-                                DD:Disconnect()
-
-                                RealCharacter.HumanoidRootPart.Velocity =
-                                    FakeCharacter.HumanoidRootPart.Velocity.Unit * 5
-
-                                for _, v in pairs(FakeCharacter:GetDescendants()) do
-                                    if v:IsA("BasePart") and v.Transparency < 1 then
-                                        v.Transparency = 1
-                                    end
-                                end
-
-                                IsInvisible = false
-                                IsInvisible2 = false
-                                FendaDimensionalValue = false
-
-                                sound6:Play()
-
-                                for i = 1, 15 do
-                                    if not IsInvisible then
-                                        RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
-                                        task.wait()
-                                    end
-                                end
-
-                                -- Remove o clone e foca a câmera de volta no personagem real
-                                FakeCharacter:Destroy()
-                                workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
-                            end
-                        end
-
-                        CreateClone()
-
-                        -- Adiciona o item no inventário e configura a ativação do script
-                        InvisibilityCloak = Instance.new("Tool")
-                        InvisibilityCloak.Name = "Invisibility Tool"
-                        InvisibilityCloak.RequiresHandle = false
-                        InvisibilityCloak.Parent = Player.Backpack
-
-                        InvisibilityCloak.Unequipped:Connect(
-                            function()
-                                if IsInvisible then
-                                    TeleportAndRemoveClone()
-                                end
-                            end
-                        )
-
-                        task.wait(0.05)
-                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(InvisibilityCloak)
                     else
-                        removeItemFromInventory("Invisibility Tool")
-                    end
+                 end
                 end
             }
         )
@@ -5286,11 +5111,10 @@ if true then
                             local character = player.Character
                             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-                            bodyVelocity = bodyVelocity or humanoidRootPart:FindFirstChild("BodyVelocity")
+                            bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
                             if bodyVelocity then
                                 if UsesSkills(NameMelee(), "Z") then
                                 else
-                                    savedBodyVelocity = bodyVelocity:Clone()
 
                                     bodyVelocity.P = 0
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
@@ -5978,6 +5802,26 @@ if true then
         }
     )
 
+    Utilities:AddSlider(
+    {
+        Name = "Your Gear <font color='rgb(50, 250, 30)'>( Limited Timer )</font> ",
+        MinValue = 1,
+        MaxValue = 6,
+        Default = _G.SettingTable.Gear or 1,
+        Increase = 1,
+        Callback = function(Value)
+            _G.SettingTable.Gear = Value
+            if not (Value == _G.Gear) and not ReloadAlert then
+                ReloadAlert = true
+                NotificationMenuGame("{color1_Green}Need Reload Script{color1_/}")
+                task.wait(2)
+                ReloadAlert = false
+            end
+        end
+
+    }
+)
+
     Utilities:AddToggle(
         {
             Name = "Super Graphics <font color='rgb(250, 50, 60)'>( Not Recommended... )</font>",
@@ -6570,4 +6414,16 @@ if true then
             ReloadList()
         end
     )
+end
+
+end)
+
+if not success then
+    OrionLib:MakeNotification({
+        Name = "Meu pau no seu cú kika: ",
+        Content = err,
+        Image = "rbxassetid://4483345998",
+        Time = 15
+    })
+    
 end
