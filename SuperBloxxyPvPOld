@@ -50,15 +50,15 @@ if 1 then
 
         local COMBAT_CONFIG = {
             enabled = true,
-            attacksPerTarget = 5,
+            attacksPerTarget = 3,
             maxTargets = 5,
             baseRange = 100,
-            minDelay = 0.02,
-            maxDelay = 0.1,
-            hitDelay = 0,
+            minDelay = 0.07, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+            maxDelay = 0.12, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+            hitDelay = 0.025, -- << Some shit to make sure anti cheat won't reach and ping won't grow
             randomization = {
-                range = {min = -2, max = 2},
-                timing = {min = -0.05, max = 0.05}
+                range = {min = -3, max = 3}, -- << Some shit to make sure anti cheat won't reach and ping won't grow
+                timing = {min = -0.05, max = 0.05} -- << Some shit to make sure anti cheat won't reach and ping won't grow
             }
         }
 
@@ -1320,8 +1320,8 @@ if 1 then
             end
         )
     end
-
-    function invisibleByMidnigth()
+ -- ===================== Invisile ====================
+    if true then
         -- Configurações do clone
         local Transparency = true
         -- Variáveis globais
@@ -1337,7 +1337,7 @@ if 1 then
         local FakeCharacter
 
         -- Função para criar o clone
-        local function CreateClone()
+        function CreateClone()
             -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
 
             local b =
@@ -1456,7 +1456,7 @@ if 1 then
         end
 
         -- Função para teleportar o personagem real para a posição do clone e apagar o clone
-        local function TeleportAndRemoveClone()
+        function TeleportAndRemoveClone()
             if IsInvisible then
                 DD:Disconnect()
                 spawn(
@@ -1492,6 +1492,11 @@ if 1 then
                 workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
             end
         end
+    end
+
+    function invisibleByMidnigth()
+        
+        local player = game.Players.LocalPlayer
 
         CreateClone()
 
@@ -1499,7 +1504,7 @@ if 1 then
         InvisibilityCloak = Instance.new("Tool")
         InvisibilityCloak.Name = "Invisibility Cloak"
         InvisibilityCloak.RequiresHandle = false
-        InvisibilityCloak.Parent = Player.Backpack
+        InvisibilityCloak.Parent = player.Backpack
 
         InvisibilityCloak.Unequipped:Connect(
             function()
@@ -1641,7 +1646,6 @@ if 1 then
                 lastBoostTime = currentTime
             end
         end
-        print("JUMP1")
 
         -- Conecta a função ao evento de pulo
         JumpBoost =
@@ -1931,7 +1935,6 @@ if 1 then
                 end
             end
         )
-        print("1")
 
         local function getBarColor(percentage)
             local r, g, b
@@ -2116,9 +2119,18 @@ if 1 then
             else
                 barFrame.Position = UDim2.new(0.5, 0, 0, -20)
             end
-
-            if progress <= 70 and _G.ActiveRace then
-                X = 0.002
+local g =_G.Gear
+if g > 0 then
+ p = 10
+if g > 2 then
+p = 30
+if g > 4 then
+p = 60
+end
+end
+end
+            if progress <= p and _G.ActiveRace then
+                X = 0.003
             end
         end
 
@@ -2232,9 +2244,6 @@ if 1 then
                 function DamageY()
                     _G.MyDamage = _G.MyDamage or 1
                     if not _G.ActiveRace and not _G.PlayerDeth then
-                        print("A " .. (_G.MyDamage / 120))
-                        print("B " .. (_G.CombatTimer / 2))
-                        print("C " .. _G.Players)
                         _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
                     end
                 end
@@ -2914,7 +2923,6 @@ if 1 then
             if targetPlayer then
                 updateTargetPlayer(targetPlayer)
             else
-                print("Jogador não encontrado: " .. newPlayerName)
                 -- Volta para o local player se o jogador não for encontrado
                 updateTargetPlayer(game.Players.LocalPlayer)
             end
@@ -5100,11 +5108,10 @@ if true then
                             local character = player.Character
                             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-                            bodyVelocity = bodyVelocity or humanoidRootPart:FindFirstChild("BodyVelocity")
+                            bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
                             if bodyVelocity then
                                 if UsesSkills(NameMelee(), "Z") then
                                 else
-                                    savedBodyVelocity = bodyVelocity:Clone()
 
                                     bodyVelocity.P = 0
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
@@ -5801,8 +5808,11 @@ if true then
         Increase = 1,
         Callback = function(Value)
             _G.SettingTable.Gear = Value
-            if not (Value == _G.Gear) then
+            if not (Value == _G.Gear) and not ReloadAlert then
+                ReloadAlert = true
                 NotificationMenuGame("{color1_Green}Need Reload Script{color1_/}")
+                task.wait(2)
+                ReloadAlert = false
             end
         end
 
