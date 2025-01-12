@@ -5792,7 +5792,7 @@ if true then
         }
     )
 
-    Script:AddSlider(
+    Utilities:AddSlider(
     {
         Name = "Your Gear <font color='rgb(50, 250, 30)'>( Limited Timer )</font> ",
         MinValue = 1,
