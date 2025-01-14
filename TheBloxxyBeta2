@@ -1617,7 +1617,7 @@ local success, err =
                     if _G.Gear < 5 then
                          pressThreshold = 99999 -- Tempo em segundos para ativar a função secundária
                     else
-                        pressThreshold = 0.3 -- Tempo em segundos para ativar a função secundária
+                        pressThreshold = 0.5 -- Tempo em segundos para ativar a função secundária
                     end
                     local isSecondaryFunctionTriggered = false
 
@@ -1745,6 +1745,7 @@ local success, err =
             end
 
             function CreateBar()
+                _G.PowerBarY = -60
                 local player = game.Players.LocalPlayer
                 local screenGui = Instance.new("ScreenGui")
                 local playerGui = player:WaitForChild("PlayerGui")
@@ -1767,7 +1768,7 @@ local success, err =
 
                 uiScale = Instance.new("UIScale")
                 uiScale.Parent = barFrame
-                uiScale.Scale = 0.9
+                uiScale.Scale = 0.8
 
                 local healthBar = Instance.new("Frame")
                 healthBar.Name = "HealthBar"
@@ -2075,7 +2076,7 @@ local success, err =
                 local function shakeBar(intensity)
                     local randomOffsetX = math.random(-intensity, intensity)
                     local randomOffsetY = math.random(-intensity, intensity)
-                    barFrame.Position = UDim2.new(0.5, randomOffsetX, 0, -20 + randomOffsetY)
+                    barFrame.Position = UDim2.new(0.5, randomOffsetX, 0, _G.PowerBarY + randomOffsetY)
                 end
 
                 function resetBar()
@@ -2087,7 +2088,8 @@ local success, err =
                         percentText.Text = "0%"
                         healthBar.Size = UDim2.new(0, 0, 1, -10)
                         healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                        barFrame.Position = UDim2.new(0.5, 0, 0, -20)
+                        _G.PowerBarY = -20
+                        barFrame.Position = UDim2.new(0.5, 0, 0, -60)
                         NoMax = true
                         maxTime = 180
                         X = 1
@@ -2149,6 +2151,30 @@ local success, err =
 
                     if (_G.PowerPogress < progress) then
                         progress = progress - X
+                    end
+
+                    if _G.PowerPogress > 50 and not AnimPowerBar then
+                        AnimPowerBar = true
+                        local TweenService = game:GetService("TweenService")
+
+                        local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+                        TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -20)}):Play()
+                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.5, 0, 0, 8)}):Play()
+                        
+                        _G.PowerBarY = -20
+                    end
+
+                    if _G.PowerPogress < 50 and AnimPowerBar then
+                        AnimPowerBar = false
+                        local TweenService = game:GetService("TweenService")
+
+                        local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+                        TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -60)}):Play()
+                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -28)}):Play()
+
+                        _G.PowerBarY = -60
                     end
 
                     progress = tonumber(string.format("%.3f", progress))
@@ -2216,7 +2242,7 @@ local success, err =
                             shakeBar(1)
                         end
                     else
-                        barFrame.Position = UDim2.new(0.5, 0, 0, -20)
+                        barFrame.Position = UDim2.new(0.5, 0, 0, _G.PowerBarY)
                     end
                     local g = _G.Gear
                     if g > 0 then
@@ -2303,7 +2329,7 @@ local success, err =
 
                     playersInArea = currentPlayersInArea
                     numberToIncrease = numberToIncrease + math.min(#playersInArea, 2)
-                    _G.Players = numberToIncrease / 3
+                    _G.Players = numberToIncrease / 2
                 end
 
                 spawn(
@@ -2325,7 +2351,7 @@ local success, err =
 
                             InCombatDetect(playerGui)
                             if (_G.InCombat) and not _G.PlayerDeth then
-                                _G.CombatTimer = _G.CombatTimer + 40
+                                _G.CombatTimer = _G.CombatTimer + 20
                             else
                                 _G.CombatTimer = _G.CombatTimer - 2.5
                             end
