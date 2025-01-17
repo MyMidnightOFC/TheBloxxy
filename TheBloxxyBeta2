@@ -1,11 +1,7 @@
-local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
-_G.OrionLib = OrionLib
+print("Script executed correctly in executor.")
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
 _G.OrionLib = OrionLib
 
-local success, err =
-    pcall(
-    function()
         -- ========================== General System ===========================
         if 1 then
             local placeId = game.PlaceId
@@ -328,31 +324,31 @@ local success, err =
             sound2.Volume = 2 -- Ajusta o volume (1 é o máximo)
             sound2.Parent = game.Workspace -- Define o local onde o som será tocado
 
-            local sound1 = Instance.new("Sound")
+            sound1 = Instance.new("Sound")
             sound1.SoundId = "rbxassetid://979751563" -- ID do áudio
             sound1.Looped = false -- Define o loop
             sound1.Volume = 1 -- Ajusta o volume (1 é o máximo)
             sound1.Parent = game.Workspace -- Define o local onde o som será tocado
 
-            local sound3 = Instance.new("Sound")
+            sound3 = Instance.new("Sound")
             sound3.SoundId = "rbxassetid://9116426079" -- ID do áudio
             sound3.Looped = false -- Define o loop
             sound3.Volume = 1 -- Ajusta o volume (1 é o máximo)
             sound3.Parent = game.Workspace -- Define o local onde o som será tocado
 
-            local sound4 = Instance.new("Sound")
+            sound4 = Instance.new("Sound")
             sound4.SoundId = "rbxassetid://6859643048" -- ID do áudio
             sound4.Looped = false -- Define o loop
             sound4.Volume = 1.5 -- Ajusta o volume (1 é o máximo)
             sound4.Parent = game.Workspace -- Define o local onde o som será tocado
 
-            local sound5 = Instance.new("Sound")
+            sound5 = Instance.new("Sound")
             sound5.SoundId = "rbxassetid://2937835489" -- ID do áudio
             sound5.Looped = false -- Define o loop
             sound5.Volume = 1 -- Ajusta o volume (1 é o máximo)
             sound5.Parent = game.Workspace -- Define o local onde o som será tocado
 
-            local sound6 = Instance.new("Sound")
+            sound6 = Instance.new("Sound")
             sound6.SoundId = "rbxassetid://4562690876" -- ID do áudio
             sound6.Looped = false -- Define o loop
             sound6.Volume = 4 -- Ajusta o volume (1 é o máximo)
@@ -697,15 +693,26 @@ local success, err =
                                     part.Material = Enum.Material.Neon
                                     part.CanCollide = false
                                     part.Anchored = true
-                                    part.CFrame =
-                                        humanoidRootPart.CFrame *
+                            
+                                    if _G.EffectsPosition then
+                                        part.CFrame = _G.EffectsPosition *
                                         CFrame.new(
                                             math.random(PowerExplosion * (-1), PowerExplosion),
                                             math.random(PowerExplosion * (-1), PowerExplosion),
                                             math.random(PowerExplosion * (-1), PowerExplosion)
                                         ) *
                                         CFrame.Angles(math.random(), math.random(), math.random())
-
+                                    else
+                                        part.CFrame =
+                                            humanoidRootPart.CFrame *
+                                            CFrame.new(
+                                                math.random(PowerExplosion * (-1), PowerExplosion),
+                                                math.random(PowerExplosion * (-1), PowerExplosion),
+                                                math.random(PowerExplosion * (-1), PowerExplosion)
+                                            ) *
+                                            CFrame.Angles(math.random(), math.random(), math.random())
+                                    end
+                            
                                     local bodyVelocity = Instance.new("BodyVelocity")
                                     bodyVelocity.Velocity =
                                         Vector3.new(
@@ -715,7 +722,7 @@ local success, err =
                                     )
                                     bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
                                     bodyVelocity.Parent = part
-
+                            
                                     local tween =
                                         tweenService:Create(
                                         part,
@@ -728,11 +735,12 @@ local success, err =
                                             part:Destroy()
                                         end
                                     )
-
+                            
                                     part.Parent = parent
                                     debris:AddItem(part, 5) -- Remove a forma após 5 segundos
                                 end
                             end
+                            
 
                             -- Função para criar brilho de tela
                             local function criarBrilho()
@@ -741,6 +749,7 @@ local success, err =
                                 bloom.Threshold = 2.5
                                 bloom.Size = 24
                                 bloom.Parent = game.Lighting
+                                bloomEffect = bloom
                                 return bloom
                             end
 
@@ -1150,9 +1159,9 @@ local success, err =
                 )
 
                 if _G.Gear > 1 then
-                    BollDistance = 200
+                    BollDistance = 160
                     if _G.Gear > 4 then
-                        BollDistance = _G.SettingTable2.Power_TP_Distance or 200
+                        BollDistance = _G.SettingTable2.Power_TP_Distance or 160
                     end
                 else
                     BollDistance = 140
@@ -1365,13 +1374,30 @@ local success, err =
                 local character = player.Character
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
 
-                RealCharacter.Archivable = true
                 local FakeCharacter
 
                 -- Função para criar o clone
                 function CreateClone()
-                    -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
+                    local Player = game.Players.LocalPlayer
+                    RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+                    local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 2e5, 0)
+                            _G.EffectsPosition = RealCharacter.HumanoidRootPart.CFrame
+                            y = _G.EffectsPosition
+                            RealCharacter.HumanoidRootPart.CFrame = x
+                            -- Certifique-se de estar no Studio com "Explorer" e "Properties" abertos.
 
+                            spawn(
+                        function()
+                            for i = 1, 180 do
+                                if IsInvisible then
+                                    RealCharacter.HumanoidRootPart.CFrame = x
+                                    task.wait(0.1)
+                                end
+                            end
+                        end
+                    )
+
+                    RealCharacter.Archivable = true
                     local b =
                         game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild(
                         "BodyVelocity"
@@ -1383,6 +1409,8 @@ local success, err =
                     end
 
                     FakeCharacter = RealCharacter:Clone()
+                    print(RealCharacter)
+                    print(RealCharacter:Clone())
 
                     -- Remover propriedades indesejadas do clone
                     for _, v in pairs(FakeCharacter:GetDescendants()) do
@@ -1401,16 +1429,13 @@ local success, err =
 
                     -- Posiciona o clone no mesmo lugar que o personagem real
                     FakeCharacter.Parent = workspace
-                    FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
-                    FakeCharacter.HumanoidRootPart.Anchored = false
+                    FakeCharacter.HumanoidRootPart.CFrame = y
                     FakeCharacter.HumanoidRootPart.Velocity = RealCharacter.HumanoidRootPart.Velocity.Unit * 4
-                    local x = RealCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 1e7, 0)
 
                     spawn(
                         function()
                             criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
                             criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
-                            RealCharacter.HumanoidRootPart.CFrame = x
                             FendaDimensional()
                         end
                     )
@@ -1497,6 +1522,7 @@ local success, err =
                 function TeleportAndRemoveClone()
                     if IsInvisible then
                         DD:Disconnect()
+                        _G.EffectsPosition = nil
                         spawn(
                             function()
                                 task.wait()
@@ -1527,6 +1553,7 @@ local success, err =
 
                         -- Remove o clone e foca a câmera de volta no personagem real
                         FakeCharacter:Destroy()
+                        FakeCharacter = nil
                         workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
                     end
                 end
@@ -1613,71 +1640,23 @@ local success, err =
                         end
                     )
 
-                    local pressStartTime
-                    if _G.Gear < 5 then
-                         pressThreshold = 99999 -- Tempo em segundos para ativar a função secundária
-                    else
-                        pressThreshold = 0.5 -- Tempo em segundos para ativar a função secundária
-                    end
-                    local isSecondaryFunctionTriggered = false
-
-                    -- Função primária (menos de 1 segundo)
-                    local function executePrimaryFunction()
-                        if not IsInvisible then
-                            invisibleByMidnigth()
-                        else
-                            local player = game.Players.LocalPlayer
-                            local character = player.Character or player.CharacterAdded:Wait()
-                            local humanoid = character:WaitForChild("Humanoid")
-
-                            -- Desequipar o item atual
-                            humanoid:UnequipTools()
-                        end
-                    end
-
-                    -- Função secundária (exatamente 1 segundo)
-                    local function executeSecondaryFunction()
-                        sound4:Play()
-                        for i = 1, 40 do
-                            TPTBP()
-                            task.wait(0.05)
-                        end
-                    end
 
                     -- Detectar quando o botão é pressionado
-                    toggleButton2.MouseButton1Down:Connect(
+                    toggleButton2.MouseButton1Click:Connect(
                         function()
-                            pressStartTime = tick() -- Marca o momento em que o botão foi pressionado
-                            isSecondaryFunctionTriggered = false -- Reseta a variável de controle
-
-                            -- Inicia o monitoramento para a função secundária
-                            task.delay(
-                                pressThreshold,
-                                function()
-                                    if pressStartTime and not isSecondaryFunctionTriggered then
-                                        local pressDuration = tick() - pressStartTime
-                                        if pressDuration >= pressThreshold then
-                                            isSecondaryFunctionTriggered = true
-                                            executeSecondaryFunction() -- Executa a função secundária
-                                        end
-                                    end
-                                end
-                            )
-                        end
-                    )
-
-                    -- Detectar quando o botão é solto
-                    toggleButton2.MouseButton1Up:Connect(
-                        function()
-                            if not isSecondaryFunctionTriggered then
-                                local pressDuration = tick() - pressStartTime
-                                if pressDuration < pressThreshold then
-                                    executePrimaryFunction() -- Executa a função primária
-                                end
+                            if not IsInvisible then
+                                invisibleByMidnigth()
+                            else
+                                local player = game.Players.LocalPlayer
+                                local character = player.Character or player.CharacterAdded:Wait()
+                                local humanoid = character:WaitForChild("Humanoid")
+    
+                                -- Desequipar o item atual
+                                humanoid:UnequipTools()
                             end
-                            pressStartTime = nil -- Reseta o tempo de início
                         end
                     )
+
                 end
             end
 
@@ -1745,7 +1724,7 @@ local success, err =
             end
 
             function CreateBar()
-                _G.PowerBarY = -60
+                _G.PowerBarY = -120
                 local player = game.Players.LocalPlayer
                 local screenGui = Instance.new("ScreenGui")
                 local playerGui = player:WaitForChild("PlayerGui")
@@ -1756,7 +1735,7 @@ local success, err =
                 barFrame.Name = "BarFrame"
                 barFrame.Parent = screenGui
                 barFrame.AnchorPoint = Vector2.new(0.5, 0)
-                barFrame.Position = UDim2.new(0.5, 0, 0, -20)
+                barFrame.Position = UDim2.new(0.5, 0, 0, -120)
                 barFrame.Size = UDim2.new(0, 300, 0, 40)
                 barFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                 barFrame.BackgroundTransparency = 0.32
@@ -1809,7 +1788,7 @@ local success, err =
                 textLabel = Instance.new("TextLabel")
                 textLabel.Parent = screenGui
                 textLabel.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
-                textLabel.Position = UDim2.new(0.35, 0, 0, 8) -- Posição central no topo da tela
+                textLabel.Position = UDim2.new(0.35, 0, 0, -120) -- Posição central no topo da tela
                 textLabel.BackgroundTransparency = 1 -- Sem fundo
                 textLabel.TextColor3 = Color3.new(0, 1, 0) -- Texto verde
                 textLabel.TextStrokeTransparency = 0 -- Contorno no texto
@@ -1826,7 +1805,7 @@ local success, err =
                 textLabel2.TextStrokeTransparency = 0 -- Contorno no texto
                 textLabel2.Text = "+0" -- Texto exibido
                 textLabel2.Font = Enum.Font.FredokaOne -- Fonte fofinha
-                textLabel2.TextSize = 15 -- Tamanho fixo da fonte
+                textLabel2.TextSize = 12 -- Tamanho fixo da fonte
                 textLabel2.Transparency = 1
 
                 -- Criar um TextLabel
@@ -1839,7 +1818,7 @@ local success, err =
                 textLabel3.TextStrokeTransparency = 0 -- Contorno no texto
                 textLabel3.Text = "+0" -- Texto exibido
                 textLabel3.Font = Enum.Font.FredokaOne -- Fonte fofinha
-                textLabel3.TextSize = 15 -- Tamanho fixo da fonte
+                textLabel3.TextSize = 12 -- Tamanho fixo da fonte
                 textLabel3.Transparency = 1
 
                 if _G.Gear == 6 then
@@ -1879,6 +1858,7 @@ local success, err =
                             _G.ACT = true
                             X = 0.01
                             _G.PowerPogress = 0
+                            _G.BarCountdown = false
                             ActiveTP()
 
                             if _G.Gear > 1 and _G.Gear < 4 then
@@ -1911,19 +1891,35 @@ local success, err =
                                     function()
                                         while _G.ActiveRace do
                                             for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
-                                                textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+                                                if not _G.ActiveRace then
+                                                    textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+                                                end
                                                 task.wait(0.05) -- Tempo entre cada passo da transição
                                             end
                                         end
-                                        textLabel.TextColor3 = Color3.new(1, 0, 1)
+                                        if not _G.ActiveRace then
+
+                                         textLabel.TextColor3 = Color3.new(1, 0, 1)
+                                        end
                                     end
                                 )
                             end
 
                             ActivePower()
-                        elseif _G.ActiveRace then
-                        -- invisibleByMidnigth()
+                        elseif _G.ActiveRace and _G.Gear > 4 then
+                            if _G.SPLY then
+                            sound4:Play()
+                            for i = 1, 30 do
+                                TPTBP()
+                                task.wait(0.05)
+                            end
+                        else
+                            NotificationMenuGame("{color1_Red}Skill unavailable.{color2_/}")
                         end
+
+                        
+                        end
+
                     end
                 )
 
@@ -2079,6 +2075,29 @@ local success, err =
                     barFrame.Position = UDim2.new(0.5, randomOffsetX, 0, _G.PowerBarY + randomOffsetY)
                 end
 
+
+                function resetBarTwo()
+                    if Reset then
+                        _G.ACT = false
+                        _G.ActiveRace = false
+                        _G.Race = false
+                        progress = 0
+                        percentText.Text = "0%"
+                        healthBar.Size = UDim2.new(0, 0, 1, -10)
+                        healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                        NoMax = true
+                        numberToIncrease = 0
+                        maxTime = 0
+                        X = 1
+                        damageLog = {}
+                        _G.CombatTimer = 0
+                        task.wait(2)
+                        maxTime = 180
+                        damageLog = {}
+
+                    end
+
+                end
                 function resetBar()
                     if Reset then
                         _G.ACT = false
@@ -2088,10 +2107,8 @@ local success, err =
                         percentText.Text = "0%"
                         healthBar.Size = UDim2.new(0, 0, 1, -10)
                         healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                        _G.PowerBarY = -20
-                        barFrame.Position = UDim2.new(0.5, 0, 0, -60)
                         NoMax = true
-                        maxTime = 180
+                        maxTime = 0
                         X = 1
                         _G.VelcityPower = nil
                         _G.VelcityPower = nil
@@ -2130,6 +2147,12 @@ local success, err =
                                 textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
                             end
                         )
+
+                       _G.CountUnDisponile = true
+                        task.wait(2)
+                        _G.CountUnDisponile = false
+                        maxTime = 180
+
                     end
                 end
 
@@ -2138,7 +2161,19 @@ local success, err =
                         X = 4
                     end
 
-                    if _G.PlayerDeth and not _G.ActiveRace then
+                    if _G.PowerPogress < 50 and AnimPowerBar and not _G.ActiveRace then
+                        AnimPowerBar = false
+                        local TweenService = game:GetService("TweenService")
+
+                        local tweenInfo = TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+                        TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -140)}):Play()
+                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -120)}):Play()
+                        task.wait(3.45)
+                        _G.PowerBarY = -120
+                    end
+
+                    if (_G.PlayerDeth and not _G.ActiveRace) or _G.CountUnDisponile then
                         if progress < 0 then
                             progress = 0
                         end
@@ -2157,25 +2192,16 @@ local success, err =
                         AnimPowerBar = true
                         local TweenService = game:GetService("TweenService")
 
-                        local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+                        local tweenInfo = TweenInfo.new(4.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
                         TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -20)}):Play()
-                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.5, 0, 0, 8)}):Play()
+                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, 8)}):Play()
+                        task.wait(4.45)
                         
                         _G.PowerBarY = -20
                     end
 
-                    if _G.PowerPogress < 50 and AnimPowerBar then
-                        AnimPowerBar = false
-                        local TweenService = game:GetService("TweenService")
-
-                        local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-
-                        TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -60)}):Play()
-                        TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -28)}):Play()
-
-                        _G.PowerBarY = -60
-                    end
+                    
 
                     progress = tonumber(string.format("%.3f", progress))
                     if progress > maxProgress then
@@ -2188,11 +2214,11 @@ local success, err =
                     healthBar.BackgroundColor3 = getBarColor(progress)
 
                     if progress == maxProgress then
-                        percentText.Text = "Click para ativar!!!"
                         _G.Race = true
 
                         if NoMax then
-                            NoMax = false
+                        percentText.Text = "Click para ativar!! - 15"
+                        NoMax = false
                             if _G.Gear > 5 then
                                 spawn(
                                     function()
@@ -2207,7 +2233,31 @@ local success, err =
                                 )
                             end
 
-                            task.delay(resetDelay, resetBar)
+                            T = 15
+                            _G.BarCountdown = true
+                            spawn(function()
+                                        while not _G.ActiveRace and _G.BarCountdown do task.wait(0.9)
+                                    if (not _G.ActiveRace) and _G.BarCountdown then
+                                    T = T -1
+                                    percentText.Text = "Click para ativar!! - " .. T
+                                    if T < 1 then
+                            _G.BarCountdown = false
+                            _G.Race = false
+                                    percentText.Text = "Click para ativar!! - 0"
+                                    task.wait(0.5)
+                                    percentText.Text = "Reseting..."
+                                    task.wait(1)
+                                    resetBarTwo()
+                                    _G.CountUnDisponile = true
+                                    task.wait(2)
+                                    _G.CountUnDisponile = false
+                        print(NameMelee())
+
+                                end
+                                    end
+                                end
+                            end)
+
                         end
                     else
                         percentText.Text = string.format("%.1f%%", progress)
@@ -2342,6 +2392,7 @@ local success, err =
                 )
 
                 _G.CombatTimer = 0
+                _G.MyDamage = 0
                 spawn(
                     function()
                         function Counter1Y()
@@ -2368,7 +2419,7 @@ local success, err =
                     function()
                         function DamageY()
                             _G.MyDamage = _G.MyDamage or 1
-                            if not _G.ActiveRace and not _G.PlayerDeth then
+                if not _G.ActiveRace and not _G.PlayerDeth then
                                 _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
                             end
                         end
@@ -3223,6 +3274,7 @@ local success, err =
                     -- Verifica se o LocalPlayer está vivo
                     if not isPlayerAlive(LocalPlayer) then
                         clearSelection()
+                        
                         -- Aguarda até o jogador reaparecer
                         repeat
                             task.wait()
@@ -3238,6 +3290,10 @@ local success, err =
                             lookStartTime = tick() -- Inicia o tempo de observação
                         elseif tick() - lookStartTime >= lookDuration then
                             -- Se o tempo de observação for atingido, seleciona o jogador
+                            if not (closestPlayerInView == _G.SPLY) then
+                                NotificationMenuGame("{color1_Green}" .. tostring(_G.LockPlayerX.Name) .. "{color1_/} has been selected.")
+                            end
+
                             selectedPlayer = closestPlayerInView
                             _G.SPLY = selectedPlayer
                         end
@@ -3697,7 +3753,8 @@ local success, err =
             end
 
             -- Função para teleportar o LocalPlayer para trás da câmera de outro jogador
-            function TPTBP()
+            function TPTBP(distanceBehind)
+                distanceBehind = distanceBehind or 20
                 if _G.SPLY and _G.SPLY:IsA("Player") and _G.SPLY.Character then
                     local selectedPlayer = _G.SPLY
                     local selectedCharacter = selectedPlayer.Character
@@ -5657,9 +5714,18 @@ local success, err =
                     _G.LockPlayer = not _G.LockPlayer
 
                     if not _G.LockPlayer then
-                        NotificationMenuGame("Unlock Player")
+                        if _G.LockPlayerX and _G.LockPlayerX.Character then
+                        NotificationMenuGame("{color1_Green}" .. tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Green}Unlock{color2_/}.")
+                        else
+                            NotificationMenuGame("Target {color2_Green}Unlock{color2_/}")
+                        end
                     else
-                        NotificationMenuGame("LOCKED PLAYER!!!")
+                        if _G.LockPlayerX and _G.LockPlayerX.Character then
+
+                        NotificationMenuGame("{color1_Green}" .. tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Red}LOCKED{color2_/}.")
+                    else
+                        NotificationMenuGame("Target {color2_Red}LOCKED{color2_/}")
+                    end
                     end
                 end
             end
@@ -5762,7 +5828,7 @@ local success, err =
                 {
                     Name = "Auto Haki!",
                     Description = "Activate Haki automatically when deactivated.",
-                    Default = _G.SettingTable.Haki or true,
+                    Default = _G.SettingTable.Haki or false,
                     Callback = function(Value)
                         _G.SettingTable.Haki = (Value)
                         if Value then
@@ -6478,7 +6544,55 @@ local success, err =
                     local RunService = game:GetService("RunService")
 
                     function SkillFruitX()
-                        if UsesSkills(NameMelee(), "Z") then
+
+                        if UsesSkills(NameMelee(), "Z") and NameMelee() == "Godhuman" and _G.SPLY then
+                            if _G.ActiveRace and _G.Gear > 5 then
+                                sound4:Play()
+                                for i = 1, 10 do
+                                    TPTBP(0)
+                                    task.wait()
+                                end
+                            end
+                        end
+
+                        if UsesSkills(NameMelee(), "X") and NameMelee() == "Electric Claw" and _G.SPLY then
+                            if _G.ActiveRace and _G.Gear > 5 then
+                                sound4:Play()
+                                for i = 1, 10 do
+                                    TPTBP(0)
+                                    task.wait()
+                                end
+                            end
+                        end
+
+                        if UsesSkills(NameMelee(), "C") and NameMelee() == "Electric Claw" and _G.SPLY then
+                            if _G.ActiveRace and _G.Gear > 5 then
+                                sound4:Play()
+                                for i = 1, 10 do
+                                    TPTBP(0)
+                                    task.wait()
+                                end
+                            end
+                        end
+
+                        if UsesSkills(NameMelee(), "Z") and NameMelee() == "Electric Claw" and _G.SPLY then
+                            if _G.ActiveRace and _G.Gear > 5 then
+                                sound4:Play()
+                                for i = 1, 10 do
+                                    TPTBP(0)
+                                    task.wait()
+                                end
+                            end
+                        end
+
+                        if UsesSkills(NameMelee(), "C") and NameMelee() == "Dough-Dough" and _G.SPLY then
+                            if _G.ActiveRace and _G.Gear > 5 then
+                                sound4:Play()
+                                for i = 1, 10 do
+                                    TPTBP(0)
+                                    task.wait()
+                                end
+                            end
                         end
 
                         DF = game:GetService("Players").LocalPlayer.Data.DevilFruit.Value
@@ -6518,7 +6632,9 @@ local success, err =
 
                     RunService.RenderStepped:Connect(
                         function()
+                            spawn(function()
                             SkillFruitX()
+                            end)
                         end
                     )
                 end
@@ -6530,6 +6646,7 @@ local success, err =
                 game,
                 "__namecall",
                 function(self, ...)
+                   
                     if self.Name == "RemoteEvent" and getnamecallmethod():lower() == "fireserver" then
                         local args = {...}
                         local Vector = args[1]
@@ -6549,6 +6666,7 @@ local success, err =
                             end
                         end
                     end
+
                     return oldhook(self, ...)
                 end
             )
@@ -6612,16 +6730,3 @@ local success, err =
                 end
             )
         end
-    end
-)
-
-if not success then
-    OrionLib:MakeNotification(
-        {
-            Name = "Meu pau no seu cú kika: ",
-            Content = err,
-            Image = "rbxassetid://4483345998",
-            Time = 15
-        }
-    )
-end
