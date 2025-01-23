@@ -30,6 +30,16 @@ if 1 then
         DropdownPlayers:Set(Playerslist, true)
     end
 
+    const = 0
+    function Const(X)
+        const = setmetatable({}, {
+            __index = {
+                x = X
+            },
+            __newindex = function() end
+        })
+    end
+
     function VT(tabela)
         local httpService = game:GetService("HttpService")
         local jsonStr = httpService:JSONEncode(tabela)
@@ -37,219 +47,155 @@ if 1 then
     end
 
     function FastAttackOn()
-        ADM_Boost_0 = ADM_Boost_0 or false
         local Players = game:GetService("Players")
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local RunService = game:GetService("RunService")
-        local Net = ReplicatedStorage.Modules.Net
-        local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
-        local RegisterHit = Net:WaitForChild("RE/RegisterHit")
-        local LocalPlayer = Players.LocalPlayer
-        if not ADM_Boost_0 then
-            COMBAT_CONFIG = {
-                enabled = true,
-                attacksPerTarget = 3,
-                maxTargets = 5,
-                baseRange = 100,
-                minDelay = 0.1, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                maxDelay = 0.15, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                hitDelay = 0.035, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                randomization = {
-                    range = {min = -3, max = 3}, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                    timing = {min = -0.1, max = 0.1} -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                }
-            }
-        else
-            COMBAT_CONFIG = {
-                enabled = true,
-                attacksPerTarget = 10,
-                maxTargets = 7,
-                baseRange = 100,
-                minDelay = 0, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                maxDelay = 0.002, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                hitDelay = 0, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                randomization = {
-                    range = {min = -3, max = 3}, -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                    timing = {min = -0.02, max = 0.02} -- << Some shit to make sure anti cheat won't reach and ping won't grow
-                }
-            }
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Net = ReplicatedStorage.Modules.Net
+local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+local RegisterHit = Net:WaitForChild("RE/RegisterHit")
+local LocalPlayer = Players.LocalPlayer
+
+local COMBAT_CONFIG = {
+    enabled = true,
+    attacksPerTarget = 5,
+    maxTargets = 5,
+    baseRange = 500, -- Alcance inicial
+    maxDynamicRange = 2000, -- Alcance dinâmico máximo
+    rangeStep = 100, -- Incremento de alcance dinâmico
+    serverMaxRange = 100, -- Limite presumido do servidor
+    minDelay = 0.025,
+    maxDelay = 0.05,
+    hitDelay = 0.02,
+}
+
+local currentRange = COMBAT_CONFIG.baseRange
+local lastTargetCheck = 0
+local TARGET_CHECK_INTERVAL = 0.1 -- Verifica alvos a cada 0.1 segundos
+
+local function GetPrimaryPart(model)
+    return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
+end
+
+local function IsValidTarget(target)
+    if not target then return false end
+
+    local humanoid = target:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then return false end
+
+    local targetPlayer = Players:GetPlayerFromCharacter(target)
+    if targetPlayer then
+        -- Verifica o time
+        local localTeam = LocalPlayer.Team
+        local targetTeam = targetPlayer.Team
+        if targetTeam == localTeam and localTeam.Name == "Marine" then
+            return false
         end
+    end
+    
+    return true
+end
 
-        local function GetPrimaryPart(model)
-            return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart") or
-                model:FindFirstChild("Head")
-        end
+local function GetNearbyTargets()
+    local character = LocalPlayer.Character
+    if not character or not character.PrimaryPart then return {} end
 
-        local function IsValidTarget(target)
-            if not target then
-                return false
-            end
+    local charPos = character.PrimaryPart.Position
+    local targets = {}
 
-            local humanoid = target:FindFirstChildOfClass("Humanoid")
-            if not humanoid or humanoid.Health <= 0 then
-                return false
-            end
-
-            local targetPlayer = Players:GetPlayerFromCharacter(target)
-            if targetPlayer and (targetPlayer.Team == LocalPlayer.Team and tostring(LocalPlayer.Team) == "Marines") then
-                return false
-            end
-
-            return true
-        end
-
-        local function GetPlayerTargets()
-            local targets = {}
-            local character = LocalPlayer.Character
-            if not character or not character.PrimaryPart then
-                return targets
-            end
-
-            local charPos = character.PrimaryPart.Position
-
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer then
-                    local playerCharacter = player.Character
-                    if playerCharacter and IsValidTarget(playerCharacter) then
-                        local primaryPart = GetPrimaryPart(playerCharacter)
-                        if primaryPart then
-                            local distance = (primaryPart.Position - charPos).Magnitude
-                            local range =
-                                COMBAT_CONFIG.baseRange +
-                                math.random(
-                                    COMBAT_CONFIG.randomization.range.min,
-                                    COMBAT_CONFIG.randomization.range.max
-                                )
-
-                            if distance <= range then
-                                table.insert(
-                                    targets,
-                                    {
-                                        part = primaryPart,
-                                        distance = distance
-                                    }
-                                )
-                            end
+    for _, folder in ipairs({workspace.Characters, workspace.Enemies}) do
+        if folder then
+            for _, entity in ipairs(folder:GetChildren()) do
+                if entity ~= character and IsValidTarget(entity) then
+                    local primaryPart = GetPrimaryPart(entity)
+                    if primaryPart then
+                        local distance = (primaryPart.Position - charPos).Magnitude
+                        if distance <= currentRange then
+                            table.insert(targets, {
+                                part = primaryPart,
+                                distance = math.min(distance, COMBAT_CONFIG.serverMaxRange)
+                            })
                         end
                     end
                 end
             end
+        end
+    end
 
-            return targets
+    table.sort(targets, function(a, b) return a.distance < b.distance end)
+    return targets
+end
+
+local function PerformAttackSequence(targets)
+    if #targets == 0 then return end
+    RegisterAttack:FireServer()
+    for i = 1, math.min(#targets, COMBAT_CONFIG.maxTargets) do
+        local target = targets[i]
+        task.spawn(function()
+        for _ = 1, COMBAT_CONFIG.attacksPerTarget do
+            local adjustedPosition = target.part.Position
+            RegisterHit:FireServer(target.part, adjustedPosition)
+            task.wait(COMBAT_CONFIG.hitDelay)
+        end
+    end)
+    for _ = 1, COMBAT_CONFIG.attacksPerTarget do
+        local adjustedPosition = target.part.Position
+        RegisterHit:FireServer(target.part, adjustedPosition)
+        task.wait(COMBAT_CONFIG.hitDelay)
+    end
+    end
+end
+
+local lastAttackTime = 0
+local function CombatLoop()
+    if not COMBAT_CONFIG.enabled then return end
+    
+    local now = tick()
+    local baseDelay = math.random(
+        COMBAT_CONFIG.minDelay * 100,
+        COMBAT_CONFIG.maxDelay * 100
+    ) / 100
+
+    if now - lastTargetCheck >= TARGET_CHECK_INTERVAL then
+        local targets = GetNearbyTargets()
+
+        -- Expande ou reduz o alcance dinâmico
+        if #targets == 0 and currentRange < COMBAT_CONFIG.maxDynamicRange then
+            currentRange = currentRange + COMBAT_CONFIG.rangeStep
+        elseif #targets > 0 then
+            currentRange = math.max(COMBAT_CONFIG.baseRange, currentRange - COMBAT_CONFIG.rangeStep)
         end
 
-        local function GetNearbyTargets()
-            local character = LocalPlayer.Character
-            if not character or not character.PrimaryPart then
-                return {}
-            end
+        PerformAttackSequence(targets)
+        lastTargetCheck = now
+    end
+end
 
-            local charPos = character.PrimaryPart.Position
-            local targets = {}
+local combatConnection
+local characterConnection
 
-            -- Adiciona inimigos do jogo
-            for _, folder in ipairs({workspace.Enemies}) do
-                if folder then
-                    for _, entity in ipairs(folder:GetChildren()) do
-                        if entity ~= character and IsValidTarget(entity) then
-                            local primaryPart = GetPrimaryPart(entity)
-                            if primaryPart then
-                                local distance = (primaryPart.Position - charPos).Magnitude
-                                local range =
-                                    COMBAT_CONFIG.baseRange +
-                                    math.random(
-                                        COMBAT_CONFIG.randomization.range.min,
-                                        COMBAT_CONFIG.randomization.range.max
-                                    )
-                                if distance <= range then
-                                    table.insert(
-                                        targets,
-                                        {
-                                            part = primaryPart,
-                                            distance = distance
-                                        }
-                                    )
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+function Cleanup()
+    if combatConnection then
+        combatConnection:Disconnect()
+        combatConnection = nil
+    end
+    if characterConnection then
+        characterConnection:Disconnect()
+        characterConnection = nil
+    end
+end
 
-            -- Adiciona jogadores detectados com certeza
-            for _, playerTarget in ipairs(GetPlayerTargets()) do
-                table.insert(targets, playerTarget)
-            end
+local function SetupCombat()
+    Cleanup()
+    combatConnection = RunService.Heartbeat:Connect(CombatLoop)
+end
 
-            -- Ordena por distância
-            table.sort(
-                targets,
-                function(a, b)
-                    return a.distance < b.distance
-                end
-            )
-            return targets
-        end
+characterConnection = LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    SetupCombat()
+end)
 
-        local function PerformAttackSequence(targets)
-            if #targets == 0 then
-                return
-            end
-            RegisterAttack:FireServer()
-            for i = 1, math.min(#targets, COMBAT_CONFIG.maxTargets) do
-                local target = targets[i]
-                for _ = 1, COMBAT_CONFIG.attacksPerTarget do
-                    RegisterHit:FireServer(target.part)
-                    task.wait(COMBAT_CONFIG.hitDelay + math.random() * COMBAT_CONFIG.randomization.timing.max)
-                end
-            end
-        end
+SetupCombat()
 
-        local lastAttackTime = 0
-        local function CombatLoop()
-            if not COMBAT_CONFIG.enabled then
-                return
-            end
-
-            local now = tick()
-            local baseDelay = math.random(COMBAT_CONFIG.minDelay * 100, COMBAT_CONFIG.maxDelay * 100) / 100
-
-            if now - lastAttackTime >= baseDelay then
-                local targets = GetNearbyTargets()
-                PerformAttackSequence(targets)
-                lastAttackTime = now
-            end
-        end
-
-        local combatConnection
-        local characterConnection
-
-        function Cleanup()
-            if combatConnection then
-                combatConnection:Disconnect()
-                combatConnection = nil
-            end
-            if characterConnection then
-                characterConnection:Disconnect()
-                characterConnection = nil
-            end
-        end
-
-        local function SetupCombat()
-            Cleanup()
-
-            combatConnection = RunService.Heartbeat:Connect(CombatLoop)
-        end
-
-        characterConnection =
-            LocalPlayer.CharacterAdded:Connect(
-            function()
-                task.wait(0.5)
-                SetupCombat()
-            end
-        )
-
-        SetupCombat()
     end
 
     function FastAttackOff()
@@ -362,7 +308,7 @@ if 1 then
         local Player = game.Players.LocalPlayer
         local Character = Player.Character or Player.CharacterAdded:Wait()
 
-        spawn(
+        task.spawn(
             function()
                 -- Função para tocar o som
                 sound1:Play()
@@ -376,7 +322,7 @@ if 1 then
 
         _G.Agility = true
 
-        spawn(
+        task.spawn(
             function()
                 function AgilityY()
                     task.wait()
@@ -469,6 +415,64 @@ if 1 then
                     flash:Destroy()
                 end
             )
+
+            -- Criação do ScreenGui
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "StylishBorderGui"
+            screenGui.ResetOnSpawn = true
+            screenGui.IgnoreGuiInset = true -- Garante o contorno exato da tela
+            screenGui.Parent = game:GetService("CoreGui") -- Usa CoreGui para cobrir toda a tela
+
+            -- Criação da Borda
+            local border = Instance.new("Frame")
+            border.Name = "StylishBorder"
+            border.Parent = screenGui
+            border.BackgroundTransparency = 1
+            border.Size = UDim2.new(1, -20, 1, -20) -- Reduz o tamanho para compensar a espessura da borda
+            border.Position = UDim2.new(0, 10, 0, 10) -- Adiciona margem para centralizar corretamente
+
+            -- Cantos Arredondados
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 32) -- Arredondamento equilibrado
+            uiCorner.Parent = border
+
+            -- Contorno da borda
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Parent = border
+            uiStroke.Color = Color3.fromRGB(0, 255, 127) -- Cor inicial (verde claro)
+            uiStroke.Thickness = 15 -- Espessura da borda
+            uiStroke.Transparency = 0.75  -- Transparência ajustada
+            uiStroke.LineJoinMode = Enum.LineJoinMode.Round -- Suaviza os cantos
+            uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- Mantém o contorno dentro dos limites
+
+            -- Função para mudar gradualmente a cor
+            local function lerpColor(color1, color2, alpha)
+                return Color3.new(
+                    color1.R + (color2.R - color1.R) * alpha,
+                    color1.G + (color2.G - color1.G) * alpha,
+                    color1.B + (color2.B - color1.B) * alpha
+                )
+            end
+
+            -- Loop para mudança de cor
+            local colors = {
+                Color3.fromRGB(0, 255, 127), -- Verde claro
+                Color3.fromRGB(255, 0, 127), -- Rosa
+                Color3.fromRGB(0, 127, 255), -- Azul
+                Color3.fromRGB(255, 255, 0) -- Amarelo
+            }
+
+            task.spawn(function()
+                while true do
+                    for i = 1, #colors do
+                        local nextIndex = (i % #colors) + 1
+                        for alpha = 0, 1, 0.035 do -- Gradual de 0 a 1
+                            uiStroke.Color = lerpColor(colors[i], colors[nextIndex], alpha)
+                            task.wait() -- Velocidade da transição (ajuste se necessário)
+                        end
+                    end
+                end
+            end)
 
             local function disableAuraEffect()
                 local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -620,7 +624,7 @@ if 1 then
 
             createAuraEffect()
 
-            spawn(
+            task.spawn(
                 function()
                     -- Configurações iniciais
                     local player = game.Players.LocalPlayer
@@ -805,7 +809,7 @@ if 1 then
                         )
                         -- Partículas contínuas ao redor do jogador
                         local particulasLoop = true
-                        spawn(
+                        task.spawn(
                             function()
                                 while particulasLoop do
                                     criarParticulas2(workspace, 20 * EO, Color3.fromRGB(0, 255, 255), 10, 1)
@@ -969,7 +973,7 @@ if 1 then
                 task.wait()
             end
 
-            spawn(
+            task.spawn(
                 function()
                     -- Função para tocar o som
                     sound3:Play()
@@ -1134,7 +1138,7 @@ if 1 then
             light.Color = targetColor
         end
 
-        spawn(
+        task.spawn(
             function()
                 while true do
                     for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
@@ -1317,7 +1321,7 @@ if 1 then
             return tween
         end
 
-        spawn(
+        task.spawn(
             function()
                 fendaColor.Saturation = 1 -- Saturação moderada
 
@@ -1369,14 +1373,14 @@ if 1 then
             _G.EffectsPosition = RealCharacter.HumanoidRootPart.CFrame
             y = _G.EffectsPosition
             RealCharacter.HumanoidRootPart.CFrame = x
-            spawn(
+            task.spawn(
                 function()
                     FendaDimensional()
                     task.wait(0.2)
                     _G.EffectsPosition = nil
                 end
             )
-            spawn(
+            task.spawn(
                 function()
                     for i = 1, 180 do
                         if IsInvisible then
@@ -1415,7 +1419,7 @@ if 1 then
             FakeCharacter.HumanoidRootPart.CFrame = y
             FakeCharacter.HumanoidRootPart.Velocity = RealCharacter.HumanoidRootPart.Velocity.Unit * 4
 
-            spawn(
+            task.spawn(
                 function()
                     criarFormas(workspace, 60, Color3.fromRGB(0, 0, 255), 15, 2)
                     criarFormas(workspace, 60, Color3.fromRGB(255, 50, 50), 1, 4)
@@ -1423,7 +1427,7 @@ if 1 then
             )
             -- Leva o personagem real para uma posição muito distante
             IsInvisible = true
-            spawn(
+            task.spawn(
                 function()
                     for i = 1, 90 do
                         if IsInvisible then
@@ -1503,7 +1507,7 @@ if 1 then
         function TeleportAndRemoveClone()
             if IsInvisible then
                 DD:Disconnect()
-                spawn(
+                task.spawn(
                     function()
                         task.wait()
                         InvisibilityCloak:Destroy()
@@ -1763,6 +1767,18 @@ if 1 then
         screenGui.Parent = playerGui
 
         -- Criar um TextLabel
+        textLabel0 = Instance.new("TextLabel")
+        textLabel0.Parent = screenGui
+        textLabel0.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
+        textLabel0.Position = UDim2.new(0.35, 0, 0, -15) -- Posição central no topo da tela
+        textLabel0.BackgroundTransparency = 1 -- Sem fundo
+        textLabel0.TextColor3 = Color3.new(0, 1, 0) -- Texto verde
+        textLabel0.TextStrokeTransparency = 0 -- Contorno no texto
+        textLabel0.Text = "0%" -- Texto exibido
+        textLabel0.Font = Enum.Font.FredokaOne -- Fonte fofinha
+        textLabel0.TextSize = 14 -- Tamanho fixo da fonte
+
+        -- Criar um TextLabel
         textLabel = Instance.new("TextLabel")
         textLabel.Parent = screenGui
         textLabel.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
@@ -1796,7 +1812,7 @@ if 1 then
         textLabel3.TextStrokeTransparency = 0 -- Contorno no texto
         textLabel3.Text = "+0" -- Texto exibido
         textLabel3.Font = Enum.Font.FredokaOne -- Fonte fofinha
-        textLabel3.TextSize = 12 -- Tamanho fixo da fonte
+        textLabel3.TextSize = 10 -- Tamanho fixo da fonte
         textLabel3.Transparency = 1
 
         if _G.Gear == 6 then
@@ -1859,7 +1875,7 @@ if 1 then
                     textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
                     textLabel3.Position = UDim2.new(0.35, 100, 0, 8) -- Posição central no topo da tela
 
-                    spawn(
+                    task.spawn(
                         function()
                             for i = 1, 0, -0.1 do
                                 textLabel2.Transparency = i
@@ -1873,7 +1889,7 @@ if 1 then
 
                     if _G.Gear > 4 then
                         GodCombatPower()
-                        spawn(
+                        task.spawn(
                             function()
                                 while _G.ActiveRace or true do
                                     for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
@@ -1978,7 +1994,7 @@ end
                 return baseY
             end
         end
-        spawn(
+        task.spawn(
             function()
                 function CheckVelocityY()
                     if not _G.ActiveRace then
@@ -1993,19 +2009,17 @@ end
                         if _G.Gear > 4 then
                             V = 2
                             if _G.Gear > 5 then
-                                V = 1
+                                V = 1.2
                                 if ADM_Boost_0 then
                                     V = 0.7
                                 end
                             end
                         end
                     end
-
                     if _G.Gear > 2 then
                         _G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 450) / V)
-
                         if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
-                            XX = (_G.VelcityPower / 2) + _G.SettingTable.SafeMode_Speed
+                            XX = _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) + math.max(ChecksVelocity(_G.MyDamage) - 280, 0) 
                         else
                             XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
                         end
@@ -2107,9 +2121,12 @@ end
                 X = 0.5 -- X
                 damageLog = {}
                 _G.CombatTimer = 0
-                task.wait(2)
+                local existingGui = game:GetService("CoreGui"):FindFirstChild("StylishBorderGui")
+                if existingGui then
+                    existingGui:Destroy() 
+                end
+                task.wait(8)
                 maxTime = 180
-                damageLog = {}
                 percentText.TextSize = 16.5
             end
         end
@@ -2148,7 +2165,7 @@ end
                 if _G.Gear > 5 then
                     FastAttackOff()
                 end
-                spawn(
+                task.spawn(
                     function()
                         for i = 0, 1, 0.1 do
                             textLabel3.Transparency = i
@@ -2164,8 +2181,13 @@ end
                     end
                 )
 
+                local existingGui = game:GetService("CoreGui"):FindFirstChild("StylishBorderGui")
+                if existingGui then
+                    existingGui:Destroy() 
+                end
+
                 _G.CountUnDisponile = true
-                task.wait(2)
+                task.wait(8)
                 _G.CountUnDisponile = false
                 maxTime = 180
             end
@@ -2184,6 +2206,7 @@ end
 
                 TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -140)}):Play()
                 TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -35)}):Play()
+                TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -17)}):Play()
                 task.wait(3.45)
                 _G.PowerBarY = -120
             end
@@ -2216,6 +2239,7 @@ end
 
                 TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -20)}):Play()
                 TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, 8)}):Play()
+                TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -100)}):Play()
                 task.wait(4.45)
 
                 _G.PowerBarY = -20
@@ -2231,10 +2255,11 @@ end
             healthBar.Size = UDim2.new(math.max(progressPercent, 0.065), -10, 1, -10)
             healthBar.BackgroundColor3 = getBarColor(progress)
 
-            if _G.PowerPogress < 75 and not _G.ActiveRace then
-                textLabel.Text = GearOriginalText .. " (" .. math.floor(progress) .. "%)"
-            else
+            if _G.PowerPogress < 100 and not _G.ActiveRace then
                 textLabel.Text = GearOriginalText
+                textLabel0.Text = "( " .. math.floor(progress) .. "% )"
+            else
+                textLabel0.Text = "( 100% )"
             end
 
             if progress == maxProgress then
@@ -2245,7 +2270,7 @@ end
                     percentText.Text = "Click para ativar!!"
                     NoMax = false
                     if _G.Gear > 5 then
-                        spawn(
+                        task.spawn(
                             function()
                                 while _G.Race do
                                     for i = 0, 1, 0.005 do -- Incremento suave para criar a transição
@@ -2260,7 +2285,7 @@ end
 
                     T = 20
                     _G.BarCountdown = true
-                    spawn(
+                    task.spawn(
                         function()
                             while not _G.ActiveRace and _G.BarCountdown do
                                 task.wait(0.9)
@@ -2370,7 +2395,7 @@ end
 
         humanoid.HealthChanged:Connect(
             function(newHealth)
-                if newHealth < lastHealth and not _G.PlayerDeth then
+                if newHealth < lastHealth then
                     local damage = lastHealth - newHealth
                     table.insert(damageLog, {damage = damage, timestamp = os.clock()})
                 end
@@ -2396,7 +2421,7 @@ end
                  then
                     local distance = getDistance(game.Players.LocalPlayer, player)
 
-                    if distance <= maxDistance and not _G.PlayerDeth then
+                    if distance <= maxDistance then
                         table.insert(currentPlayersInArea, player)
                     end
                 end
@@ -2407,7 +2432,7 @@ end
             _G.Players = numberToIncrease
         end
 
-        spawn(
+        task.spawn(
             function()
                 while true do
                     checkPlayersInArea()
@@ -2418,7 +2443,7 @@ end
 
         _G.CombatTimer = 0
         _G.MyDamage = 0
-        spawn(
+        task.spawn(
             function()
                 function Counter1Y()
                     cleanUpDamageLog()
@@ -2440,7 +2465,7 @@ end
             end
         )
 
-        spawn(
+        task.spawn(
             function()
                 function DamageY()
                     _G.MyDamage = _G.MyDamage or 1
@@ -2676,7 +2701,7 @@ end
         tool.Parent = plr.Backpack
     end
 
-    spawn(
+    task.spawn(
         function()
             pcall(
                 function()
@@ -2930,7 +2955,7 @@ end
             _G.highlightEnabled = _G.highlightEnabled
 
             if _G.highlightEnabled then
-                spawn(
+                task.spawn(
                     function()
                         function HiGH()
                             for _, player in ipairs(Players:GetPlayers()) do
@@ -3141,7 +3166,7 @@ end
         end
     end
 
-    spawn(
+    task.spawn(
         function()
             function OJOY()
                 if (next(_G.OJO_SV) == nil) then
@@ -3344,7 +3369,7 @@ end
         )
     end
 
-    spawn(
+    task.spawn(
         function()
             function OJOVSY()
                 if (next(_G.OJO_VS) == nil) then
@@ -3369,7 +3394,7 @@ end
 
     function AutoSuperHaki()
         -- Verifica se a variável global SafeRepeatLFV está ativa
-        spawn(
+        task.spawn(
             function()
                 while true do
                     if (_G.SettingTable.Haki) then
@@ -3743,6 +3768,10 @@ end
         end
     end
 
+    function print(X)
+        NotificationMenuGame(X, "", 5)
+    end
+
     local player = game.Players.LocalPlayer
     local distanceBehind = 20 -- Distância atrás do jogador selecionado
     local minHeightFromGround = 4500 -- Altura mínima para ajuste de posição
@@ -3842,7 +3871,7 @@ end
     end
 
     ReloadList = function()
-        spawn(
+        task.spawn(
             function()
                 if (NameGun()) then
                     EquipWeapon(NameGun())
@@ -4004,7 +4033,7 @@ if 1 then
         }
     end
     -- Periodic auto-save
-    spawn(
+    task.spawn(
         function()
             while true do
                 task.wait(1) -- Automatically saves every second
@@ -4099,7 +4128,7 @@ if 1 then
 
                 if Value then
                     CreateHighlightV1()
-                    spawn(
+                    task.spawn(
                         function()
                             while _G.SettingTable.LigthV1 do
                                 task.wait(1)
@@ -4144,7 +4173,7 @@ if 1 then
                         end
                     )
                 end
-                spawn(
+                task.spawn(
                     function()
                         while _G.SettingTable.AimbotV2 do
                             task.wait()
@@ -4195,7 +4224,7 @@ if 1 then
                         end
                     )
                 end
-                spawn(
+                task.spawn(
                     function()
                         while _G.SettingTable.AimbotV1 do
                             task.wait()
@@ -4253,7 +4282,7 @@ if 1 then
     local ReloadInterval = 10
     local Timer = ReloadInterval + 1
 
-    spawn(
+    task.spawn(
         function()
             function UpdateListY()
                 Timer = Timer - 1
@@ -4394,7 +4423,7 @@ if true then
         }
     )
 
-    spawn(
+    task.spawn(
         function()
             pcall(
                 function()
@@ -4434,7 +4463,7 @@ if true then
                 _G.GlobalSafeMode = Value
 
                 if (Value) then
-                    spawn(
+                    task.spawn(
                         function()
                             function GlobalSafeModeY()
                                 if _G.GlobalSafeMode and not _G.PlayerDeth then
@@ -5091,6 +5120,7 @@ if true then
             Increase = 1,
             Callback = function(Value)
                 _G.SettingTable.SafeMode_Speed = (Value)
+                Angel_Z = Value
             end
         }
     )
@@ -5246,7 +5276,7 @@ if true then
                 _G.SettingTable.Agility = (Value)
                 if (Value) then
                     -- Loop contínuo para controlar a movimentação do jogador baseado no analógico
-                    spawn(
+                    task.spawn(
                         function()
                             _G.BoostY = false
 
@@ -5265,7 +5295,7 @@ if true then
 
                                                 if (moveDirection.Magnitude > 0 and not _G.MinkV7) then
                                                     if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
-                                                        XX = (_G.VelcityPower / 2) + _G.SettingTable.SafeMode_Speed
+                                                        XX = _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) + math.max(ChecksVelocity(_G.MyDamage) - 280, 0) 
                                                     else
                                                         XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
                                                     end
@@ -5332,7 +5362,7 @@ if true then
             Callback = function(Value)
                 _G.SettingTable.Stun = Value
 
-                spawn(
+                task.spawn(
                     function()
                         local RunService = game:GetService("RunService")
                         function NoStunX()
@@ -5883,7 +5913,7 @@ if true then
     )
 
     function MinkV7Function()
-        spawn(
+        task.spawn(
             function()
                 function MINKV7Y()
                     local player = game.Players.LocalPlayer
@@ -6060,7 +6090,7 @@ if true then
                 if Value then
                     _G.CountUnDisponile = true
                     CreateBar()
-                    task.wait(10)
+                    task.wait(0)
                     _G.CountUnDisponile = false
                 end
             end
@@ -6544,7 +6574,7 @@ if true then
     Dough_V = false
     CDK_Z = 0
     startTime = tick()
-    spawn(
+    task.spawn(
         function()
             local RunService = game:GetService("RunService")
 
@@ -6648,7 +6678,7 @@ if true then
 
             RunService.RenderStepped:Connect(
                 function()
-                    spawn(
+                    task.spawn(
                         function()
                             SkillFruitX()
                         end
@@ -6707,7 +6737,7 @@ if true then
         end
     end
 
-    spawn(UpdateWaponList)
+    task.spawn(UpdateWaponList)
 end
 
 --================== Deth System =====================
