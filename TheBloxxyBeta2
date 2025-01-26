@@ -1,4 +1,4 @@
---[[ I'm Bloxxy/Midnight and I just put this here to state that I have the complete source code to prove my identity as the owner of the script. ]]--
+--[[ I'm Bloxxy/Midnight and I just put this here to state that I have the complete source code to prove my identity as the owner of the script. ]] --
 
 print("Script executed correctly in executor.")
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
@@ -16,6 +16,9 @@ elseif placeId == 7449423635 then
 SEA = "3"
 end
 
+workspace = game.Workspace
+HttpService = game:GetService("HttpService")
+
 if (SEA == "") then
 while true do
 task.wait()
@@ -32,14 +35,45 @@ end
 DropdownPlayers:Set(Playerslist, true)
 end
 
+-- Criação do texto na tela do jogador local
+player = game.Players.LocalPlayer
+playerGui = player:WaitForChild("PlayerGui") -- Garante que o PlayerGui está carregado
+
+-- Criar um ScreenGui
+screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CuteTextGui"
+screenGui.Parent = playerGui
+
+InfoText = Instance.new("TextLabel")
+InfoText.Parent = screenGui
+InfoText.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
+InfoText.Position = UDim2.new(0.35, 225, 0, 330) -- Posição central no topo da tela
+InfoText.BackgroundTransparency = 1 -- Sem fundo
+InfoText.TextColor3 = Color3.new(0, 1, 0) -- Texto verde
+InfoText.TextStrokeTransparency = 0 -- Contorno no texto
+InfoText.Text = "" -- Texto exibido
+InfoText.Font = Enum.Font.FredokaOne -- Fonte fofinha
+InfoText.TextSize = 16 -- Tamanho fixo da fonte
+
+function ColorByPercent(percentage)
+local red = 1 - (percentage / 100) -- Reduz o vermelho conforme a porcentagem aumenta
+local green = percentage / 100    -- Aumenta o verde conforme a porcentagem aumenta
+return Color3.new(red, green, 0)  -- Azul é sempre 0
+end
+
 const = 0
 function Const(X)
-const = setmetatable({}, {
+const =
+setmetatable(
+{},
+{
 __index = {
 x = X
 },
-__newindex = function() end
-})
+__newindex = function()
+end
+}
+)
 end
 
 function VT(tabela)
@@ -123,26 +157,26 @@ for _, player in ipairs(Players:GetPlayers()) do
 if player ~= LocalPlayer then
 local playerCharacter = player.Character
 if playerCharacter and IsValidTarget(playerCharacter) then
-  local primaryPart = GetPrimaryPart(playerCharacter)
-  if primaryPart then
-      local distance = (primaryPart.Position - charPos).Magnitude
-      local range =
-          COMBAT_CONFIG.baseRange +
-          math.random(
-              COMBAT_CONFIG.randomization.range.min,
-              COMBAT_CONFIG.randomization.range.max
-          )
+local primaryPart = GetPrimaryPart(playerCharacter)
+if primaryPart then
+local distance = (primaryPart.Position - charPos).Magnitude
+local range =
+    COMBAT_CONFIG.baseRange +
+    math.random(
+        COMBAT_CONFIG.randomization.range.min,
+        COMBAT_CONFIG.randomization.range.max
+    )
 
-      if distance <= range then
-          table.insert(
-              targets,
-              {
-                  part = primaryPart,
-                  distance = distance
-              }
-          )
-      end
-  end
+if distance <= range then
+    table.insert(
+        targets,
+        {
+            part = primaryPart,
+            distance = distance
+        }
+    )
+end
+end
 end
 end
 end
@@ -163,27 +197,27 @@ local targets = {}
 for _, folder in ipairs({workspace.Enemies}) do
 if folder then
 for _, entity in ipairs(folder:GetChildren()) do
-  if entity ~= character and IsValidTarget(entity) then
-      local primaryPart = GetPrimaryPart(entity)
-      if primaryPart then
-          local distance = (primaryPart.Position - charPos).Magnitude
-          local range =
-              COMBAT_CONFIG.baseRange +
-              math.random(
-                  COMBAT_CONFIG.randomization.range.min,
-                  COMBAT_CONFIG.randomization.range.max
-              )
-          if distance <= range then
-              table.insert(
-                  targets,
-                  {
-                      part = primaryPart,
-                      distance = distance
-                  }
-              )
-          end
-      end
-  end
+if entity ~= character and IsValidTarget(entity) then
+local primaryPart = GetPrimaryPart(entity)
+if primaryPart then
+    local distance = (primaryPart.Position - charPos).Magnitude
+    local range =
+        COMBAT_CONFIG.baseRange +
+        math.random(
+            COMBAT_CONFIG.randomization.range.min,
+            COMBAT_CONFIG.randomization.range.max
+        )
+    if distance <= range then
+        table.insert(
+            targets,
+            {
+                part = primaryPart,
+                distance = distance
+            }
+        )
+    end
+end
+end
 end
 end
 end
@@ -310,10 +344,10 @@ if (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name == Nam
 for i, v in next, game:GetService("Players").LocalPlayer.PlayerGui.Main.Skills[Name]:GetChildren() do
 if v:IsA("Frame") and v.Name == Skill then
 if
-  (v.Name ~= "Template" and v.Title.TextColor3 == Color3.new(1, 1, 1) and
-      v.Cooldown.Size == UDim2.new(1, 0, 1, -1))
+(v.Name ~= "Template" and v.Title.TextColor3 == Color3.new(1, 1, 1) and
+v.Cooldown.Size == UDim2.new(1, 0, 1, -1))
 then
-  return true
+return true
 end
 end
 end
@@ -362,6 +396,73 @@ sound6.SoundId = "rbxassetid://4562690876" -- ID do áudio
 sound6.Looped = false -- Define o loop
 sound6.Volume = 4 -- Ajusta o volume (1 é o máximo)
 sound6.Parent = game.Workspace -- Define o local onde o som será tocado
+local tweenService = game:GetService("TweenService")
+local debris = game:GetService("Debris")
+
+PowerExplosion = 15
+PowerExplosionMultiplication = 1
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+function criarFormas(parent, quantidade, cor, velocidade, tamanho)
+for i = 1, quantidade do
+local part = Instance.new("Part")
+part.Size = Vector3.new(tamanho, tamanho, tamanho)
+part.Shape = Enum.PartType.Block
+part.Color = cor
+part.Material = Enum.Material.Neon
+part.CanCollide = false
+part.Anchored = true
+
+if _G.EffectsPosition then
+part.CFrame =
+_G.EffectsPosition *
+CFrame.new(
+math.random(PowerExplosion * (-1), PowerExplosion),
+math.random(PowerExplosion * (-1), PowerExplosion),
+math.random(PowerExplosion * (-1), PowerExplosion)
+) *
+CFrame.Angles(math.random(), math.random(), math.random())
+else
+part.CFrame =
+humanoidRootPart.CFrame *
+CFrame.new(
+math.random(PowerExplosion * (-1), PowerExplosion),
+math.random(PowerExplosion * (-1), PowerExplosion),
+math.random(PowerExplosion * (-1), PowerExplosion)
+) *
+CFrame.Angles(math.random(), math.random(), math.random())
+end
+
+local bodyVelocity = Instance.new("BodyVelocity")
+bodyVelocity.Velocity =
+Vector3.new(
+math.random(-velocidade, velocidade),
+math.random(-velocidade, velocidade),
+math.random(-velocidade, velocidade)
+)
+bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+bodyVelocity.Parent = part
+
+local tween =
+tweenService:Create(
+part,
+TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+{Transparency = 1, Size = Vector3.new(0, 0, 0)}
+)
+tween:Play()
+tween.Completed:Connect(
+function()
+part:Destroy()
+end
+)
+
+part.Parent = parent
+debris:AddItem(part, 5) -- Remove a forma após 5 segundos
+end
+end
+
 
 function ActivePower()
 task.wait(0.2)
@@ -393,28 +494,28 @@ function()
 function AgilityY()
 task.wait()
 pcall(
-  function()
-      local player = game.Players.LocalPlayer
-      local character = player.Character
-      if character then
-          local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-          local humanoid = character:FindFirstChildOfClass("Humanoid")
+function()
+local player = game.Players.LocalPlayer
+local character = player.Character
+if character then
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
 
-          if humanoidRootPart and humanoid then
-              local moveDirection = humanoid.MoveDirection
+    if humanoidRootPart and humanoid then
+        local moveDirection = humanoid.MoveDirection
 
-              if moveDirection.Magnitude > 0 and _G.ACT then
-                  local newVelocity =
-                      Vector3.new(
-                      moveDirection.X * 200,
-                      humanoidRootPart.Velocity.Y,
-                      moveDirection.Z * 200
-                  )
-                  humanoidRootPart.Velocity = newVelocity
-              end
-          end
-      end
-  end
+        if moveDirection.Magnitude > 0 and _G.ACT then
+            local newVelocity =
+                Vector3.new(
+                moveDirection.X * 200,
+                humanoidRootPart.Velocity.Y,
+                moveDirection.Z * 200
+            )
+            humanoidRootPart.Velocity = newVelocity
+        end
+    end
+end
+end
 )
 end
 while _G.Agility do
@@ -461,26 +562,7 @@ end
 
 -- Ativação do poder
 local function ativarPoder()
--- Flash inicial
-local flash = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-flash.IgnoreGuiInset = true
-local frame = Instance.new("Frame", flash)
-frame.Size = UDim2.new(1, 0, 1, 0)
-frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-frame.BackgroundTransparency = 0.5
 
-local tweenFlash =
-TweenService:Create(
-frame,
-TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-{BackgroundTransparency = 1}
-)
-tweenFlash:Play()
-tweenFlash.Completed:Connect(
-function()
-flash:Destroy()
-end
-)
 
 local function disableAuraEffect()
 local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -488,7 +570,7 @@ local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 -- Verifica e remove todos os ParticleEmitters da HumanoidRootPart
 for _, child in ipairs(humanoidRootPart:GetChildren()) do
 if child:IsA("ParticleEmitter") then
-  child:Destroy()
+child:Destroy()
 end
 end
 end
@@ -532,7 +614,7 @@ local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local function createParticle(properties)
 local particle = Instance.new("ParticleEmitter")
 for prop, value in pairs(properties) do
-  particle[prop] = value
+particle[prop] = value
 end
 particle.Parent = humanoidRootPart
 return particle
@@ -541,91 +623,91 @@ end
 -- Partículas amarelo-vermelho vibrante
 createParticle(
 {
-  Color = ColorSequence.new {
-      ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
-      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-  },
-  LightEmission = 2,
-  Rate = 5000,
-  Speed = NumberRange.new(1, 2),
-  Lifetime = NumberRange.new(0.5, 1.5),
-  Size = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 1),
-      NumberSequenceKeypoint.new(1, 0)
-  },
-  Transparency = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 0),
-      NumberSequenceKeypoint.new(1, 1)
-  }
+Color = ColorSequence.new {
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+},
+LightEmission = 2,
+Rate = 5000,
+Speed = NumberRange.new(1, 2),
+Lifetime = NumberRange.new(0.5, 1.5),
+Size = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 1),
+NumberSequenceKeypoint.new(1, 0)
+},
+Transparency = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 0),
+NumberSequenceKeypoint.new(1, 1)
+}
 }
 )
 
 -- Partículas azul-branco com brilho intenso
 createParticle(
 {
-  Color = ColorSequence.new {
-      ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
-      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-  },
-  LightEmission = 3,
-  Rate = 3000,
-  Speed = NumberRange.new(2, 4),
-  Lifetime = NumberRange.new(0.5, 1.5),
-  Size = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 2),
-      NumberSequenceKeypoint.new(1, 0.5)
-  },
-  Transparency = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 0),
-      NumberSequenceKeypoint.new(1, 0.7)
-  },
-  Rotation = NumberRange.new(0, 360),
-  RotSpeed = NumberRange.new(50, 100)
+Color = ColorSequence.new {
+ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+},
+LightEmission = 3,
+Rate = 3000,
+Speed = NumberRange.new(2, 4),
+Lifetime = NumberRange.new(0.5, 1.5),
+Size = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 2),
+NumberSequenceKeypoint.new(1, 0.5)
+},
+Transparency = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 0),
+NumberSequenceKeypoint.new(1, 0.7)
+},
+Rotation = NumberRange.new(0, 360),
+RotSpeed = NumberRange.new(50, 100)
 }
 )
 
 -- Partículas de faíscas multicoloridas com movimento randômico
 createParticle(
 {
-  Color = ColorSequence.new {
-      ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
-      ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
-  },
-  LightEmission = 1,
-  Rate = 6000,
-  Speed = NumberRange.new(3, 5),
-  Lifetime = NumberRange.new(0.5, 1.5),
-  Size = NumberSequence.new(0.7),
-  Transparency = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 0),
-      NumberSequenceKeypoint.new(1, 1)
-  },
-  VelocitySpread = 180
+Color = ColorSequence.new {
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+},
+LightEmission = 1,
+Rate = 6000,
+Speed = NumberRange.new(3, 5),
+Lifetime = NumberRange.new(0.5, 1.5),
+Size = NumberSequence.new(0.7),
+Transparency = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 0),
+NumberSequenceKeypoint.new(1, 1)
+},
+VelocitySpread = 180
 }
 )
 
 -- Partículas de anéis multicoloridos
 createParticle(
 {
-  Color = ColorSequence.new {
-      ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
-      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
-  },
-  LightEmission = 2,
-  Rate = 1000,
-  Speed = NumberRange.new(0, 1),
-  Lifetime = NumberRange.new(0.5, 1.5),
-  Size = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 5),
-      NumberSequenceKeypoint.new(1, 0)
-  },
-  Transparency = NumberSequence.new {
-      NumberSequenceKeypoint.new(0, 0.5),
-      NumberSequenceKeypoint.new(1, 1)
-  },
-  Rotation = NumberRange.new(0, 360),
-  RotSpeed = NumberRange.new(-50, 50)
+Color = ColorSequence.new {
+ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 255)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+},
+LightEmission = 2,
+Rate = 1000,
+Speed = NumberRange.new(0, 1),
+Lifetime = NumberRange.new(0.5, 1.5),
+Size = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 5),
+NumberSequenceKeypoint.new(1, 0)
+},
+Transparency = NumberSequence.new {
+NumberSequenceKeypoint.new(0, 0.5),
+NumberSequenceKeypoint.new(1, 1)
+},
+Rotation = NumberRange.new(0, 360),
+RotSpeed = NumberRange.new(-50, 50)
 }
 )
 end
@@ -645,216 +727,160 @@ local debris = game:GetService("Debris")
 
 -- Função para criar partículas animadas
 local function criarParticulas2(parent, quantidade, cor, velocidade, tamanho)
-  for i = 1, quantidade do
-      local part = Instance.new("Part")
-      part.Size = Vector3.new(tamanho, tamanho, tamanho)
-      part.Shape = Enum.PartType.Ball
-      part.Color = cor
-      part.Material = Enum.Material.Neon
-      part.CanCollide = false
-      part.Anchored = true
-      part.CFrame =
-          humanoidRootPart.CFrame *
-          CFrame.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10))
+for i = 1, quantidade do
+local part = Instance.new("Part")
+part.Size = Vector3.new(tamanho, tamanho, tamanho)
+part.Shape = Enum.PartType.Ball
+part.Color = cor
+part.Material = Enum.Material.Neon
+part.CanCollide = false
+part.Anchored = true
+part.CFrame =
+    humanoidRootPart.CFrame *
+    CFrame.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10))
 
-      local bodyVelocity = Instance.new("BodyVelocity")
-      bodyVelocity.Velocity =
-          Vector3.new(
-          math.random(-velocidade, velocidade),
-          math.random(-velocidade, velocidade),
-          math.random(-velocidade, velocidade)
-      )
-      bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-      bodyVelocity.Parent = part
+local bodyVelocity = Instance.new("BodyVelocity")
+bodyVelocity.Velocity =
+    Vector3.new(
+    math.random(-velocidade, velocidade),
+    math.random(-velocidade, velocidade),
+    math.random(-velocidade, velocidade)
+)
+bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+bodyVelocity.Parent = part
 
-      local tween =
-          tweenService:Create(
-          part,
-          TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-          {Transparency = 1, Size = Vector3.new(0, 0, 0)}
-      )
-      tween:Play()
-      tween.Completed:Connect(
-          function()
-              part:Destroy()
-          end
-      )
+local tween =
+    tweenService:Create(
+    part,
+    TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {Transparency = 1, Size = Vector3.new(0, 0, 0)}
+)
+tween:Play()
+tween.Completed:Connect(
+    function()
+        part:Destroy()
+    end
+)
 
-      part.Parent = parent
-      debris:AddItem(part, 3) -- Remove a partícula após 3 segundos
-  end
+part.Parent = parent
+debris:AddItem(part, 3) -- Remove a partícula após 3 segundos
+end
 end
 
 -- Função para criar formas geométricas animadas
 PowerExplosion = 15
 PowerExplosionMultiplication = 1
 if _G.Gear > 5 then
-  PowerExplosion = 20
-  PowerExplosionMultiplication = 3
+PowerExplosion = 20
+PowerExplosionMultiplication = 3
 end
 
-function criarFormas(parent, quantidade, cor, velocidade, tamanho)
-  for i = 1, quantidade do
-      local part = Instance.new("Part")
-      part.Size = Vector3.new(tamanho, tamanho, tamanho)
-      part.Shape = Enum.PartType.Block
-      part.Color = cor
-      part.Material = Enum.Material.Neon
-      part.CanCollide = false
-      part.Anchored = true
 
-      if _G.EffectsPosition then
-          part.CFrame =
-              _G.EffectsPosition *
-              CFrame.new(
-                  math.random(PowerExplosion * (-1), PowerExplosion),
-                  math.random(PowerExplosion * (-1), PowerExplosion),
-                  math.random(PowerExplosion * (-1), PowerExplosion)
-              ) *
-              CFrame.Angles(math.random(), math.random(), math.random())
-      else
-          part.CFrame =
-              humanoidRootPart.CFrame *
-              CFrame.new(
-                  math.random(PowerExplosion * (-1), PowerExplosion),
-                  math.random(PowerExplosion * (-1), PowerExplosion),
-                  math.random(PowerExplosion * (-1), PowerExplosion)
-              ) *
-              CFrame.Angles(math.random(), math.random(), math.random())
-      end
-
-      local bodyVelocity = Instance.new("BodyVelocity")
-      bodyVelocity.Velocity =
-          Vector3.new(
-          math.random(-velocidade, velocidade),
-          math.random(-velocidade, velocidade),
-          math.random(-velocidade, velocidade)
-      )
-      bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-      bodyVelocity.Parent = part
-
-      local tween =
-          tweenService:Create(
-          part,
-          TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-          {Transparency = 1, Size = Vector3.new(0, 0, 0)}
-      )
-      tween:Play()
-      tween.Completed:Connect(
-          function()
-              part:Destroy()
-          end
-      )
-
-      part.Parent = parent
-      debris:AddItem(part, 5) -- Remove a forma após 5 segundos
-  end
-end
 
 -- Função para criar brilho de tela
 local function criarBrilho()
-  local bloom = Instance.new("BloomEffect")
-  bloom.Intensity = 2
-  bloom.Threshold = 2.5
-  bloom.Size = 24
-  bloom.Parent = game.Lighting
-  bloomEffect = bloom
-  return bloom
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 2
+bloom.Threshold = 2.5
+bloom.Size = 24
+bloom.Parent = game.Lighting
+bloomEffect = bloom
+return bloom
 end
 
 -- Função para criar um piscar de tela
 local function piscarTela(cor, duracao)
-  local flash = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-  local frame = Instance.new("Frame")
-  frame.Size = UDim2.new(1, 0, 1, 0)
-  frame.BackgroundColor3 = cor
-  frame.BorderSizePixel = 0
-  frame.Parent = flash
+local flash = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = cor
+frame.BorderSizePixel = 0
+frame.Parent = flash
 
-  local tween =
-      tweenService:Create(
-      frame,
-      TweenInfo.new(duracao, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-      {BackgroundTransparency = 1}
-  )
-  tween:Play()
-  tween.Completed:Connect(
-      function()
-          flash:Destroy()
-      end
-  )
+local tween =
+tweenService:Create(
+frame,
+TweenInfo.new(duracao, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+{BackgroundTransparency = 1}
+)
+tween:Play()
+tween.Completed:Connect(
+function()
+    flash:Destroy()
+end
+)
 end
 
 -- Função de ativação
 local function ativarPoder()
-  -- Piscar de tela inicial
+-- Piscar de tela inicial
 
-  -- Brilho inicial
-  local brilho = criarBrilho()
-  -- Explosão inicial massiva
-  criarParticulas2(workspace, 250, Color3.fromRGB(255, 0, 0), 40, 3)
-  criarFormas(workspace, 80 * EO * PowerExplosionMultiplication, Color3.fromRGB(0, 0, 255), 15, 2)
-  criarFormas(
-      workspace,
-      70 * EO * PowerExplosionMultiplication,
-      Color3.fromRGB(255, 255, 255),
-      1,
-      4
-  )
-  criarFormas(
-      workspace,
-      50 * EO * PowerExplosionMultiplication,
-      Color3.fromRGB(255, 50, 50),
-      1,
-      4
-  )
-  criarFormas(
-      workspace,
-      50 * EO * PowerExplosionMultiplication,
-      Color3.fromRGB(50, 50, 255),
-      1,
-      4
-  )
-  -- Partículas contínuas ao redor do jogador
-  local particulasLoop = true
-  task.spawn(
-      function()
-          while particulasLoop do
-              criarParticulas2(workspace, 20 * EO, Color3.fromRGB(0, 255, 255), 10, 1)
-              criarFormas(workspace, 8 * EO, Color3.fromRGB(255, 0, 0), 15, 2)
-              criarFormas(workspace, 8 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
-              if _G.Gear == 5 then
-                  criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 250), 1, 2)
-                  criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 255), 1, 2)
-                  criarFormas(workspace, 5 * EO, Color3.fromRGB(40, 250, 0), 1, 2)
-                  criarFormas(workspace, 5 * EO, Color3.fromRGB(250, 130, 0), 1, 2)
-              end
+-- Brilho inicial
+local brilho = criarBrilho()
+-- Explosão inicial massiva
+criarParticulas2(workspace, 250, Color3.fromRGB(255, 0, 0), 40, 3)
+criarFormas(workspace, 80 * EO * PowerExplosionMultiplication, Color3.fromRGB(0, 0, 255), 15, 2)
+criarFormas(
+workspace,
+70 * EO * PowerExplosionMultiplication,
+Color3.fromRGB(255, 255, 255),
+1,
+4
+)
+criarFormas(
+workspace,
+50 * EO * PowerExplosionMultiplication,
+Color3.fromRGB(255, 50, 50),
+1,
+4
+)
+criarFormas(
+workspace,
+50 * EO * PowerExplosionMultiplication,
+Color3.fromRGB(50, 50, 255),
+1,
+4
+)
+-- Partículas contínuas ao redor do jogador
+local particulasLoop = true
+task.spawn(
+function()
+    while particulasLoop do
+        criarParticulas2(workspace, 20 * EO, Color3.fromRGB(0, 255, 255), 10, 1)
+        criarFormas(workspace, 8 * EO, Color3.fromRGB(255, 0, 0), 15, 2)
+        criarFormas(workspace, 8 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
+        if _G.Gear == 5 then
+            criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 250), 1, 2)
+            criarFormas(workspace, 10 * EO, Color3.fromRGB(40, 40, 255), 1, 2)
+            criarFormas(workspace, 5 * EO, Color3.fromRGB(40, 250, 0), 1, 2)
+            criarFormas(workspace, 5 * EO, Color3.fromRGB(250, 130, 0), 1, 2)
+        end
 
-              if _G.Gear == 6 then
-                  criarFormas(workspace, 10 * EO, Color3.fromRGB(200, 0, 200), 1, 2)
-                  criarFormas(workspace, 10 * EO, Color3.fromRGB(250, 0, 250), 1, 2)
-              end
+        if _G.Gear == 6 then
+            criarFormas(workspace, 10 * EO, Color3.fromRGB(200, 0, 200), 1, 2)
+            criarFormas(workspace, 10 * EO, Color3.fromRGB(250, 0, 250), 1, 2)
+        end
 
-              task.wait(0.2)
-          end
-      end
-  )
+        task.wait(0.2)
+    end
+end
+)
 
-  -- Após 10 segundos, finalizar o poder
-  while _G.ACT do
-      task.wait()
-  end
-  task.wait(0.3)
-  particulasLoop = false
+-- Após 10 segundos, finalizar o poder
+while _G.ACT do
+task.wait()
+end
+task.wait(0.3)
+particulasLoop = false
 
-  -- Explosão final
-  criarParticulas2(workspace, 60 * EO, Color3.fromRGB(255, 0, 0), 75, 3)
-  criarFormas(workspace, 90 * EO, Color3.fromRGB(255, 255, 255), 30, 4)
-  criarFormas(workspace, 90 * EO, Color3.fromRGB(255, 50, 50), 30, 4)
-  criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 50, 255), 30, 4)
-  criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 250, 255), 30, 4)
-  task.wait(3)
-  brilho:Destroy()
+-- Explosão final
+criarParticulas2(workspace, 60 * EO, Color3.fromRGB(255, 0, 0), 75, 3)
+criarFormas(workspace, 90 * EO, Color3.fromRGB(255, 255, 255), 30, 4)
+criarFormas(workspace, 90 * EO, Color3.fromRGB(255, 50, 50), 30, 4)
+criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 50, 255), 30, 4)
+criarFormas(workspace, 90 * EO, Color3.fromRGB(50, 250, 255), 30, 4)
+task.wait(3)
+brilho:Destroy()
 end
 
 -- Ativar automaticamente ao carregar
@@ -901,7 +927,7 @@ end
 X1 = 1
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(85, 170, 255),
@@ -911,7 +937,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(85, 255, 85),
@@ -921,7 +947,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(255, 85, 85),
@@ -931,7 +957,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(85, 85, 255),
@@ -941,7 +967,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(255, 255, 85),
@@ -951,7 +977,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(255, 85, 255),
@@ -961,7 +987,7 @@ math.random(1, 2)
 
 criarParticula(
 LocalPlayer.Character.HumanoidRootPart.Position +
-  Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
+Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10)),
 particulasFolder,
 1,
 Color3.fromRGB(124, 50, 252),
@@ -987,8 +1013,8 @@ function()
 sound3:Play()
 task.wait(0.5)
 if sound2 and sound2.SoundId == "rbxassetid://9125898975" then
-  sound2:Stop()
-  sound2:Destroy() -- Remove o objeto de som para liberar recursos
+sound2:Stop()
+sound2:Destroy() -- Remove o objeto de som para liberar recursos
 end
 end
 )
@@ -1150,8 +1176,8 @@ task.spawn(
 function()
 while true do
 for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
-  targetColor = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
-  task.wait(0.02) -- Tempo entre cada passo da transição
+targetColor = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+task.wait(0.02) -- Tempo entre cada passo da transição
 end
 end
 end
@@ -1173,10 +1199,10 @@ local rootPart = character.PrimaryPart
 local cameraDirection = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
 
 local forwardPosition =
-  Vector3.new(
-  rootPart.Position.X + (cameraDirection.X * BollDistance), -- Distância aumentada para 70 unidades
-  rootPart.Position.Y,
-  rootPart.Position.Z + (cameraDirection.Z * BollDistance) -- Distância aumentada para 70 unidades
+Vector3.new(
+rootPart.Position.X + (cameraDirection.X * BollDistance), -- Distância aumentada para 70 unidades
+rootPart.Position.Y,
+rootPart.Position.Z + (cameraDirection.Z * BollDistance) -- Distância aumentada para 70 unidades
 )
 
 -- Ajustar a posição da esfera com base no terreno
@@ -1186,8 +1212,8 @@ local adjustedPosition = adjustSpherePosition(forwardPosition)
 moveSphereToPosition(adjustedPosition)
 
 if _G.Gear > 1 then
-  -- Mudar a cor da esfera gradualmente
-  changeColorGradually()
+-- Mudar a cor da esfera gradualmente
+changeColorGradually()
 end
 end
 end
@@ -1255,30 +1281,30 @@ end
 toggleButton.MouseButton1Click:Connect(
 function()
 if character and character.PrimaryPart and not _G.PowerTP then
-  _G.PowerTP = (_G.Gear < 5 or _G.Gear == 5)
-  toggleButton.TextSize = 25
-  toggleButton.Text = "🕗" -- Emoji
-  toggleButton.Active = false
-  borderFrame.BackgroundTransparency = 0.92
-  toggleButton.BackgroundTransparency = 0.87
-  if _G.Gear > 1 then
-      sound4:Play()
-  else
-      sound5:Play()
-  end
-  character:SetPrimaryPartCFrame(CFrame.new(sphere.Position))
-  criarFormas(workspace, 50 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
-  criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
-  criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
-  criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 250, 50), 1, 4)
+_G.PowerTP = (_G.Gear < 5 or _G.Gear == 5)
+toggleButton.TextSize = 25
+toggleButton.Text = "🕗" -- Emoji
+toggleButton.Active = false
+borderFrame.BackgroundTransparency = 0.92
+toggleButton.BackgroundTransparency = 0.87
+if _G.Gear > 1 then
+sound4:Play()
+else
+sound5:Play()
+end
+character:SetPrimaryPartCFrame(CFrame.new(sphere.Position))
+criarFormas(workspace, 50 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
+criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
+criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 50, 255), 1, 4)
+criarFormas(workspace, 50 * EO, Color3.fromRGB(50, 250, 50), 1, 4)
 
-  task.wait(math.max(4.2 - _G.Gear, 0.05))
-  _G.PowerTP = false
-  toggleButton.Text = "🚀" -- Emoji
-  borderFrame.BackgroundTransparency = 0.75
-  toggleButton.Active = true
-  toggleButton.BackgroundTransparency = 0.65
-  toggleButton.TextSize = 20
+task.wait(math.max(4.2 - _G.Gear, 0.05))
+_G.PowerTP = false
+toggleButton.Text = "🚀" -- Emoji
+borderFrame.BackgroundTransparency = 0.75
+toggleButton.Active = true
+toggleButton.BackgroundTransparency = 0.65
+toggleButton.TextSize = 20
 end
 end
 )
@@ -1337,11 +1363,11 @@ while FendaDimensionalValue do
 fendaColor.Saturation = 1.2
 fendaBlur.Size = 2.5
 for i, k in pairs(game.Players.LocalPlayer.PlayerGui.Notifications:GetDescendants()) do
-  if k:IsA("TextLabel") then
-      if string.find(k.Text, "Mar") or string.find(k.Text, "Sea") then
-          k:Destroy()
-      end
-  end
+if k:IsA("TextLabel") then
+if string.find(k.Text, "Mar") or string.find(k.Text, "Sea") then
+    k:Destroy()
+end
+end
 end
 task.wait(0.1)
 end
@@ -1391,10 +1417,10 @@ end
 task.spawn(
 function()
 for i = 1, 180 do
-  if IsInvisible then
-      RealCharacter.HumanoidRootPart.CFrame = x
-      task.wait(0.1)
-  end
+if IsInvisible then
+RealCharacter.HumanoidRootPart.CFrame = x
+task.wait(0.1)
+end
 end
 end
 )
@@ -1438,10 +1464,10 @@ IsInvisible = true
 task.spawn(
 function()
 for i = 1, 90 do
-  if IsInvisible then
-      RealCharacter.HumanoidRootPart.CFrame = x
-      task.wait(0.1)
-  end
+if IsInvisible then
+RealCharacter.HumanoidRootPart.CFrame = x
+task.wait(0.1)
+end
 end
 end
 )
@@ -1455,7 +1481,7 @@ FakeCharacter.Humanoid.WalkSpeed = RealCharacter.Humanoid.WalkSpeed * 2
 if Transparency then
 for _, v in pairs(FakeCharacter:GetDescendants()) do
 if v:IsA("BasePart") and v.Transparency < 1 then
-  v.Transparency = 0.9
+v.Transparency = 0.9
 end
 end
 end
@@ -1486,24 +1512,24 @@ function()
 local moveDirection2 = humanoid.MoveDirection
 
 if IsInvisible and moveDirection2.Magnitude > 0 then
-  bodyVelocity2.Parent = nil
+bodyVelocity2.Parent = nil
 
-  -- Move o clone na direção da câmera
-  local camera = workspace.CurrentCamera
-  local moveDirection = camera.CFrame.LookVector
+-- Move o clone na direção da câmera
+local camera = workspace.CurrentCamera
+local moveDirection = camera.CFrame.LookVector
 
-  -- Determinar se está indo para trás
-  local isMovingBackward = moveDirection:Dot(moveDirection2) < 0
+-- Determinar se está indo para trás
+local isMovingBackward = moveDirection:Dot(moveDirection2) < 0
 
-  -- Ajustar o valor de y
-  local adjustedY = isMovingBackward and (moveDirection.Y * -1.2) or (moveDirection.Y * 1.4)
-  local adjustedV = isMovingBackward and (1.6) or (1.8)
+-- Ajustar o valor de y
+local adjustedY = isMovingBackward and (moveDirection.Y * -1.2) or (moveDirection.Y * 1.4)
+local adjustedV = isMovingBackward and (1.6) or (1.8)
 
-  FakeCharacter.HumanoidRootPart.Velocity =
-      Vector3.new(moveDirection2.X, adjustedY + 0.35, moveDirection2.Z).Unit *
-      (FakeCharacter.Humanoid.WalkSpeed * adjustedV)
+FakeCharacter.HumanoidRootPart.Velocity =
+Vector3.new(moveDirection2.X, adjustedY + 0.35, moveDirection2.Z).Unit *
+(FakeCharacter.Humanoid.WalkSpeed * adjustedV)
 elseif (moveDirection2.Magnitude == 0) and IsInvisible and IsInvisible2 then
-  bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
+bodyVelocity2.Parent = FakeCharacter.HumanoidRootPart
 end
 end
 )
@@ -1517,8 +1543,8 @@ if IsInvisible then
 DD:Disconnect()
 task.spawn(
 function()
-  task.wait()
-  InvisibilityCloak:Destroy()
+task.wait()
+InvisibilityCloak:Destroy()
 end
 )
 
@@ -1526,7 +1552,7 @@ RealCharacter.HumanoidRootPart.Velocity = FakeCharacter.HumanoidRootPart.Velocit
 
 for _, v in pairs(FakeCharacter:GetDescendants()) do
 if v:IsA("BasePart") and v.Transparency < 1 then
-  v.Transparency = 1
+v.Transparency = 1
 end
 end
 
@@ -1538,8 +1564,8 @@ sound6:Play()
 
 for i = 1, 15 do
 if not IsInvisible then
-  RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
-  task.wait()
+RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+task.wait()
 end
 end
 
@@ -1636,19 +1662,19 @@ end
 toggleButton2.MouseButton1Click:Connect(
 function()
 if not InvisileDelay then
-  InvisileDelay = true
-  if not IsInvisible then
-      invisibleByMidnigth()
-  else
-      local player = game.Players.LocalPlayer
-      local character = player.Character or player.CharacterAdded:Wait()
-      local humanoid = character:WaitForChild("Humanoid")
+InvisileDelay = true
+if not IsInvisible then
+invisibleByMidnigth()
+else
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
-      -- Desequipar o item atual
-      humanoid:UnequipTools()
-  end
-  task.wait(0.5)
-  InvisileDelay = false
+-- Desequipar o item atual
+humanoid:UnequipTools()
+end
+task.wait(0.5)
+InvisileDelay = false
 end
 end
 )
@@ -1770,15 +1796,6 @@ percentText.TextSize = 16.5
 percentText.TextStrokeTransparency = 0.9
 percentText.Active = true
 
--- Criação do texto na tela do jogador local
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui") -- Garante que o PlayerGui está carregado
-
--- Criar um ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CuteTextGui"
-screenGui.Parent = playerGui
-
 -- Criar um TextLabel
 textLabel0 = Instance.new("TextLabel")
 textLabel0.Parent = screenGui
@@ -1831,33 +1848,33 @@ textLabel3.Transparency = 1
 if _G.Gear == 6 then
 textLabel.Text = "SUPERIOR GEAR"
 textLabel.TextColor3 = Color3.new(1, 0, 1)
-GearOriginalText ="SUPERIOR GEAR"
+GearOriginalText = "SUPERIOR GEAR"
 end
 
 if _G.Gear == 5 then
 textLabel.Text = "ULTRA GEAR"
 textLabel.TextColor3 = Color3.new(0, 1, 1)
-GearOriginalText ="ULTRA GEAR"
+GearOriginalText = "ULTRA GEAR"
 end
 
 if _G.Gear == 4 then
 textLabel.Text = "SUPER GEAR"
-GearOriginalText ="SUPER GEAR"
+GearOriginalText = "SUPER GEAR"
 end
 
 if _G.Gear == 3 then
 textLabel.Text = "THIRD GEAR"
-GearOriginalText ="THIRD GEAR"
+GearOriginalText = "THIRD GEAR"
 end
 
 if _G.Gear == 2 then
 textLabel.Text = "SECOND GEAR"
-GearOriginalText ="SECOND GEAR"
+GearOriginalText = "SECOND GEAR"
 end
 
 if _G.Gear == 1 then
 textLabel.Text = "BEGINNER"
-GearOriginalText ="BEGINNER"
+GearOriginalText = "BEGINNER"
 end
 
 z = 0
@@ -1868,11 +1885,38 @@ if _G.Race then
 local player = game.Players.LocalPlayer
 character = player and player.Character
 k = character.HumanoidRootPart.CFrame + Vector3.new(0, 300, 0)
-task.spawn(function()
+task.spawn(
+function()
 for i = 1, 3 do
     character.HumanoidRootPart.CFrame = k
     task.wait()
 end
+end
+)
+
+task.spawn(function()
+-- Flash inicial
+local tweenService = game:GetService("TweenService")
+LocalPlayer = game.Players.LocalPlayer
+local flash = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+flash.IgnoreGuiInset = true
+local frame = Instance.new("Frame", flash)
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(255, 255, 200)
+frame.BackgroundTransparency = 0.5
+
+local tweenFlash =
+TweenService:Create(
+frame,
+TweenInfo.new(2.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+{BackgroundTransparency = 1}
+)
+tweenFlash:Play()
+tweenFlash.Completed:Connect(
+function()
+    flash:Destroy()
+end
+)
 end)
 Reset = false
 progress = 100
@@ -1887,46 +1931,46 @@ _G.BarCountdown = false
 ActiveTP()
 
 if _G.Gear > 1 and _G.Gear < 4 then
-  JumpBoostPower()
+JumpBoostPower()
 end
 
 if _G.Gear > 5 then
-  FastAttackOn()
-  _G.NoStunPower = true
+FastAttackOn()
+_G.NoStunPower = true
 end
 
 textLabel2.Position = UDim2.new(0.35, -100, 0, 8) -- Posição central no topo da tela
 textLabel3.Position = UDim2.new(0.35, 100, 0, 8) -- Posição central no topo da tela
 
 task.spawn(
-  function()
-      for i = 1, 0, -0.1 do
-          textLabel2.Transparency = i
-          textLabel2.BackgroundTransparency = 1
-          textLabel3.Transparency = i
-          textLabel3.BackgroundTransparency = 1
-          task.wait()
-      end
-  end
+function()
+for i = 1, 0, -0.1 do
+    textLabel2.Transparency = i
+    textLabel2.BackgroundTransparency = 1
+    textLabel3.Transparency = i
+    textLabel3.BackgroundTransparency = 1
+    task.wait()
+end
+end
 )
 
 if _G.Gear > 4 then
-  GodCombatPower()
-  task.spawn(
-      function()
-          while _G.ActiveRace or true do
-              for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
-                  if (not _G.ActiveRace) or true  then
-                      textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
-                  end
-                  task.wait(0.05) -- Tempo entre cada passo da transição
-              end
-          end
-          if not _G.ActiveRace then
-              textLabel.TextColor3 = Color3.new(1, 0, 1)
-          end
-      end
-  )
+GodCombatPower()
+task.spawn(
+function()
+    while _G.ActiveRace or true do
+        for i = 0, 1, 0.01 do -- Incremento suave para criar a transição
+            if (not _G.ActiveRace) or true then
+                textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+            end
+            task.wait(0.05) -- Tempo entre cada passo da transição
+        end
+    end
+    if not _G.ActiveRace then
+        textLabel.TextColor3 = Color3.new(1, 0, 1)
+    end
+end
+)
 end
 
 ActivePower()
@@ -1941,40 +1985,39 @@ z = 0
 _G.LockPlayer = not _G.LockPlayer
 
 if not _G.LockPlayer then
-if _G.LockPlayerX and _G.LockPlayerX.Character then
-NotificationMenuGame(
-"{color1_Green}" ..
-tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Green}Unlock{color2_/}."
-)
+    if _G.LockPlayerX and _G.LockPlayerX.Character then
+        NotificationMenuGame(
+            "{color1_Green}" ..
+                tostring(_G.LockPlayerX.Name) ..
+                    "{color1_/} has been {color2_Green}Unlock{color2_/}."
+        )
+    else
+        NotificationMenuGame("Target {color2_Green}Unlock{color2_/}")
+    end
 else
-NotificationMenuGame("Target {color2_Green}Unlock{color2_/}")
+    if _G.LockPlayerX and _G.LockPlayerX.Character then
+        NotificationMenuGame(
+            "{color1_Green}" ..
+                tostring(_G.LockPlayerX.Name) ..
+                    "{color1_/} has been {color2_Red}LOCKED{color2_/}."
+        )
+    else
+        NotificationMenuGame("Target {color2_Red}LOCKED{color2_/}")
+    end
 end
-else
-if _G.LockPlayerX and _G.LockPlayerX.Character then
-NotificationMenuGame(
-"{color1_Green}" ..
-tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Red}LOCKED{color2_/}."
-)
-else
-NotificationMenuGame("Target {color2_Red}LOCKED{color2_/}")
-end
-end
-
 end
 elseif z > 1 then
 z = 0
 if _G.SPLY then
 sound4:Play()
 for i = 1, 40 do
-TPTBP()
-task.wait()
+    TPTBP()
+    task.wait()
 end
 else
 NotificationMenuGame("{color1_Red}Skill unavailable.{color2_/}")
 end
 end
-
-
 end
 end
 )
@@ -2021,57 +2064,60 @@ task.spawn(
 function()
 function CheckVelocityY()
 if not _G.ActiveRace then
-  return
+return
 end
 
 _G.MyDamage = _G.MyDamage or 1
 
 V = 4.5
 if _G.Gear > 3 then
-  V = 3
-  if _G.Gear > 4 then
-      V = 2
-      if _G.Gear > 5 then
-          V = 1.2
-          if ADM_Boost_0 then
-              V = 0.7
-          end
-      end
-  end
+V = 3
+if _G.Gear > 4 then
+V = 2
+if _G.Gear > 5 then
+    V = 1.2
+    if ADM_Boost_0 then
+        V = 0.7
+    end
+end
+end
 end
 if _G.Gear > 2 then
-  _G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 450) / V)
-  if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
-      XX = _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) + (math.max(ChecksVelocity(_G.MyDamage) - 280, 0) * 1.2) + 9
-  else
-      XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
-  end
-
-  _G.FOVSpeed = XX / 2
-  textLabel2.Text = "+" .. math.floor(XX) .. " →"
+_G.VelcityPower = math.floor(math.min(ChecksVelocity(_G.MyDamage), 450) / V)
+if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
+XX =
+    _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) +
+    (math.max(ChecksVelocity(_G.MyDamage) - 280, 0) * 1.2) +
+    9
 else
-  textLabel2.Text = ""
-  _G.VelcityPower = nil
+XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+end
+
+_G.FOVSpeed = XX / 2
+textLabel2.Text = "+" .. math.floor(XX) .. " →"
+else
+textLabel2.Text = ""
+_G.VelcityPower = nil
 end
 
 H = 1
 if _G.Gear < 4 then
-  H = 2
+H = 2
 end
 
 if _G.Gear > 4 then
-  H = 1
-  if ADM_Boost_0 then
-      H = 0.7
-  end
+H = 1
+if ADM_Boost_0 then
+H = 0.7
+end
 end
 
 _G.JumpPowerPower = math.floor(ChecksJump(_G.MyDamage) / H)
 
 if _G.JumpPowerPower and _G.SettingTable.Jump then
-  YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
 else
-  YY = _G.JumpPowerPower or _G.SettingTable.Jump
+YY = _G.JumpPowerPower or _G.SettingTable.Jump
 end
 
 textLabel3.Text = "+" .. math.floor(math.min(YY, 300)) .. " ↑"
@@ -2108,7 +2154,7 @@ end
 for _, child in ipairs(parent:GetChildren()) do
 if string.find(child.Name, "InCombat") then
 if (child.Visible) then
-  _G.InCombat = true
+_G.InCombat = true
 end
 end
 InCombatDetect(child, depth + 1)
@@ -2167,9 +2213,11 @@ _G.VelcityPower = nil
 _G.JumpPowerPower = nil
 task.wait()
 _G.PowerPogress = 0
+if not _G.SettingTable.TeleportHability then
 toggleButton:Destroy()
 toggleButton = nil
 borderFrame:Destroy()
+end
 percentText.TextSize = 16.5
 
 sphere:Destroy()
@@ -2187,20 +2235,19 @@ FastAttackOff()
 end
 task.spawn(
 function()
-  for i = 0, 1, 0.1 do
-      textLabel3.Transparency = i
-      textLabel3.BackgroundTransparency = 1
-      textLabel2.Transparency = i
-      textLabel2.BackgroundTransparency = 1
+for i = 0, 1, 0.1 do
+textLabel3.Transparency = i
+textLabel3.BackgroundTransparency = 1
+textLabel2.Transparency = i
+textLabel2.BackgroundTransparency = 1
 
-      task.wait()
-  end
+task.wait()
+end
 
-  textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
-  textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+textLabel3.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
+textLabel2.Position = UDim2.new(0.35, 10000, 0, 8) -- Posição central no topo da tela
 end
 )
-
 
 _G.CountUnDisponile = true
 task.wait(8)
@@ -2222,7 +2269,7 @@ local tweenInfo = TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection
 
 TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -140)}):Play()
 TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -35)}):Play()
-TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -17)}):Play()
+TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -15)}):Play()
 task.wait(3.45)
 _G.PowerBarY = -120
 end
@@ -2283,49 +2330,48 @@ _G.Race = true
 end
 
 if progress == maxProgress then
-
 if NoMax then
 percentText.TextSize = 4
 percentText.Text = "Click para ativar!!"
 NoMax = false
 if _G.Gear > 5 then
-  task.spawn(
-      function()
-          while _G.Race do
-              for i = 0, 1, 0.005 do -- Incremento suave para criar a transição
-                  textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
-                  task.wait() -- Tempo entre cada passo da transição
-              end
-          end
-          textLabel.TextColor3 = Color3.new(1, 0, 1)
-      end
-  )
+task.spawn(
+function()
+    while _G.Race do
+        for i = 0, 1, 0.005 do -- Incremento suave para criar a transição
+            textLabel.TextColor3 = Color3.fromHSV(i, 1, 1) -- Gradualmente alterando a tonalidade
+            task.wait() -- Tempo entre cada passo da transição
+        end
+    end
+    textLabel.TextColor3 = Color3.new(1, 0, 1)
+end
+)
 end
 
 T = 20
 _G.BarCountdown = true
 task.spawn(
-  function()
-      while not _G.ActiveRace and _G.BarCountdown do
-          task.wait(0.9)
-          if (not _G.ActiveRace) and _G.BarCountdown then
-              T = T - 1
-              -- percentText.Text = "Click para ativar!! - " .. T
-              if T < 1 then
-                  _G.BarCountdown = false
-                  _G.Race = false
-                  -- percentText.Text = "Click para ativar!! - 0"
-                  task.wait(0.5)
-                  percentText.Text = "Reseting..."
-                  task.wait(1)
-                  _G.CountUnDisponile = true
-                  resetBarTwo()
-                  task.wait(10)
-                  _G.CountUnDisponile = false
-              end
-          end
-      end
-  end
+function()
+while not _G.ActiveRace and _G.BarCountdown do
+    task.wait(0.9)
+    if (not _G.ActiveRace) and _G.BarCountdown then
+        T = T - 1
+        -- percentText.Text = "Click para ativar!! - " .. T
+        if T < 1 then
+            _G.BarCountdown = false
+            _G.Race = false
+            -- percentText.Text = "Click para ativar!! - 0"
+            task.wait(0.5)
+            percentText.Text = "Reseting..."
+            task.wait(1)
+            _G.CountUnDisponile = true
+            resetBarTwo()
+            task.wait(10)
+            _G.CountUnDisponile = false
+        end
+    end
+end
+end
 )
 end
 else
@@ -2349,7 +2395,7 @@ local intensity = 1
 if progress >= 85 then
 intensity = 1.5
 if progress >= 99 then
-  intensity = 1.8
+intensity = 1.8
 end
 end
 
@@ -2369,12 +2415,12 @@ p = 10
 if g > 2 then
 p = 30
 if g > 4 then
-  p = 60
+p = 60
 end
 end
 end
-if progress <= p and _G.ActiveRace and ADM_Boost_0 then
-X = 0.003
+if progress <= p and _G.ActiveRace then
+X = 0.001
 end
 end
 
@@ -2436,12 +2482,12 @@ local currentPlayersInArea = {}
 for _, player in ipairs(game.Players:GetPlayers()) do
 if
 player ~= game.Players.LocalPlayer and player.Character and
-  player.Character:FindFirstChild("HumanoidRootPart")
+player.Character:FindFirstChild("HumanoidRootPart")
 then
 local distance = getDistance(game.Players.LocalPlayer, player)
 
 if distance <= maxDistance then
-  table.insert(currentPlayersInArea, player)
+table.insert(currentPlayersInArea, player)
 end
 end
 end
@@ -2471,14 +2517,16 @@ _G.MyDamage = totalDamage
 
 InCombatDetect(playerGui)
 if (_G.InCombat) and not _G.PlayerDeth then
-  _G.CombatTimer = _G.CombatTimer + math.max((_G.Gear / 1), 2.5)
+_G.CombatTimer = _G.CombatTimer + math.max((_G.Gear / 1), 2.5)
 elseif false then
-task.spawn(function()
-task.wait(5)
-if not ((_G.InCombat) and not _G.PlayerDeth) then
-  _G.CombatTimer = math.max(_G.CombatTimer - 0.5, 0)
+task.spawn(
+function()
+    task.wait(5)
+    if not ((_G.InCombat) and not _G.PlayerDeth) then
+        _G.CombatTimer = math.max(_G.CombatTimer - 0.5, 0)
+    end
 end
-end)
+)
 end
 local Players = game:GetService("Players")
 
@@ -2488,19 +2536,19 @@ local character = LocalPlayer.Character
 
 charPos = character.PrimaryPart.Position
 for _, folder in ipairs({game.Workspace.Enemies}) do
-  if folder then
-                  for _, entity in ipairs(folder:GetChildren()) do
-          if entity ~= character and IsValidTarget(entity) then
-              local primaryPart = GetPrimaryPart(entity)
-              if primaryPart then
-                  local distance = (primaryPart.Position - charPos).Magnitude
-                  if distance < 50 then
-                      _G.CombatTimer = _G.CombatTimer + 2.5
-                  end
-              end
-          end
-      end
-  end
+if folder then
+for _, entity in ipairs(folder:GetChildren()) do
+    if entity ~= character and IsValidTarget(entity) then
+        local primaryPart = GetPrimaryPart(entity)
+        if primaryPart then
+            local distance = (primaryPart.Position - charPos).Magnitude
+            if distance < 50 then
+                _G.CombatTimer = _G.CombatTimer + 2.5
+            end
+        end
+    end
+end
+end
 end
 end
 
@@ -2516,7 +2564,7 @@ function()
 function DamageY()
 _G.MyDamage = _G.MyDamage or 1
 if not _G.ActiveRace and not _G.PlayerDeth then
-  _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
+_G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
 end
 end
 
@@ -2615,7 +2663,7 @@ table.remove(playerItemActions, i) -- Remove a ação correspondente
 if not (not inventory or not itemName) then
 local item = inventory:FindFirstChild(itemName)
 if item then
-  item:Destroy()
+item:Destroy()
 end
 end
 break
@@ -2664,78 +2712,78 @@ local success, result =
 pcall(
 function()
 if not (_G.V1 or _G.V2) then
-  NotificationMenuGame("Habilite o Teleporte V1 ou V2.")
-  return
+NotificationMenuGame("Habilite o Teleporte V1 ou V2.")
+return
 end
 local actions = getActionFromJson(actionName)
 if not actions then
-  return
+return
 end -- Se a ação não for encontrada, sai da função
 
 for _, action in ipairs(actions) do
-  local weaponName = action.item
-  local key = action.key
-  local t = action.delay or 0.7
-  local d = action.M or 400
-  local T = action.T or 0
-  local S = action.S or 0
+local weaponName = action.item
+local key = action.key
+local t = action.delay or 0.7
+local d = action.M or 400
+local T = action.T or 0
+local S = action.S or 0
 
-  local distance =
-      round(
-      (game:GetService("Players").LocalPlayer.Character.Head.Position -
-          _G.SPLY.Character.Head.Position).Magnitude / 3
-  )
+local distance =
+round(
+(game:GetService("Players").LocalPlayer.Character.Head.Position -
+    _G.SPLY.Character.Head.Position).Magnitude / 3
+)
 
-  local root = plr.Character.HumanoidRootPart
+local root = plr.Character.HumanoidRootPart
 
-  if (distance > d) then
-      NotificationMenuGame("Jogador muito distante...")
-      return
-  end
+if (distance > d) then
+NotificationMenuGame("Jogador muito distante...")
+return
+end
 
-  -- Posiciona o player (conforme seu código) e equipa a arma
-  if
-      _G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and
-          (T == 1)
-   then
-      if (_G.SelectedPosition and _G.SelectedBall and _G.IsScriptRunning) then
-          root.CFrame = _G.SelectedPosition2
-      else
-          currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
-          newPosition = currentPosition + Vector3.new(0, 2.5, 0)
-          root.CFrame = newPosition
-      end
-  else
-      if (T == 1) then
-          NotificationMenuGame("Jogador não encontrado para a posição!")
-          return
-      end
-  end
+-- Posiciona o player (conforme seu código) e equipa a arma
+if
+_G.SPLY and _G.SPLY.Character and _G.SPLY.Character:FindFirstChild("HumanoidRootPart") and
+    (T == 1)
+then
+if (_G.SelectedPosition and _G.SelectedBall and _G.IsScriptRunning) then
+    root.CFrame = _G.SelectedPosition2
+else
+    currentPosition = _G.SPLY.Character.HumanoidRootPart.CFrame
+    newPosition = currentPosition + Vector3.new(0, 2.5, 0)
+    root.CFrame = newPosition
+end
+else
+if (T == 1) then
+    NotificationMenuGame("Jogador não encontrado para a posição!")
+    return
+end
+end
 
-  if (distance > d) then
-      root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
-      NotificationMenuGame("Jogador muito distante...")
-      return
-  end
+if (distance > d) then
+root.CFrame = root.CFrame + Vector3.new(2, 25, 0)
+NotificationMenuGame("Jogador muito distante...")
+return
+end
 
-  -- Equipar e pressionar a tecla da ação
-  if containsItem(_G.WeaponList, weaponName) then
-      EquipWeapon(weaponName)
-      while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name ==
-          weaponName) do
-          task.wait()
-      end
-      -- Pressiona a tecla especificada
-      game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
-      task.wait(S)
-      game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+-- Equipar e pressionar a tecla da ação
+if containsItem(_G.WeaponList, weaponName) then
+EquipWeapon(weaponName)
+while not (game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name ==
+    weaponName) do
+    task.wait()
+end
+-- Pressiona a tecla especificada
+game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+task.wait(S)
+game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
 
-      task.wait(t)
-  else
-      NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
-      game:GetService("Players").LocalPlayer.Character:WaitForChild("Humanoid"):UnequipTools()
-      return
-  end
+task.wait(t)
+else
+NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
+game:GetService("Players").LocalPlayer.Character:WaitForChild("Humanoid"):UnequipTools()
+return
+end
 end
 end
 )
@@ -2760,7 +2808,9 @@ tool.Name = actionName .. " Manual"
 
 -- Função principal a ser chamada quando a ferramenta é ativada
 local function A()
-local success, result = pcall(function()
+local success, result =
+pcall(
+function()
 local plr = game:GetService("Players").LocalPlayer
 local mouse = plr:GetMouse()
 
@@ -2781,7 +2831,9 @@ local l = pos - root.Position
 local r = root.CFrame + l
 
 local actions = getActionFromJson(actionName)
-if not actions then return end
+if not actions then
+return
+end
 
 for _, action in ipairs(actions) do
 local weaponName = action.item
@@ -2792,65 +2844,62 @@ local S = action.S or 0
 
 local distance = round((plr.Character.Head.Position - r.Position).Magnitude / 3)
 if distance > d then
-  NotificationMenuGame("Jogador muito distante...")
-  return
+NotificationMenuGame("Jogador muito distante...")
+return
 end
 
 root.CFrame = r
 
 if containsItem(_G.WeaponList, weaponName) then
-  EquipWeapon(weaponName)
-  local tool = plr.Character:FindFirstChildOfClass("Tool")
-  while not tool or tool.Name ~= weaponName do
-      task.wait()
-      tool = plr.Character:FindFirstChildOfClass("Tool")
-  end
+EquipWeapon(weaponName)
+local tool = plr.Character:FindFirstChildOfClass("Tool")
+while not tool or tool.Name ~= weaponName do
+    task.wait()
+    tool = plr.Character:FindFirstChildOfClass("Tool")
+end
 
-  game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
-  task.wait(S)
-  game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
-  task.wait(t)
+game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+task.wait(S)
+game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+task.wait(t)
 else
-  NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
-  return
+NotificationMenuGame("Arma " .. weaponName .. " não encontrada!")
+return
 end
 end
-end)
+end
+)
 
 if not success then
 NotificationMenuGame("error: " .. result)
 end
 end
 
-
 tool.Activated:Connect(A)
 addItemToInventory(nil, tool, A)
 tool.Parent = plr.Backpack
 end
-
-
-
 
 task.spawn(
 function()
 pcall(
 function()
 game:GetService("RunService").Stepped:Connect(
-  function()
-      pcall(
-          function()
-              if _G.SettingTable.NoClip or _G.Clip then
-                  for _, v in pairs(
-                      game:GetService("Players").LocalPlayer.Character:GetDescendants()
-                  ) do
-                      if v:IsA("BasePart") then
-                          v.CanCollide = false
-                      end
-                  end
-              end
-          end
-      )
-  end
+function()
+pcall(
+    function()
+        if _G.SettingTable.NoClip or _G.Clip then
+            for _, v in pairs(
+                game:GetService("Players").LocalPlayer.Character:GetDescendants()
+            ) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+)
+end
 )
 end
 )
@@ -2954,7 +3003,7 @@ _G.HighlightV1 = false
 for _, player in ipairs(Players:GetPlayers()) do
 local indicator = _G.IndicatorInstanceList[player.Name]
 if indicator then
-  indicator:Destroy()
+indicator:Destroy()
 end
 end
 end
@@ -2985,18 +3034,18 @@ table.insert(PlayersIndicatorList, player.Name)
 -- Definir a cor principal com base no time e valores
 MainColor = Color3.fromRGB(255, 0, 0) -- Padrão vermelho
 if (CheckSafeZone(character)) then
-  MainColor = Color3.fromRGB(0, 255, 50) -- Padrão Verde
+MainColor = Color3.fromRGB(0, 255, 50) -- Padrão Verde
 end
 
 if
-  tostring(game.Players.LocalPlayer.Team) == "Marines" and
-      game.Players.LocalPlayer.Team == player.Team
+tostring(game.Players.LocalPlayer.Team) == "Marines" and
+game.Players.LocalPlayer.Team == player.Team
 then
-  MainColor = Color3.fromRGB(255, 0, 255) -- Verde para time igual
+MainColor = Color3.fromRGB(255, 0, 255) -- Verde para time igual
 elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 10000000 then
-  MainColor = Color3.fromRGB(153, 0, 255)
+MainColor = Color3.fromRGB(153, 0, 255)
 elseif game:GetService("Players")[player.Name].leaderstats["Bounty/Honor"].Value > 3000000 then
-  MainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
+MainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
 end
 
 -- Criar o indicador visual
@@ -3044,17 +3093,17 @@ local success, result =
 pcall(
 function()
 local bountyValue =
-  player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Bounty/Honor") and
-  player.leaderstats["Bounty/Honor"].Value or
-  0
+player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Bounty/Honor") and
+player.leaderstats["Bounty/Honor"].Value or
+0
 local mainColor = Color3.fromRGB(255, 0, 0) -- Vermelho padrão
 
 if player == Players.LocalPlayer then
-  mainColor = Color3.fromRGB(0, 255, 0) -- Verde para o próprio jogador
+mainColor = Color3.fromRGB(0, 255, 0) -- Verde para o próprio jogador
 elseif bountyValue > 3000000 then
-  mainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
+mainColor = Color3.fromRGB(255, 255, 0) -- Amarelo para alta pontuação
 elseif Players.LocalPlayer.Team == player.Team then
-  mainColor = Color3.fromRGB(0, 255, 255) -- Azul para mesmo time
+mainColor = Color3.fromRGB(0, 255, 255) -- Azul para mesmo time
 end
 
 local highlight = Instance.new("Highlight")
@@ -3087,21 +3136,21 @@ _G.highlightEnabled = _G.highlightEnabled
 if _G.highlightEnabled then
 task.spawn(
 function()
-  function HiGH()
-      for _, player in ipairs(Players:GetPlayers()) do
-          removeHighlight(player)
-          createHighlight(player)
-      end
-  end
+function HiGH()
+for _, player in ipairs(Players:GetPlayers()) do
+    removeHighlight(player)
+    createHighlight(player)
+end
+end
 
-  while _G.highlightEnabled do
-      task.wait(0.5)
-      HiGHY()
-  end
-  task.wait(1)
-  for _, player in ipairs(Players:GetPlayers()) do
-      removeHighlight(player)
-  end
+while _G.highlightEnabled do
+task.wait(0.5)
+HiGHY()
+end
+task.wait(1)
+for _, player in ipairs(Players:GetPlayers()) do
+removeHighlight(player)
+end
 end
 )
 else
@@ -3115,9 +3164,9 @@ Players.PlayerAdded:Connect(
 function(player)
 player.CharacterAdded:Connect(
 function()
-  if _G.highlightEnabled then
-      createHighlight(player)
-  end
+if _G.highlightEnabled then
+createHighlight(player)
+end
 end
 )
 end
@@ -3129,7 +3178,7 @@ for _, player in ipairs(Players:GetPlayers()) do
 player.CharacterAdded:Connect(
 function()
 if _G.highlightEnabled then
-  createHighlight(player)
+createHighlight(player)
 end
 end
 )
@@ -3209,10 +3258,10 @@ table.insert(directionHistory, humanoid.MoveDirection)
 
 -- Limita o tamanho do histórico
 if #velocityHistory > maxHistorySize then
-  table.remove(velocityHistory, 1)
+table.remove(velocityHistory, 1)
 end
 if #directionHistory > maxHistorySize then
-  table.remove(directionHistory, 1)
+table.remove(directionHistory, 1)
 end
 
 -- Calcula a média de velocidade e direção
@@ -3226,13 +3275,13 @@ local deltaTime = _G.SensitivityDistance
 
 -- Calcula a posição prevista
 local predictedPosition =
-  rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
+rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
 
 -- Atualiza a posição da esfera
 if not sphere then
-  sphere = createSphere()
-  sphere.Parent = workspace
-  updateSphereColor(sphere)
+sphere = createSphere()
+sphere.Parent = workspace
+updateSphereColor(sphere)
 end
 
 sphere.Position = predictedPosition
@@ -3242,8 +3291,8 @@ _G.SelectedBall = sphere
 else
 -- Reseta se o jogador sair do jogo ou perder a vida
 if sphere then
-  sphere:Destroy()
-  sphere = nil
+sphere:Destroy()
+sphere = nil
 end
 _G.SelectedPosition = nil
 end
@@ -3346,7 +3395,7 @@ local character = player.Character
 local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
 local adjustedCameraPosition =
-  humanoidRootPart.Position - Vector3.new(0, _G.SettingTable2.SelectPlayer_Cam or 40, 0) -- Posição ajustada da câmera
+humanoidRootPart.Position - Vector3.new(0, _G.SettingTable2.SelectPlayer_Cam or 40, 0) -- Posição ajustada da câmera
 local direction = (adjustedCameraPosition - camera.CFrame.Position).unit
 
 -- Usa um ponto 0.5 unidades acima do centro da tela para compatibilidade com Shift Lock
@@ -3354,15 +3403,15 @@ local dotProduct = direction:Dot(camera.CFrame.LookVector)
 
 -- Verifica se o jogador está dentro da área de observação
 if dotProduct > observationArea then
-  -- Verifica se este jogador está mais centralizado (mais próximo do ponto de foco) que o anterior
-  if dotProduct > bestDotProduct then
-      if _G.LockPlayer then
-          closestPlayer = _G.LockPlayerX
-      else
-          bestDotProduct = dotProduct
-          closestPlayer = player
-      end
-  end
+-- Verifica se este jogador está mais centralizado (mais próximo do ponto de foco) que o anterior
+if dotProduct > bestDotProduct then
+if _G.LockPlayer then
+    closestPlayer = _G.LockPlayerX
+else
+    bestDotProduct = dotProduct
+    closestPlayer = player
+end
+end
 end
 end
 end
@@ -3402,9 +3451,9 @@ selectedLine.Parent = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 else
 -- Se o alvo mudou, recria a linha para o novo alvo
 if selectedLine.Attachment1.Parent ~= targetPart then
-  selectedLine:Destroy()
-  selectedLine = nil
-  createOrUpdateSelectionLine(player) -- Recria a linha com o novo alvo
+selectedLine:Destroy()
+selectedLine = nil
+createOrUpdateSelectionLine(player) -- Recria a linha com o novo alvo
 end
 end
 else
@@ -3463,9 +3512,9 @@ lookStartTime = tick() -- Inicia o tempo de observação
 elseif tick() - lookStartTime >= lookDuration then
 -- Se o tempo de observação for atingido, seleciona o jogador
 if not (closestPlayerInView == _G.SPLY) then
-  NotificationMenuGame(
-      "{color1_Green}" .. tostring(_G.LockPlayerX.Name) .. "{color1_/} has been selected."
-  )
+NotificationMenuGame(
+"{color1_Green}" .. tostring(_G.LockPlayerX.Name) .. "{color1_/} has been selected."
+)
 end
 
 selectedPlayer = closestPlayerInView
@@ -3528,7 +3577,7 @@ task.spawn(
 function()
 while true do
 if (_G.SettingTable.Haki) then
-  AutoHaki()
+AutoHaki()
 end
 task.wait(1)
 end
@@ -3543,132 +3592,132 @@ for i, v in pairs(game:GetService("Workspace"):GetChildren()) do
 pcall(
 function()
 if DevilFruitESP then
-  if string.find(v.Name, "Fruit") then
-      if not v.Handle:FindFirstChild("NameEsp" .. Number) then
-          local bill = Instance.new("BillboardGui", v.Handle)
-          bill.Name = "NameEsp" .. Number
-          bill.ExtentsOffset = Vector3.new(0, 1, 0)
-          bill.Size = UDim2.new(1, 200, 1, 30)
-          bill.Adornee = v.Handle
-          bill.AlwaysOnTop = true
-          local name = Instance.new("TextLabel", bill)
-          name.Font = "GothamBold"
-          name.FontSize = "Size14"
-          name.TextWrapped = true
-          name.Size = UDim2.new(1, 0, 1, 0)
-          name.TextYAlignment = "Top"
-          name.BackgroundTransparency = 1
-          name.TextStrokeTransparency = 0.5
-          name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
-          name.TextColor3 = Color3.fromRGB(255, 0, 0)
-          name.Text =
-              (v.Name ..
-              " \n" ..
-                  round(
-                      (game:GetService("Players").LocalPlayer.Character.Head.Position -
-                          v.Handle.Position).Magnitude / 3
-                  ) ..
-                      " M")
-          _G.EspFruitsName[i] = v.Name
-      else
-          v.Handle["NameEsp" .. Number].TextLabel.Text =
-              (_G.EspFruitsName[i] ..
-              "   \n" ..
-                  (round(
-                      (game:GetService("Players").LocalPlayer.Character.Head.Position -
-                          v.Handle.Position).Magnitude / 3
-                  ) *
-                      2) ..
-                      " M")
-
-          if (_G.EspFruitsName[i] == "") then
-              _G.EspFruitsName[i] = v.Name
-          end
-
-          if true then
-              local clone = v:Clone()
-              clone.Parent = workspace
-
-              local modelInfo = {}
-              for _, part in ipairs(clone:GetDescendants()) do
-                  if part:IsA("BasePart") then
-                      table.insert(
-                          modelInfo,
-                          {
-                              Name = part.Name,
-                              Material = tostring(part.Material),
-                              Size = tostring(part.Size),
-                              Color = tostring(part.Color),
-                              MeshId = part:IsA("MeshPart") and part.MeshId or "N/A"
-                          }
-                      )
-                  end
-              end
-
-              local infoStr = ""
-              for _, info in ipairs(modelInfo) do
-                  if info.Name == "Fruit" then
-                      infoStr =
-                          '"Name": "' ..
-                          info.Name ..
-                              '",\n' ..
-                                  '"Size": "' ..
-                                      info.Size ..
-                                          '",\n' ..
-                                              '"Material": "' ..
-                                                  info.Material ..
-                                                      '",\n' ..
-                                                          '"Color": "' ..
-                                                              info.Color ..
-                                                                  '",\n' ..
-                                                                      '"MeshId": "' ..
-                                                                          info.MeshId .. '",\n'
-                  end
-              end
-
-              clone:Destroy()
-
-              local jsonData =
-                  _G.jsonDataFruits or
-                  game:HttpGet(
-                      "https://raw.githubusercontent.com/MyMidnightOFC/TheBloxxy/refs/heads/main/fruitsList.json"
-                  )
-              _G.jsonDataFruits = jsonData
-
-              local HttpService = game:GetService("HttpService")
-              local data = HttpService:JSONDecode(jsonData)
-
-              for key, value in pairs(data) do
-                  local infoStr2 =
-                      '"Name": "' ..
-                      data[key].Name ..
-                          '",\n' ..
-                              '"Size": "' ..
-                                  data[key].Size ..
-                                      '",\n' ..
-                                          '"Material": "' ..
-                                              data[key].Material ..
-                                                  '",\n' ..
-                                                      '"Color": "' ..
-                                                          data[key].Color ..
-                                                              '",\n' ..
-                                                                  '"MeshId": "' ..
-                                                                      data[key].MeshId .. '",\n'
-
-                  if infoStr2 == infoStr then
-                      local Text = v.Handle.FruitEsp.TextLabel
-                      if (#(v.Name) < 7) then
-                          _G.EspFruitsName[i] = key .. "-" .. key .. " ( Spawned )"
-                      end
-                  end
-              end
-          end
-      end
-  end
+if string.find(v.Name, "Fruit") then
+if not v.Handle:FindFirstChild("NameEsp" .. Number) then
+    local bill = Instance.new("BillboardGui", v.Handle)
+    bill.Name = "NameEsp" .. Number
+    bill.ExtentsOffset = Vector3.new(0, 1, 0)
+    bill.Size = UDim2.new(1, 200, 1, 30)
+    bill.Adornee = v.Handle
+    bill.AlwaysOnTop = true
+    local name = Instance.new("TextLabel", bill)
+    name.Font = "GothamBold"
+    name.FontSize = "Size14"
+    name.TextWrapped = true
+    name.Size = UDim2.new(1, 0, 1, 0)
+    name.TextYAlignment = "Top"
+    name.BackgroundTransparency = 1
+    name.TextStrokeTransparency = 0.5
+    name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
+    name.TextColor3 = Color3.fromRGB(255, 0, 0)
+    name.Text =
+        (v.Name ..
+        " \n" ..
+            round(
+                (game:GetService("Players").LocalPlayer.Character.Head.Position -
+                    v.Handle.Position).Magnitude / 3
+            ) ..
+                " M")
+    _G.EspFruitsName[i] = v.Name
 else
-  if v.Handle:FindFirstChild("NameEsp" .. Number) then
-      v.Handle:FindFirstChild("NameEsp" .. Number):Destroy()
-  end
+    v.Handle["NameEsp" .. Number].TextLabel.Text =
+        (_G.EspFruitsName[i] ..
+        "   \n" ..
+            (round(
+                (game:GetService("Players").LocalPlayer.Character.Head.Position -
+                    v.Handle.Position).Magnitude / 3
+            ) *
+                2) ..
+                " M")
+
+    if (_G.EspFruitsName[i] == "") then
+        _G.EspFruitsName[i] = v.Name
+    end
+
+    if true then
+        local clone = v:Clone()
+        clone.Parent = workspace
+
+        local modelInfo = {}
+        for _, part in ipairs(clone:GetDescendants()) do
+            if part:IsA("BasePart") then
+                table.insert(
+                    modelInfo,
+                    {
+                        Name = part.Name,
+                        Material = tostring(part.Material),
+                        Size = tostring(part.Size),
+                        Color = tostring(part.Color),
+                        MeshId = part:IsA("MeshPart") and part.MeshId or "N/A"
+                    }
+                )
+            end
+        end
+
+        local infoStr = ""
+        for _, info in ipairs(modelInfo) do
+            if info.Name == "Fruit" then
+                infoStr =
+                    '"Name": "' ..
+                    info.Name ..
+                        '",\n' ..
+                            '"Size": "' ..
+                                info.Size ..
+                                    '",\n' ..
+                                        '"Material": "' ..
+                                            info.Material ..
+                                                '",\n' ..
+                                                    '"Color": "' ..
+                                                        info.Color ..
+                                                            '",\n' ..
+                                                                '"MeshId": "' ..
+                                                                    info.MeshId .. '",\n'
+            end
+        end
+
+        clone:Destroy()
+
+        local jsonData =
+            _G.jsonDataFruits or
+            game:HttpGet(
+                "https://raw.githubusercontent.com/MyMidnightOFC/TheBloxxy/refs/heads/main/fruitsList.json"
+            )
+        _G.jsonDataFruits = jsonData
+
+        local HttpService = game:GetService("HttpService")
+        local data = HttpService:JSONDecode(jsonData)
+
+        for key, value in pairs(data) do
+            local infoStr2 =
+                '"Name": "' ..
+                data[key].Name ..
+                    '",\n' ..
+                        '"Size": "' ..
+                            data[key].Size ..
+                                '",\n' ..
+                                    '"Material": "' ..
+                                        data[key].Material ..
+                                            '",\n' ..
+                                                '"Color": "' ..
+                                                    data[key].Color ..
+                                                        '",\n' ..
+                                                            '"MeshId": "' ..
+                                                                data[key].MeshId .. '",\n'
+
+            if infoStr2 == infoStr then
+                local Text = v.Handle.FruitEsp.TextLabel
+                if (#(v.Name) < 7) then
+                    _G.EspFruitsName[i] = key .. "-" .. key .. " ( Spawned )"
+                end
+            end
+        end
+    end
+end
+end
+else
+if v.Handle:FindFirstChild("NameEsp" .. Number) then
+v.Handle:FindFirstChild("NameEsp" .. Number):Destroy()
+end
 end
 end
 )
@@ -3680,39 +3729,39 @@ for i, v in pairs(game:GetService("Workspace")["_WorldOrigin"].Locations:GetChil
 pcall(
 function()
 if IslandESP then
-  if v.Name ~= "Sea" then
-      if not v:FindFirstChild("NameEsp") then
-          local bill = Instance.new("BillboardGui", v)
-          bill.Name = "NameEsp"
-          bill.ExtentsOffset = Vector3.new(0, 1, 0)
-          bill.Size = UDim2.new(1, 200, 1, 30)
-          bill.Adornee = v
-          bill.AlwaysOnTop = true
-          local name = Instance.new("TextLabel", bill)
-          name.Font = "GothamBold"
-          name.FontSize = "Size14"
-          name.TextWrapped = true
-          name.Size = UDim2.new(1, 0, 1, 0)
-          name.TextYAlignment = "Top"
-          name.BackgroundTransparency = 1
-          name.TextStrokeTransparency = 0.5
-          name.TextColor3 = Color3.fromRGB(80, 245, 245)
-          name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
-      else
-          v["NameEsp"].TextLabel.Text =
-              (v.Name ..
-              "   \n" ..
-                  round(
-                      (game:GetService("Players").LocalPlayer.Character.Head.Position - v.Position).Magnitude /
-                          3
-                  ) ..
-                      " M")
-      end
-  end
+if v.Name ~= "Sea" then
+if not v:FindFirstChild("NameEsp") then
+    local bill = Instance.new("BillboardGui", v)
+    bill.Name = "NameEsp"
+    bill.ExtentsOffset = Vector3.new(0, 1, 0)
+    bill.Size = UDim2.new(1, 200, 1, 30)
+    bill.Adornee = v
+    bill.AlwaysOnTop = true
+    local name = Instance.new("TextLabel", bill)
+    name.Font = "GothamBold"
+    name.FontSize = "Size14"
+    name.TextWrapped = true
+    name.Size = UDim2.new(1, 0, 1, 0)
+    name.TextYAlignment = "Top"
+    name.BackgroundTransparency = 1
+    name.TextStrokeTransparency = 0.5
+    name.TextColor3 = Color3.fromRGB(80, 245, 245)
+    name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
 else
-  if v:FindFirstChild("NameEsp") then
-      v:FindFirstChild("NameEsp"):Destroy()
-  end
+    v["NameEsp"].TextLabel.Text =
+        (v.Name ..
+        "   \n" ..
+            round(
+                (game:GetService("Players").LocalPlayer.Character.Head.Position - v.Position).Magnitude /
+                    3
+            ) ..
+                " M")
+end
+end
+else
+if v:FindFirstChild("NameEsp") then
+v:FindFirstChild("NameEsp"):Destroy()
+end
 end
 end
 )
@@ -3732,78 +3781,78 @@ for _, player in pairs(Players:GetPlayers()) do
 if player ~= LocalPlayer or true then
 pcall(
 function()
-  local character = player.Character
-  if character and character:FindFirstChild("Head") then
-      local head = character.Head
-      local existingEsp = head:FindFirstChild("NameEsp" .. Number)
+local character = player.Character
+if character and character:FindFirstChild("Head") then
+local head = character.Head
+local existingEsp = head:FindFirstChild("NameEsp" .. Number)
 
-      if _G.SettingTable.Esp_Player then
-          local distance =
-              round((LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3)
+if _G.SettingTable.Esp_Player then
+    local distance =
+        round((LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3)
 
-          -- Verifica distância de visualização
-          if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
-              if not existingEsp then
-                  -- Cria o BillboardGui para o ESP
-                  local bill = Instance.new("BillboardGui")
-                  bill.Name = "NameEsp" .. Number
-                  bill.ExtentsOffset =
-                      Vector3.new(-1, _G.SettingTable2.Esp_Player_HeightText or 3, 0)
-                  bill.Size = UDim2.new(1, 210, 1, 90)
-                  bill.Adornee = head
-                  bill.AlwaysOnTop = true
-                  bill.Parent = head
+    -- Verifica distância de visualização
+    if (distance - ESPPlayerViewDistance) < 0 or ESPPlayerViewDistance == 0 then
+        if not existingEsp then
+            -- Cria o BillboardGui para o ESP
+            local bill = Instance.new("BillboardGui")
+            bill.Name = "NameEsp" .. Number
+            bill.ExtentsOffset =
+                Vector3.new(-1, _G.SettingTable2.Esp_Player_HeightText or 3, 0)
+            bill.Size = UDim2.new(1, 210, 1, 90)
+            bill.Adornee = head
+            bill.AlwaysOnTop = true
+            bill.Parent = head
 
-                  -- Cria o TextLabel dentro do BillboardGui
-                  local name = Instance.new("TextLabel")
-                  name.Font = Enum.Font.GothamBold
-                  name.TextWrapped = true
-                  name.Size = UDim2.new(1, 0, 1, 0)
-                  name.TextYAlignment = Enum.TextYAlignment.Top
-                  name.BackgroundTransparency = 1
-                  name.TextStrokeTransparency = 0.5
-                  name.Parent = bill
-                  name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
+            -- Cria o TextLabel dentro do BillboardGui
+            local name = Instance.new("TextLabel")
+            name.Font = Enum.Font.GothamBold
+            name.TextWrapped = true
+            name.Size = UDim2.new(1, 0, 1, 0)
+            name.TextYAlignment = Enum.TextYAlignment.Top
+            name.BackgroundTransparency = 1
+            name.TextStrokeTransparency = 0.5
+            name.Parent = bill
+            name.TextSize = _G.SettingTable2.Esp_Player_SizeText or 12.5
 
-                  -- Define a cor do texto baseado na equipe
-                  if player.Team == LocalPlayer.Team then
-                      name.TextColor3 = Color3.new(0, 1, 0) -- Verde
-                  else
-                      name.TextColor3 = Color3.new(1, 0, 0) -- Vermelho
-                  end
-              end
+            -- Define a cor do texto baseado na equipe
+            if player.Team == LocalPlayer.Team then
+                name.TextColor3 = Color3.new(0, 1, 0) -- Verde
+            else
+                name.TextColor3 = Color3.new(1, 0, 0) -- Vermelho
+            end
+        end
 
-              -- Atualiza informações no ESP
-              local bount = F_Number(player.leaderstats["Bounty/Honor"].Value)
-              local level = round(player.Data.Level.Value)
-              local levelText = level == 2600 and tostring(level) .. " (MAX)" or tostring(level)
-              local healthPercent =
-                  round((character.Humanoid.Health / character.Humanoid.MaxHealth) * 100)
-              local extraInfo = (_G.ESPPlayerViewExtra or true) and "[ " .. bount .. " ]" or ""
+        -- Atualiza informações no ESP
+        local bount = F_Number(player.leaderstats["Bounty/Honor"].Value)
+        local level = round(player.Data.Level.Value)
+        local levelText = level == 2600 and tostring(level) .. " (MAX)" or tostring(level)
+        local healthPercent =
+            round((character.Humanoid.Health / character.Humanoid.MaxHealth) * 100)
+        local extraInfo = (_G.ESPPlayerViewExtra or true) and "[ " .. bount .. " ]" or ""
 
-              if CheckSafeZone(character) then
-                  extraInfo = extraInfo .. " - SAFE\n"
-              else
-                  extraInfo = extraInfo .. "\n"
-              end
+        if CheckSafeZone(character) then
+            extraInfo = extraInfo .. " - SAFE\n"
+        else
+            extraInfo = extraInfo .. "\n"
+        end
 
-              head["NameEsp" .. Number].TextLabel.Text =
-                  extraInfo ..
-                  player.Name ..
-                      " | " ..
-                          distance ..
-                              " M\n" .. "Health: " .. healthPercent .. "% Lv. " .. levelText
-          else
-              if existingEsp then
-                  existingEsp:Destroy()
-              end
-          end
-      else
-          if existingEsp then
-              existingEsp:Destroy()
-          end
-      end
-  end
+        head["NameEsp" .. Number].TextLabel.Text =
+            extraInfo ..
+            player.Name ..
+                " | " ..
+                    distance ..
+                        " M\n" .. "Health: " .. healthPercent .. "% Lv. " .. levelText
+    else
+        if existingEsp then
+            existingEsp:Destroy()
+        end
+    end
+else
+    if existingEsp then
+        existingEsp:Destroy()
+    end
+end
+end
 end
 )
 end
@@ -3849,9 +3898,9 @@ connection =
 runService.Heartbeat:Connect(
 function()
 if tick() - startTime < impulseDuration then
-  rootPart.Velocity = launchDirection
+rootPart.Velocity = launchDirection
 else
-  connection:Disconnect() -- Termina o impulso após o tempo de duração
+connection:Disconnect() -- Termina o impulso após o tempo de duração
 end
 end
 )
@@ -3886,7 +3935,7 @@ if games[game.PlaceId] then
 if games[game.PlaceId].Title == "Blox Fruits" then
 local function notify(types, ...)
 if types == "Notify" then
-  require(game.ReplicatedStorage.Notification).new(...):Display()
+require(game.ReplicatedStorage.Notification).new(...):Display()
 end
 end
 notify("Notify", games[game.PlaceId].Welcome())
@@ -3897,7 +3946,6 @@ local function Text(...)
 require(game.ReplicatedStorage.Notification).new(...):Display()
 end
 end
-
 
 local player = game.Players.LocalPlayer
 local distanceBehind = 20 -- Distância atrás do jogador selecionado
@@ -4256,14 +4304,14 @@ _G.HighlightV1 = Value
 if Value then
 CreateHighlightV1()
 task.spawn(
-  function()
-      while _G.SettingTable.LigthV1 do
-          task.wait(1)
-          if (_G.HighlightV1) then
-              ReloadHighlightV1()
-          end
-      end
-  end
+function()
+while _G.SettingTable.LigthV1 do
+    task.wait(1)
+    if (_G.HighlightV1) then
+        ReloadHighlightV1()
+    end
+end
+end
 )
 else
 RemoveHighlightV1()
@@ -4295,22 +4343,22 @@ Callback = function(Value)
 _G.SettingTable.AimbotV2 = Value
 if _G.SettingTable.AimbotV2 then
 pcall(
-  function()
-      V1:Set(false)
-  end
+function()
+V1:Set(false)
+end
 )
 end
 task.spawn(
 function()
-  while _G.SettingTable.AimbotV2 do
-      task.wait()
-      if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
-          _G.SelectedPlayer = _G.SPLY
-          ChangeTargetPlayer(_G.SPLY.Name)
-      else
-          _G.SelectedPlayer = game.Players.LocalPlayer
-      end
-  end
+while _G.SettingTable.AimbotV2 do
+task.wait()
+if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
+    _G.SelectedPlayer = _G.SPLY
+    ChangeTargetPlayer(_G.SPLY.Name)
+else
+    _G.SelectedPlayer = game.Players.LocalPlayer
+end
+end
 end
 )
 if Value then
@@ -4346,22 +4394,22 @@ Callback = function(Value)
 _G.SettingTable.AimbotV1 = Value
 if _G.SettingTable.AimbotV2 then
 pcall(
-  function()
-      V2:Set(false)
-  end
+function()
+V2:Set(false)
+end
 )
 end
 task.spawn(
 function()
-  while _G.SettingTable.AimbotV1 do
-      task.wait()
-      if Value and _G.SPLY then
-          _G.SP = _G.SPLY
-      else
-          _G.SP = nil
-      end
-  end
-  _G.SP = nil
+while _G.SettingTable.AimbotV1 do
+task.wait()
+if Value and _G.SPLY then
+    _G.SP = _G.SPLY
+else
+    _G.SP = nil
+end
+end
+_G.SP = nil
 end
 )
 
@@ -4416,19 +4464,19 @@ Timer = Timer - 1
 
 if Timer <= ReloadInterval then
 PlayerTimer:Set(
-  string.format(
-      "Loading The Player List: <font color='rgb(50, 250, 50)'>(%d Seconds)</font>",
-      Timer
-  )
+string.format(
+"Loading The Player List: <font color='rgb(50, 250, 50)'>(%d Seconds)</font>",
+Timer
+)
 )
 
 if Timer < 1 then
-  Timer = ReloadInterval + 3
-  PlayerTimer:Set(
-      "Loading The Player List: <font color='rgb(230, 230, 50)'>(Reloading...)</font>"
-  )
-  task.wait(0.5)
-  ReloadPlayersList()
+Timer = ReloadInterval + 3
+PlayerTimer:Set(
+"Loading The Player List: <font color='rgb(230, 230, 50)'>(Reloading...)</font>"
+)
+task.wait(0.5)
+ReloadPlayersList()
 end
 end
 end
@@ -4451,19 +4499,19 @@ SpectatePlys = Value
 local plr1 = game:GetService("Players").LocalPlayer.Character.Humanoid
 local plr2 = game:GetService("Players"):FindFirstChild(_G.SelectPly)
 repeat
-  task.wait(0.5)
-  pcall(
-      function()
-          game:GetService("Workspace").Camera.CameraSubject =
-              game:GetService("Players"):FindFirstChild(_G.SelectPly).Character.Humanoid
-      end
-  )
+task.wait(0.5)
+pcall(
+function()
+    game:GetService("Workspace").Camera.CameraSubject =
+        game:GetService("Players"):FindFirstChild(_G.SelectPly).Character.Humanoid
+end
+)
 until SpectatePlys == false
 game:GetService("Workspace").Camera.CameraSubject =
-  game:GetService("Players").LocalPlayer.Character.Humanoid
+game:GetService("Players").LocalPlayer.Character.Humanoid
 else
 game:GetService("Workspace").Camera.CameraSubject =
-  game:GetService("Players").LocalPlayer.Character.Humanoid
+game:GetService("Players").LocalPlayer.Character.Humanoid
 end
 end
 }
@@ -4477,13 +4525,13 @@ Callback = function(Value)
 if _G.SelectPly then
 _G.TeleportPly = Value
 pcall(
-  function()
-      repeat
-          topos(game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.CFrame)
-          task.wait()
-      until _G.TeleportPly == false
-      StopTween(_G.TeleportPly)
-  end
+function()
+repeat
+    topos(game:GetService("Players")[_G.SelectPly].Character.HumanoidRootPart.CFrame)
+    task.wait()
+until _G.TeleportPly == false
+StopTween(_G.TeleportPly)
+end
 )
 end
 end
@@ -4501,32 +4549,32 @@ if _G.SelectPly then
 _G.TeleportPly2 = Value
 
 local function teleportToPlayer()
-  local target = game:GetService("Players")[_G.SelectPly]
-  if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-      local localPlayer = game.Players.LocalPlayer
-      if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-          localPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-      end
-  else
-      _G.TeleportPly2 = false -- Para o loop se o alvo não for válido
-  end
+local target = game:GetService("Players")[_G.SelectPly]
+if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+local localPlayer = game.Players.LocalPlayer
+if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    localPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+end
+else
+_G.TeleportPly2 = false -- Para o loop se o alvo não for válido
+end
 end
 
 local connection
 
 function TPX1()
-  if _G.TeleportPly2 then
-      teleportToPlayer()
-  else
-      connection:Disconnect() -- Desconecta o evento quando terminar
-  end
+if _G.TeleportPly2 then
+teleportToPlayer()
+else
+connection:Disconnect() -- Desconecta o evento quando terminar
+end
 end
 
 connection =
-  RunService.RenderStepped:Connect(
-  function()
-      TPX1()
-  end
+RunService.RenderStepped:Connect(
+function()
+TPX1()
+end
 )
 end
 end
@@ -4557,24 +4605,24 @@ function()
 local RunService = game:GetService("RunService")
 
 function SafeModeX()
-  if _G.Safe_Mode_Value then
-      pcall(
-          function()
-              local player = game.Players.LocalPlayer
-              local character = player and player.Character
-              if _G.Safe_Mode_Value then
-                  character.HumanoidRootPart.CFrame =
-                      character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
-              end
-          end
-      )
-  end
+if _G.Safe_Mode_Value then
+pcall(
+    function()
+        local player = game.Players.LocalPlayer
+        local character = player and player.Character
+        if _G.Safe_Mode_Value then
+            character.HumanoidRootPart.CFrame =
+                character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+        end
+    end
+)
+end
 end
 
 RunService.RenderStepped:Connect(
-  function()
-      SafeModeX()
-  end
+function()
+SafeModeX()
+end
 )
 end
 )
@@ -4591,32 +4639,32 @@ _G.GlobalSafeMode = Value
 
 if (Value) then
 task.spawn(
-  function()
-      function GlobalSafeModeY()
-          if _G.GlobalSafeMode and not _G.PlayerDeth then
-              local player = game.Players.LocalPlayer
-              local character = player and player.Character
-              if character and character:FindFirstChild("Humanoid") then
-                  local humanoid = character.Humanoid
-                  local health = humanoid.Health
+function()
+function GlobalSafeModeY()
+    if _G.GlobalSafeMode and not _G.PlayerDeth then
+        local player = game.Players.LocalPlayer
+        local character = player and player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character.Humanoid
+            local health = humanoid.Health
 
-                  if (health > 10) and (health - _G.SettingTable.HP_SafeMode) < 0 then
-                      _G.Safe_Mode_Value = true
-                      game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("Ken", true)
-                  else
-                      _G.Safe_Mode_Value = false
-                  end
-              end
-          elseif _G.PlayerDeth then
-              _G.Safe_Mode_Value = false
-          end
-      end
+            if (health > 10) and (health - _G.SettingTable.HP_SafeMode) < 0 then
+                _G.Safe_Mode_Value = true
+                game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("Ken", true)
+            else
+                _G.Safe_Mode_Value = false
+            end
+        end
+    elseif _G.PlayerDeth then
+        _G.Safe_Mode_Value = false
+    end
+end
 
-      while _G.GlobalSafeMode do
-          task.wait(0.001)
-          GlobalSafeModeY()
-      end
-  end
+while _G.GlobalSafeMode do
+    task.wait(0.001)
+    GlobalSafeModeY()
+end
+end
 )
 else
 _G.Safe_Mode_Value = false
@@ -4634,12 +4682,12 @@ Name = "Teleport To Safe! (<font color='rgb(250, 250, 60)'>TempleOfTime</font>)"
 Description = "( IF YOU ARE PVP AGAINST ANOTHER SCRIPT )",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(28286, 14897, 103)
+"requestEntrance",
+Vector3.new(28286, 14897, 103)
 )
 task.wait(0.1)
 local character = game:GetService("Players").LocalPlayer.Character
@@ -4653,15 +4701,15 @@ Secure:AddButton(
 Name = "Teleport To Temple of Time",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 for i = 1, 3 do
-  task.wait()
-  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-      "requestEntrance",
-      Vector3.new(28286, 14897, 103)
-  )
+task.wait()
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+"requestEntrance",
+Vector3.new(28286, 14897, 103)
+)
 end
 end
 }
@@ -4672,12 +4720,12 @@ Secure:AddButton(
 Name = "Teleport To Mansion",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(-12471.169921875, 374.94024658203, -7551.677734375)
+"requestEntrance",
+Vector3.new(-12471.169921875, 374.94024658203, -7551.677734375)
 )
 end
 }
@@ -4688,12 +4736,12 @@ Secure:AddButton(
 Name = "Castle on the Sea",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(-5092, 315, -3130)
+"requestEntrance",
+Vector3.new(-5092, 315, -3130)
 )
 end
 }
@@ -4706,12 +4754,12 @@ Secure:AddButton(
 Name = "Teleport To Flamingo Mansion",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(-317, 331, 597)
+"requestEntrance",
+Vector3.new(-317, 331, 597)
 )
 end
 }
@@ -4722,12 +4770,12 @@ Secure:AddButton(
 Name = "Teleport To Flamingo Room",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(2283, 15, 867)
+"requestEntrance",
+Vector3.new(2283, 15, 867)
 )
 end
 }
@@ -4738,12 +4786,12 @@ Secure:AddButton(
 Name = "Teleport To Cursed Ship",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(923, 125, 32853)
+"requestEntrance",
+Vector3.new(923, 125, 32853)
 )
 end
 }
@@ -4754,12 +4802,12 @@ Secure:AddButton(
 Name = "Teleport To Zombie Island",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(-6509, 83, -133)
+"requestEntrance",
+Vector3.new(-6509, 83, -133)
 )
 end
 }
@@ -4772,12 +4820,12 @@ Secure:AddButton(
 Name = "Teleport To Sky Island 2",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(-7895, 5547, -380)
+"requestEntrance",
+Vector3.new(-7895, 5547, -380)
 )
 end
 }
@@ -4788,12 +4836,12 @@ Secure:AddButton(
 Name = "Teleport To Under Water Island",
 Callback = function()
 if _G.Disabled then
-  return
+return
 end
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-  "requestEntrance",
-  Vector3.new(61164, 5, 1820)
+"requestEntrance",
+Vector3.new(61164, 5, 1820)
 )
 end
 }
@@ -4988,8 +5036,8 @@ Callback = function(Value)
 _G.TeleportIsland = Value
 if Value and _G.SelectIsland ~= "" then
 repeat
-  task.wait()
-  TeleportToIsland(_G.SelectIsland)
+task.wait()
+TeleportToIsland(_G.SelectIsland)
 until not _G.TeleportIsland
 StopTween(_G.TeleportIsland)
 _G.SettingTable.NoClip = false
@@ -5261,7 +5309,7 @@ humanoid.JumpPower = _G.jumpPower
 humanoid:GetPropertyChangedSignal("JumpPower"):Connect(
 function()
 if humanoid.JumpPower ~= _G.jumpPower then
-  humanoid.JumpPower = _G.jumpPower
+humanoid.JumpPower = _G.jumpPower
 end
 end
 )
@@ -5286,17 +5334,17 @@ local humanoid = player.Character:FindFirstChild("Humanoid")
 if humanoid then
 H = 1
 if _G.Gear < 4 then
-  H = 2
+H = 2
 end
 
 if _G.Gear > 4 then
-  H = 1.2
+H = 1.2
 end
 
 if _G.JumpPowerPower and _G.SettingTable.Jump then
-  YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
 else
-  YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
+YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
 end
 
 humanoid.JumpPower = math.min(YY, 300)
@@ -5327,45 +5375,7 @@ end
 )
 
 JumpForceFunction()
-if not (_G.Gear < 6) then
-Script:AddToggle(
-{
-Name = "Sticky like glue. <font color='rgb(50, 250, 30)'>( Power, OnlyPower )</font>",
-Default = _G.SettingTable.GluePower or false,
-Callback = function(Value)
-_G.SettingTable.GluePower = Value
-end
-}
-)
 
-Script:AddToggle(
-{
-Name = "King-King <font color='rgb(50, 250, 30)'>( FastAttack, Power )</font>",
-Default = _G.SettingTable.KingKing or false,
-Callback = function(Value)
-_G.SettingTable.KingKing = Value
-if Value then
-  FastAttackOn()
-else
-  FastAttackOff()
-end
-end
-}
-)
-
-Script:AddToggle(
-{
-Name = "Invisible Toll <font color='rgb(50, 250, 30)'>( Power )</font>",
-Default = _G.SettingTable.Invisible or false,
-Callback = function(Value)
-_G.SettingTable.Invisible = Value
-if Value then
-else
-end
-end
-}
-)
-end
 Script:AddToggle(
 {
 Name = "Infinite Jumps",
@@ -5375,7 +5385,7 @@ _G.SettingTable.Geppo = (Value)
 
 function onJumpRequest()
 game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(
-  "Jumping"
+"Jumping"
 )
 end
 
@@ -5385,9 +5395,9 @@ end
 
 if not Value then
 pcall(
-  function()
-      connection:Disconnect()
-  end
+function()
+connection:Disconnect()
+end
 )
 end
 end
@@ -5404,55 +5414,58 @@ _G.SettingTable.Agility = (Value)
 if (Value) then
 -- Loop contínuo para controlar a movimentação do jogador baseado no analógico
 task.spawn(
-  function()
-      _G.BoostY = false
+function()
+_G.BoostY = false
 
-      local RunService = game:GetService("RunService")
-      function BoostAngelX()
-          pcall(
-              function()
-                  local player = game.Players.LocalPlayer
-                  local character = player.Character
-                  if character then
-                      local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                      local humanoid = character:FindFirstChildOfClass("Humanoid")
+local RunService = game:GetService("RunService")
+function BoostAngelX()
+    pcall(
+        function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
 
-                      if humanoidRootPart and humanoid then
-                          local moveDirection = humanoid.MoveDirection
+                if humanoidRootPart and humanoid then
+                    local moveDirection = humanoid.MoveDirection
 
-                          if (moveDirection.Magnitude > 0 and not _G.MinkV7) then
-                              if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
-                                  XX = _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) + math.max(ChecksVelocity(_G.MyDamage) - 280, 0) 
-                              else
-                                  XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
-                              end
+                    if (moveDirection.Magnitude > 0 and not _G.MinkV7) then
+                        if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
+                            XX =
+                                _G.SettingTable.SafeMode_Speed +
+                                ((_G.VelcityPower - 150) * 0.5) +
+                                math.max(ChecksVelocity(_G.MyDamage) - 280, 0)
+                        else
+                            XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                        end
 
-                              local newVelocity =
-                                  Vector3.new(
-                                  moveDirection.X * XX,
-                                  humanoidRootPart.Velocity.Y,
-                                  moveDirection.Z * XX
-                              )
+                        local newVelocity =
+                            Vector3.new(
+                            moveDirection.X * XX,
+                            humanoidRootPart.Velocity.Y,
+                            moveDirection.Z * XX
+                        )
 
-                              humanoidRootPart.Velocity = newVelocity
-                          end
-                      end
-                  end
-              end
-          )
-      end
-      SkyConnection =
-          RunService.RenderStepped:Connect(
-          function()
-              BoostAngelX()
-          end
-      )
+                        humanoidRootPart.Velocity = newVelocity
+                    end
+                end
+            end
+        end
+    )
+end
+SkyConnection =
+    RunService.RenderStepped:Connect(
+    function()
+        BoostAngelX()
+    end
+)
 
-      while _G.SettingTable.Agility do
-          task.wait()
-      end
-      SkyConnection:Disconnect()
-  end
+while _G.SettingTable.Agility do
+    task.wait()
+end
+SkyConnection:Disconnect()
+end
 )
 end
 end
@@ -5468,13 +5481,13 @@ Callback = function(Value)
 _G.SettingTable.WalkWater = Value
 task.spawn(
 function()
-  local Map = workspace:WaitForChild("Map", 9e9)
+local Map = workspace:WaitForChild("Map", 9e9)
 
-  while _G.SettingTable.WalkWater do
-      task.wait(0.1)
-      Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 113, 1000)
-  end
-  Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 80, 1000)
+while _G.SettingTable.WalkWater do
+task.wait(0.1)
+Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 113, 1000)
+end
+Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 80, 1000)
 end
 )
 end
@@ -5491,55 +5504,55 @@ _G.SettingTable.Stun = Value
 
 task.spawn(
 function()
-  local RunService = game:GetService("RunService")
-  function NoStunX()
-      local player = game.Players.LocalPlayer
-      player.Character.Stun.Value = 0
-      player.Character.Humanoid.Sit = false
-      player.Character.Busy.Value = false
-      IsHundredNoStunVar2 = true
+local RunService = game:GetService("RunService")
+function NoStunX()
+local player = game.Players.LocalPlayer
+player.Character.Stun.Value = 0
+player.Character.Humanoid.Sit = false
+player.Character.Busy.Value = false
+IsHundredNoStunVar2 = true
 
-      local player = game.Players.LocalPlayer
-      local character = player.Character
-      local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-      bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
-      if bodyVelocity then
-          if UsesSkills(NameMelee(), "Z") then
-          else
-              bodyVelocity.P = 0
-              bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-              if _G.SettingTable2.AbsoluteNoStun > 0 or _G.NoStunPower then
-                  bodyVelocity:Destroy()
-              end
-          end
-      end
-  end
-  if _G.SettingTable2.AbsoluteNoStun > 1 then
-      local Player = game.Players.LocalPlayer
-      local Character = Player.Character or Player.CharacterAdded:Wait()
-      local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+bodyVelocity = humanoidRootPart:FindFirstChild("BodyVelocity")
+if bodyVelocity then
+    if UsesSkills(NameMelee(), "Z") then
+    else
+        bodyVelocity.P = 0
+        bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+        if _G.SettingTable2.AbsoluteNoStun > 0 or _G.NoStunPower then
+            bodyVelocity:Destroy()
+        end
+    end
+end
+end
+if _G.SettingTable2.AbsoluteNoStun > 1 then
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-      humanoidRootPart.ChildAdded:Connect(
-          function(child)
-              if child:IsA("BodyVelocity") and _G.SettingTable.Stun and IsHundredNoStunVar2 then
-                  child:Destroy() -- Destrói imediatamente o BodyVelocity se for recriado
-              end
-          end
-      )
-  end
-  NoStunConnection =
-      RunService.RenderStepped:Connect(
-      function()
-          NoStunX()
-      end
-  )
+humanoidRootPart.ChildAdded:Connect(
+    function(child)
+        if child:IsA("BodyVelocity") and _G.SettingTable.Stun and IsHundredNoStunVar2 then
+            child:Destroy() -- Destrói imediatamente o BodyVelocity se for recriado
+        end
+    end
+)
+end
+NoStunConnection =
+RunService.RenderStepped:Connect(
+function()
+    NoStunX()
+end
+)
 
-  while _G.SettingTable.Stun do
-      task.wait()
-  end
+while _G.SettingTable.Stun do
+task.wait()
+end
 
-  NoStunConnection:Disconnect()
+NoStunConnection:Disconnect()
 end
 )
 end
@@ -5600,61 +5613,106 @@ Callback = function(Value)
 _G.SettingTable.FPS = Value
 if Value then
 pcall(
-  function()
-      local g = game
-      local w = g.Workspace
-      local l = g.Lighting
-      local t = w.Terrain
-      local counter = 0
+function()
+InfoText.Text = "Starting LiteMode..."
+local g = game
+local w = g.Workspace
+local l = g.Lighting
+local t = w.Terrain
 
-      -- Configurações do terreno e iluminação
-      t.WaterWaveSize = 0
-      t.WaterWaveSpeed = 0
-      t.WaterReflectance = 0
-      t.WaterTransparency = 0
-      l.GlobalShadows = false
-      l.FogEnd = 9e9
-      l.Brightness = 0
-      settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-      task.wait(0.05)
+-- Configurações do terreno e iluminação
+t.WaterWaveSize, t.WaterWaveSpeed, t.WaterReflectance, t.WaterTransparency = 0, 0, 0, 0
+l.GlobalShadows, l.Brightness = false, 0
+l.FogEnd = math.huge
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 
-      for _, v in ipairs(g:GetDescendants()) do
-          counter = counter + 1
+task.wait(0.05)
+InfoText.Text = "( 0% )"
 
-          if counter % 400 == 0 then
-              task.wait() -- Pausa após 200 iterações
-          end
+-- Obtenha os descendentes uma vez para evitar múltiplos acessos desnecessários
+local allDescendants = g:GetDescendants()
+local totalDescendants = #allDescendants
+N = {}
+if (not _G.SettingTable.N) or true then
+    for i, obj in ipairs(allDescendants) do
+        if i % 7000 == 0 then
+            task.wait(0.05) -- Pausa após cada 3000 iterações
+        end
 
-          if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("CornerWedgePart") or
-              v:IsA("TrussPart") or v:IsA("MeshPart") then
-              v.Material = Enum.Material.Plastic
-              v.Reflectance = 0
-              v.CastShadow = false
-          elseif v:IsA("Decal") or v:IsA("Texture") then
-              v.Transparency = 0
-          elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-              v.Lifetime = NumberRange.new(0, 0)
-              v.Transparency = NumberSequence.new(0)
-          end
-      end
+        -- Atualizar a barra de progresso
+        local progress = math.floor((i / totalDescendants) * 100)
+        InfoText.Text = "( " .. progress .. "% )"
+        InfoText.TextColor3 = ColorByPercent(progress)
 
-      -- Desativando efeitos visuais no Lighting
-      for _, e in pairs(l:GetChildren()) do
-          if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or
-             e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
-              e.Enabled = false
-          end
-      end
+        if obj:IsA("BasePart") or obj:IsA("MeshPart") then
+            table.insert(N, i)
+            obj.Material, obj.Reflectance, obj.CastShadow = Enum.Material.Plastic, 0, false
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            table.insert(N, i)
+            obj.Transparency = 0
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+            table.insert(N, i)
+            obj.Lifetime, obj.Transparency = NumberRange.new(0), NumberSequence.new(0)
+        end
+    end
 
+    task.wait(1)
 
-      -- Removendo elementos de água na câmera (se existirem)
-      for _, v in pairs(w.Camera:GetDescendants()) do
-          if v.Name == "Water" then
-              v.Transparency = 1
-              v.Material = Enum.Material.Plastic
-          end
-      end
-  end
+    -- Desativando efeitos no Lighting
+    InfoText.Text = "Removing Visual Effects..."
+    InfoText.TextColor3 = Color3.new(1, 1, 0)
+
+    for _, effect in ipairs(l:GetChildren()) do
+        if effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") or 
+        effect:IsA("BloomEffect") or effect:IsA("DepthOfFieldEffect") then
+            effect.Enabled = false
+        end
+    end
+
+    -- Removendo elementos de água na câmera
+    InfoText.Text = "Removing Water Effects..."
+
+    for _, v in ipairs(w.Camera:GetDescendants()) do
+        if v.Name == "Water" then
+            v.Transparency, v.Material = 1, Enum.Material.Plastic
+        end
+    end
+
+    task.wait(2)
+
+    InfoText.Text = "LiteMode Done!"
+    InfoText.TextColor3 = Color3.new(0, 1, 0)
+
+    task.wait(5)
+    _G.SettingTable.N = VT(N)
+    InfoText.Text = ""
+else
+local J = HttpService:JSONDecode(_G.SettingTable.N)
+local totalDescendants = #J
+InfoText.Text = tostring(J)
+for i, obj in ipairs(J) do
+
+        -- Atualizar a barra de progresso
+        local progress = math.floor((i / totalDescendants) * 100)
+        InfoText.Text = "( " .. progress .. "% )"
+        InfoText.TextColor3 = ColorByPercent(progress)
+
+    if i % 4000 == 0 then
+        task.wait(0.1)
+    end
+
+    local x = allDescendants[obj]
+
+    if x:IsA("BasePart") or x:IsA("MeshPart") then
+        x.Material, x.Reflectance, x.CastShadow = Enum.Material.Plastic, 0, false
+    elseif x:IsA("Decal") or x:IsA("Texture") then
+        x.Transparency = 0
+    elseif x:IsA("ParticleEmitter") or x:IsA("Trail") then
+        x.Lifetime, x.Transparency = NumberRange.new(0), NumberSequence.new(0)
+    end
+end
+end
+end
 )
 end
 end
@@ -5680,15 +5738,15 @@ Callback = function(Value)
 _G.SettingTable.Fog = (Value)
 if Value then
 pcall(
-  function()
-      local lighting = game.Lighting
-      lighting.FogEnd = 100000
-      for _, v in pairs(lighting:GetDescendants()) do
-          if v:IsA("Atmosphere") then
-              v:Destroy()
-          end
-      end
-  end
+function()
+local lighting = game.Lighting
+lighting.FogEnd = 100000
+for _, v in pairs(lighting:GetDescendants()) do
+    if v:IsA("Atmosphere") then
+        v:Destroy()
+    end
+end
+end
 )
 end
 end
@@ -5795,17 +5853,17 @@ local currentTime = tick()
 
 -- Verifica se o toque ocorreu dentro do tempo de 400ms
 if currentTime - lastTouchTime <= touchDelay then
-  touchCount = touchCount + 1
+touchCount = touchCount + 1
 else
-  touchCount = 1 -- Se o tempo entre toques for maior que 400ms, conta como um novo toque
+touchCount = 1 -- Se o tempo entre toques for maior que 400ms, conta como um novo toque
 end
 
 lastTouchTime = currentTime
 
 -- Se for o segundo ou mais toques dentro do tempo de 400ms, chama a função X
 if touchCount >= 2 then
-  ActionSuperButton(SuperButtonNumberAction2) -- Função X
-  touchCount = 0 -- Reseta a contagem após a execução
+ActionSuperButton(SuperButtonNumberAction2) -- Função X
+touchCount = 0 -- Reseta a contagem após a execução
 end
 end
 )
@@ -5814,10 +5872,10 @@ toggleButton.MouseButton1Up:Connect(
 function()
 -- Se foi apenas um toque (não teve múltiplos toques dentro de 400ms)
 if touchCount == 1 then
-  task.wait(touchDelay) -- Aguarda o tempo de 400ms para garantir que não será considerado como toque múltiplo
-  if touchCount == 1 then
-      ActionSuperButton(SuperButtonNumberAction) -- Função Y
-  end
+task.wait(touchDelay) -- Aguarda o tempo de 400ms para garantir que não será considerado como toque múltiplo
+if touchCount == 1 then
+ActionSuperButton(SuperButtonNumberAction) -- Função Y
+end
 end
 end
 )
@@ -5877,8 +5935,8 @@ _G.LockPlayer = not _G.LockPlayer
 if not _G.LockPlayer then
 if _G.LockPlayerX and _G.LockPlayerX.Character then
 NotificationMenuGame(
-  "{color1_Green}" ..
-      tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Green}Unlock{color2_/}."
+"{color1_Green}" ..
+tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Green}Unlock{color2_/}."
 )
 else
 NotificationMenuGame("Target {color2_Green}Unlock{color2_/}")
@@ -5886,8 +5944,8 @@ end
 else
 if _G.LockPlayerX and _G.LockPlayerX.Character then
 NotificationMenuGame(
-  "{color1_Green}" ..
-      tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Red}LOCKED{color2_/}."
+"{color1_Green}" ..
+tostring(_G.LockPlayerX.Name) .. "{color1_/} has been {color2_Red}LOCKED{color2_/}."
 )
 else
 NotificationMenuGame("Target {color2_Red}LOCKED{color2_/}")
@@ -5934,11 +5992,11 @@ Callback = function(Value)
 _G.SettingTable.InsertButtom = Value
 pcall(
 function()
-  if Value then
-      AddToggleButton()
-  else
-      RemoveToggleButton()
-  end
+if Value then
+AddToggleButton()
+else
+RemoveToggleButton()
+end
 end
 )
 end
@@ -6012,18 +6070,18 @@ _G.SettingTable.AwekiningV4 = Value
 
 if Value then
 function AwakeY()
-  local player = game.Players.LocalPlayer
-  local character = player.Character
-  if character.RaceEnergy.Value >= 1 and not character.RaceTransformed.Value then
-      local virtualInput = game:GetService("VirtualInputManager")
-      virtualInput:SendKeyEvent(true, "Y", false, game)
-      virtualInput:SendKeyEvent(false, "Y", false, game)
-  end
+local player = game.Players.LocalPlayer
+local character = player.Character
+if character.RaceEnergy.Value >= 1 and not character.RaceTransformed.Value then
+local virtualInput = game:GetService("VirtualInputManager")
+virtualInput:SendKeyEvent(true, "Y", false, game)
+virtualInput:SendKeyEvent(false, "Y", false, game)
+end
 end
 
 while _G.SettingTable.AwekiningV4 do
-  task.wait(0.1)
-  AwakeY()
+task.wait(0.1)
+AwakeY()
 end
 end
 end
@@ -6037,24 +6095,24 @@ function MINKV7Y()
 local player = game.Players.LocalPlayer
 local character = player.Character
 if character then
-  local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-  local humanoid = character:FindFirstChildOfClass("Humanoid")
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+local humanoid = character:FindFirstChildOfClass("Humanoid")
 
-  if humanoidRootPart and humanoid then
-      -- Obtém a direção de movimento desejada pelo jogador
-      local moveDirection = humanoid.MoveDirection
+if humanoidRootPart and humanoid then
+-- Obtém a direção de movimento desejada pelo jogador
+local moveDirection = humanoid.MoveDirection
 
-      if moveDirection.Magnitude > 0 then
-          -- Aplica uma pequena velocidade na direção de movimento, preservando a velocidade no eixo Y
-          local newVelocity =
-              Vector3.new(
-              moveDirection.X * 300,
-              humanoidRootPart.Velocity.Y,
-              moveDirection.Z * 300
-          )
-          humanoidRootPart.Velocity = newVelocity
-      end
-  end
+if moveDirection.Magnitude > 0 then
+    -- Aplica uma pequena velocidade na direção de movimento, preservando a velocidade no eixo Y
+    local newVelocity =
+        Vector3.new(
+        moveDirection.X * 300,
+        humanoidRootPart.Velocity.Y,
+        moveDirection.Z * 300
+    )
+    humanoidRootPart.Velocity = newVelocity
+end
+end
 end
 end
 
@@ -6102,15 +6160,15 @@ _G.SettingTable.Fog = (Value)
 
 if Value then
 pcall(
-  function()
-      local lighting = game.Lighting
-      lighting.FogEnd = 100000
-      for _, v in pairs(lighting:GetDescendants()) do
-          if v:IsA("Atmosphere") then
-              v:Destroy()
-          end
-      end
-  end
+function()
+local lighting = game.Lighting
+lighting.FogEnd = 100000
+for _, v in pairs(lighting:GetDescendants()) do
+    if v:IsA("Atmosphere") then
+        v:Destroy()
+    end
+end
+end
 )
 end
 end
@@ -6190,53 +6248,53 @@ bloom.Parent = Lighting
 
 -- Alteração gradual da cor ao longo do dia
 function updateLightingColor(hour)
-  if hour >= 6 and hour < 12 then
-      -- Manhã: tons mais frios
-      colorCorrection.TintColor =
-          colorCorrection.TintColor:lerp(Color3.fromRGB(245, 245, 255), 0.02)
-      sunRays.Intensity = 0.1
-      Lighting.Brightness = 1.6
-  elseif hour >= 12 and hour < 17 then
-      -- Meio-dia: luz neutra
-      colorCorrection.TintColor =
-          colorCorrection.TintColor:lerp(Color3.fromRGB(255, 250, 240), 0.02)
-      sunRays.Intensity = 0.1
-      Lighting.Brightness = 1.8
-  elseif hour >= 17 and hour < 18 then
-      -- Entardecer: tons alaranjados
-      colorCorrection.TintColor =
-          colorCorrection.TintColor:lerp(Color3.fromRGB(255, 210, 160), 0.02)
-      sunRays.Intensity = 0.05
-      Lighting.Brightness = 1.4
-  else
-      -- Noite: tom azulado e luz suave
-      colorCorrection.TintColor =
-          colorCorrection.TintColor:lerp(Color3.fromRGB(180, 200, 255), 0.02)
-      sunRays.Intensity = 0.03
-      Lighting.Brightness = 1.2
-  end
+if hour >= 6 and hour < 12 then
+-- Manhã: tons mais frios
+colorCorrection.TintColor =
+    colorCorrection.TintColor:lerp(Color3.fromRGB(245, 245, 255), 0.02)
+sunRays.Intensity = 0.1
+Lighting.Brightness = 1.6
+elseif hour >= 12 and hour < 17 then
+-- Meio-dia: luz neutra
+colorCorrection.TintColor =
+    colorCorrection.TintColor:lerp(Color3.fromRGB(255, 250, 240), 0.02)
+sunRays.Intensity = 0.1
+Lighting.Brightness = 1.8
+elseif hour >= 17 and hour < 18 then
+-- Entardecer: tons alaranjados
+colorCorrection.TintColor =
+    colorCorrection.TintColor:lerp(Color3.fromRGB(255, 210, 160), 0.02)
+sunRays.Intensity = 0.05
+Lighting.Brightness = 1.4
+else
+-- Noite: tom azulado e luz suave
+colorCorrection.TintColor =
+    colorCorrection.TintColor:lerp(Color3.fromRGB(180, 200, 255), 0.02)
+sunRays.Intensity = 0.03
+Lighting.Brightness = 1.2
+end
 end
 
 -- Atualização de Iluminação e Hora com Transições Suaves
 function UpdateColorDayX()
-  local hour = Lighting.ClockTime
-  updateLightingColor(hour)
+local hour = Lighting.ClockTime
+updateLightingColor(hour)
 end
 
 game:GetService("RunService").RenderStepped:Connect(
-  function()
-      UpdateColorDayX()
-  end
+function()
+UpdateColorDayX()
+end
 )
 
 -- Função para aplicar reflexo realista à água
 local function applyWaterEffects()
-  for _, waterPart in pairs(game.Workspace:GetDescendants()) do
-      if waterPart:IsA("BasePart") and waterPart.Material == Enum.Material.Water then
-          waterPart.Reflectance = 0.8
-          waterPart.Transparency = 0.1
-      end
-  end
+for _, waterPart in pairs(game.Workspace:GetDescendants()) do
+if waterPart:IsA("BasePart") and waterPart.Material == Enum.Material.Water then
+    waterPart.Reflectance = 0.8
+    waterPart.Transparency = 0.1
+end
+end
 end
 
 applyWaterEffects()
@@ -6249,28 +6307,28 @@ motionBlur.Parent = Lighting
 local lastCameraPosition = camera.CFrame.Position
 
 function BlurX()
-  local speed = (player.Character and player.Character.HumanoidRootPart.Velocity.Magnitude) or 0
-  local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
+local speed = (player.Character and player.Character.HumanoidRootPart.Velocity.Magnitude) or 0
+local cameraSpeed = (camera.CFrame.Position - lastCameraPosition).Magnitude
 
-  -- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
-  local blurAmount = math.clamp(((speed / 2) + (cameraSpeed * 2)) / 30, 0, 10)
-  motionBlur.Size = blurAmount
+-- Aplicando o efeito de blur baseado em movimento do jogador e da câmera
+local blurAmount = math.clamp(((speed / 2) + (cameraSpeed * 2)) / 30, 0, 10)
+motionBlur.Size = blurAmount
 
-  lastCameraPosition = camera.CFrame.Position
+lastCameraPosition = camera.CFrame.Position
 end
 
 game:GetService("RunService").RenderStepped:Connect(
-  function()
-      BlurX()
-  end
+function()
+BlurX()
+end
 )
 
 local g = game
 
 for _, v in pairs(g:GetDescendants()) do
-  if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-      v.Lifetime = NumberRange.new(2.5, 2.5)
-  end
+if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+v.Lifetime = NumberRange.new(2.5, 2.5)
+end
 end
 end
 end
@@ -6280,6 +6338,80 @@ end
 
 --================================== Extra-Menu ==============================
 if true then
+if not (_G.Gear < 5) then
+Extra:AddSection(
+{
+Name = "Power Habilities"
+}
+)
+
+Extra:AddToggle(
+{
+Name = "Permanent Teleport Skill. <font color='rgb(50, 250, 30)'>( Power, Perm )</font>",
+Default = _G.SettingTable.TeleportHability or false,
+Callback = function(Value)
+_G.SettingTable.TeleportHability = Value
+if not toggleButton then
+ActiveTP()
+task.wait()
+BollDistance = 120
+end
+
+if not Value and toggleButton and not _G.ActiveRace then
+toggleButton:Destroy()
+toggleButton = nil
+borderFrame:Destroy()
+end
+end
+}
+)
+
+if not (_G.Gear < 6) then
+Extra:AddToggle(
+{
+Name = "Sticky like glue. <font color='rgb(50, 250, 30)'>( Power, OnlyPower )</font>",
+Default = _G.SettingTable.GluePower or false,
+Callback = function(Value)
+_G.SettingTable.GluePower = Value
+end
+}
+)
+
+Extra:AddToggle(
+{
+Name = "King-King <font color='rgb(50, 250, 30)'>( FastAttack, Power )</font>",
+Default = _G.SettingTable.KingKing or false,
+Callback = function(Value)
+_G.SettingTable.KingKing = Value
+if Value then
+FastAttackOn()
+else
+FastAttackOff()
+end
+end
+}
+)
+
+Extra:AddToggle(
+{
+Name = "Invisible Toll <font color='rgb(50, 250, 30)'>( Power )</font>",
+Default = _G.SettingTable.Invisible or false,
+Callback = function(Value)
+_G.SettingTable.Invisible = Value
+if Value then
+else
+end
+end
+}
+)
+end
+end
+Extra:AddSection(
+{
+Name = "Teleport Configuration"
+}
+)
+
 VV1 =
 Extra:AddToggle(
 {
@@ -6290,9 +6422,9 @@ Callback = function(Value)
 _G.SettingTable.TPV1 = Value
 if _G.SettingTable.TPV2 then
 pcall(
-  function()
-      VV2:Set(false)
-  end
+function()
+VV2:Set(false)
+end
 )
 end
 _G.V1 = (Value)
@@ -6319,9 +6451,9 @@ Callback = function(Value)
 _G.SettingTable.TPV2 = Value
 if _G.SettingTable.TPV2 then
 pcall(
-  function()
-      VV1:Set(false)
-  end
+function()
+VV1:Set(false)
+end
 )
 end
 
@@ -6350,10 +6482,10 @@ while _G.SettingTable.TPV2 do
 task.wait(0.1)
 
 if (_G.SPLY) and (_G.SPLY.Character) and (_G.SPLY.Character:FindFirstChild("Humanoid")) then
-  _G.SelectedPlayer = _G.SPLY
-  ChangeTargetPlayer(_G.SPLY.Name)
+_G.SelectedPlayer = _G.SPLY
+ChangeTargetPlayer(_G.SPLY.Name)
 else
-  _G.SelectedPlayer = game.Players.LocalPlayer
+_G.SelectedPlayer = game.Players.LocalPlayer
 end
 end
 end
@@ -6373,8 +6505,8 @@ Default = false,
 Callback = function(Value)
 if not Value then
 if _G.TPTOLL then
-  _G.TPTOLL:Destroy()
-  _G.TPTOLL = nil
+_G.TPTOLL:Destroy()
+_G.TPTOLL = nil
 end
 return
 end
@@ -6386,10 +6518,10 @@ tool.RequiresHandle = false
 tool.Name = "Teleport"
 tool.Activated:Connect(
 function()
-  local root = plr.Character.HumanoidRootPart
-  local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
-  local offset = pos - root.Position
-  root.CFrame = root.CFrame + offset
+local root = plr.Character.HumanoidRootPart
+local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+local offset = pos - root.Position
+root.CFrame = root.CFrame + offset
 end
 )
 tool.Parent = plr.Backpack
@@ -6422,69 +6554,69 @@ TeleportTool.Name = "Teleport V2"
 local function teleport()
 local Character = LocalPlayer.Character
 if Character then
-  local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-  if HumanoidRootPart then
-      local Hit = Mouse.Hit
-      local NewPosition = Hit.Position + Vector3.new(0, 2.5, 0)
-      local Offset = NewPosition - HumanoidRootPart.Position
-      HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + Offset
-  end
+local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+if HumanoidRootPart then
+local Hit = Mouse.Hit
+local NewPosition = Hit.Position + Vector3.new(0, 2.5, 0)
+local Offset = NewPosition - HumanoidRootPart.Position
+HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + Offset
+end
 end
 end
 
 TeleportTool.Activated:Connect(
 function()
-  ItemUsed = true
-  _G.OrionLib:MakeNotification(
-      {
-          Name = "Teleport V2 Ready!!",
-          Content = "The item has been used, click on the teleport location!",
-          Image = "rbxassetid://4483345998",
-          Time = 3
-      }
-  )
+ItemUsed = true
+_G.OrionLib:MakeNotification(
+{
+    Name = "Teleport V2 Ready!!",
+    Content = "The item has been used, click on the teleport location!",
+    Image = "rbxassetid://4483345998",
+    Time = 3
+}
+)
 end
 )
 
 UserInputService.InputBegan:Connect(
 function(input, gameProcessed)
-  if not gameProcessed then
-      if input.UserInputType == Enum.UserInputType.Touch then
-          IsDragging = false
-      elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-          IsDragging = false
-      end
-  end
+if not gameProcessed then
+if input.UserInputType == Enum.UserInputType.Touch then
+    IsDragging = false
+elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+    IsDragging = false
+end
+end
 end
 )
 
 UserInputService.InputChanged:Connect(
 function(input, gameProcessed)
-  if not gameProcessed then
-      if input.UserInputType == Enum.UserInputType.Touch then
-          IsDragging = true
-      elseif input.UserInputType == Enum.UserInputType.MouseMovement then
-          IsDragging = true
-      end
-  end
+if not gameProcessed then
+if input.UserInputType == Enum.UserInputType.Touch then
+    IsDragging = true
+elseif input.UserInputType == Enum.UserInputType.MouseMovement then
+    IsDragging = true
+end
+end
 end
 )
 
 UserInputService.InputEnded:Connect(
 function(input, gameProcessed)
-  if not gameProcessed then
-      if
-          (input.UserInputType == Enum.UserInputType.Touch) or
-              (input.UserInputType == Enum.UserInputType.MouseButton1)
-       then
-          if not IsDragging and ItemUsed then
-              -- Executar código de teletransporte
-              teleport()
-              -- Resetar a variável após o uso
-              ItemUsed = false
-          end
-      end
-  end
+if not gameProcessed then
+if
+    (input.UserInputType == Enum.UserInputType.Touch) or
+        (input.UserInputType == Enum.UserInputType.MouseButton1)
+ then
+    if not IsDragging and ItemUsed then
+        -- Executar código de teletransporte
+        teleport()
+        -- Resetar a variável após o uso
+        ItemUsed = false
+    end
+end
+end
 end
 )
 
@@ -6549,7 +6681,6 @@ end
 end
 }
 )
-
 
 Extra:AddSection(
 {
@@ -6669,77 +6800,77 @@ local RunService = game:GetService("RunService")
 function SkillFruitX()
 if UsesSkills(NameMelee(), "Z") and NameMelee() == "Godhuman" and _G.SPLY and _G.SettingTable.GluePower then
 if _G.ActiveRace and _G.Gear > 5 then
-  sound4:Play()
-  for i = 1, 10 do
-      TPTBP(0)
-      task.wait()
-  end
+sound4:Play()
+for i = 1, 10 do
+TPTBP(0)
+task.wait()
+end
 end
 end
 
 if
 UsesSkills(NameMelee(), "X") and NameMelee() == "Electric Claw" and _G.SPLY and
-  _G.SettingTable.GluePower
+_G.SettingTable.GluePower
 then
 if _G.ActiveRace and _G.Gear > 5 then
-  sound4:Play()
-  for i = 1, 10 do
-      TPTBP(0)
-      task.wait()
-  end
+sound4:Play()
+for i = 1, 10 do
+TPTBP(0)
+task.wait()
+end
 end
 end
 
 if
 UsesSkills(NameMelee(), "C") and NameMelee() == "Electric Claw" and _G.SPLY and
-  _G.SettingTable.GluePower
+_G.SettingTable.GluePower
 then
 if _G.ActiveRace and _G.Gear > 5 then
-  sound4:Play()
-  for i = 1, 10 do
-      TPTBP(0)
-      task.wait()
-  end
+sound4:Play()
+for i = 1, 10 do
+TPTBP(0)
+task.wait()
+end
 end
 end
 
 if
 UsesSkills(NameMelee(), "Z") and NameMelee() == "Electric Claw" and _G.SPLY and
-  _G.SettingTable.GluePower
+_G.SettingTable.GluePower
 then
 if _G.ActiveRace and _G.Gear > 5 then
-  sound4:Play()
-  for i = 1, 10 do
-      TPTBP(0)
-      task.wait()
-  end
+sound4:Play()
+for i = 1, 10 do
+TPTBP(0)
+task.wait()
+end
 end
 end
 
 if
 UsesSkills(NameMelee(), "C") and NameMelee() == "Dough-Dough" and _G.SPLY and
-  _G.SettingTable.GluePower
+_G.SettingTable.GluePower
 then
 if _G.ActiveRace and _G.Gear > 5 then
-  sound4:Play()
-  for i = 1, 10 do
-      TPTBP(0)
-      task.wait()
-  end
+sound4:Play()
+for i = 1, 10 do
+TPTBP(0)
+task.wait()
+end
 end
 end
 
 DF = game:GetService("Players").LocalPlayer.Data.DevilFruit.Value
 if DF == "Dough-Dough" and UsesSkills(DF, "V") then
 if not (Dough_V) then
-  Dough_V = true
-  startTime = tick()
+Dough_V = true
+startTime = tick()
 
-  while tick() - startTime < 0.8 do
-      task.wait()
-  end
+while tick() - startTime < 0.8 do
+task.wait()
+end
 
-  _G.NoAim["Dough"] = true
+_G.NoAim["Dough"] = true
 end
 else
 Dough_V = false
@@ -6756,7 +6887,7 @@ end
 if NameSword() == "Cursed Dual Katana" and UsesSkills(NameSword(), "Z") then
 CDK_Z = CDK_Z + 1
 if CDK_Z > 5 then
-  _G.NoAim["CDK"] = true
+_G.NoAim["CDK"] = true
 end
 else
 _G.NoAim["CDK"] = nil
@@ -6767,9 +6898,9 @@ end
 RunService.RenderStepped:Connect(
 function()
 task.spawn(
-  function()
-      SkillFruitX()
-  end
+function()
+SkillFruitX()
+end
 )
 end
 )
@@ -6787,14 +6918,14 @@ local args = {...}
 local Vector = args[1]
 if typeof(Vector) == "Vector3" then
 if _G.AimbotPos and (next(_G.NoAim) == nil) then
-  return oldhook(self, _G.AimbotPos, ...)
+return oldhook(self, _G.AimbotPos, ...)
 elseif _G.SP and _G.SP.Character and _G.SP.Character.HumanoidRootPart and (next(_G.NoAim) == nil) then
-  return oldhook(self, _G.SP.Character.HumanoidRootPart.Position, ...)
+return oldhook(self, _G.SP.Character.HumanoidRootPart.Position, ...)
 elseif
-  _G.SelectedBall and _G.SettingTable.AimbotV2 and _G.SelectedBall.Position and
-      (next(_G.NoAim) == nil)
+_G.SelectedBall and _G.SettingTable.AimbotV2 and _G.SelectedBall.Position and
+(next(_G.NoAim) == nil)
 then
-  return oldhook(self, _G.SelectedBall.Position, ...)
+return oldhook(self, _G.SelectedBall.Position, ...)
 end
 end
 end
