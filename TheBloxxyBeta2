@@ -4,6 +4,9 @@ print("Script executed correctly in executor.")
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/jensonhirst/Orion/main/source")))()
 _G.OrionLib = OrionLib -- Solara Compatibilidade
 
+
+local status, resultado = pcall(function()
+
 -- ========================== General System ===========================
 if 1 then
     local placeId = game.PlaceId
@@ -18,6 +21,8 @@ if 1 then
 
     workspace = game.Workspace
     HttpService = game:GetService("HttpService")
+    _G.ADM_Boost_1 = 0
+    _G.ADM_Boost_2 = true
 
     if (SEA == "") then
         while true do
@@ -92,6 +97,38 @@ if 1 then
         return jsonStr
     end
 
+    local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer  -- Funciona apenas em LocalScripts
+
+function IsValidTarget(target)
+    if not target or not target:IsA("Model") then
+        return false
+    end
+
+    local humanoid = target:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then
+        return false
+    end
+
+    -- ⚠️ Correção: Verificar se target realmente é um personagem antes de chamar GetPlayerFromCharacter
+    local targetPlayer
+    pcall(function()
+        targetPlayer = Players:GetPlayerFromCharacter(target)
+    end)
+
+    if targetPlayer and LocalPlayer and LocalPlayer.Team and targetPlayer.Team == LocalPlayer.Team and tostring(LocalPlayer.Team) == "Marines" then
+        return false
+    end
+
+    return true
+end
+
+
+    function GetPrimaryPart(model)
+        return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart") or
+            model:FindFirstChild("Head")
+    end
+    
     function FastAttackOn()
         ADM_Boost_0 = ADM_Boost_0 or false
         local Players = game:GetService("Players")
@@ -131,28 +168,9 @@ if 1 then
             }
         end
 
-        function GetPrimaryPart(model)
-            return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart") or
-                model:FindFirstChild("Head")
-        end
+       
 
-        function IsValidTarget(target)
-            if not target then
-                return false
-            end
-
-            local humanoid = target:FindFirstChildOfClass("Humanoid")
-            if not humanoid or humanoid.Health <= 0 then
-                return false
-            end
-
-            local targetPlayer = Players:GetPlayerFromCharacter(target)
-            if targetPlayer and (targetPlayer.Team == LocalPlayer.Team and tostring(LocalPlayer.Team) == "Marines") then
-                return false
-            end
-
-            return true
-        end
+        
 
         local function GetPlayerTargets()
             local targets = {}
@@ -251,14 +269,20 @@ if 1 then
             if #targets == 0 then
                 return
             end
+            h = COMBAT_CONFIG.hitDelay + math.random() * COMBAT_CONFIG.randomization.timing.max
+            if _G.ADM_Boost_2 then
+                h = 0
+            end
             RegisterAttack:FireServer()
             for i = 1, math.min(#targets, COMBAT_CONFIG.maxTargets) do
                 local target = targets[i]
                 for _ = 1, COMBAT_CONFIG.attacksPerTarget do
                     RegisterHit:FireServer(target.part)
-                    task.wait(COMBAT_CONFIG.hitDelay + math.random() * COMBAT_CONFIG.randomization.timing.max)
+                    RegisterHit:FireServer(target.part)
+                    task.wait(h)
                 end
             end
+        
         end
 
         local lastAttackTime = 0
@@ -270,7 +294,7 @@ if 1 then
             local now = tick()
             local baseDelay = math.random(COMBAT_CONFIG.minDelay * 100, COMBAT_CONFIG.maxDelay * 100) / 100
 
-            if now - lastAttackTime >= baseDelay then
+            if (now - lastAttackTime >= baseDelay) or _G.ADM_Boost_2 then
                 local targets = GetNearbyTargets()
                 PerformAttackSequence(targets)
                 lastAttackTime = now
@@ -294,7 +318,11 @@ if 1 then
         local function SetupCombat()
             Cleanup()
 
-            combatConnection = RunService.Heartbeat:Connect(CombatLoop)
+            combatConnection = RunService.Heartbeat:Connect(
+                function()
+                    task.spawn(CombatLoop)
+                end
+            )
         end
 
         characterConnection =
@@ -368,7 +396,7 @@ if 1 then
 
     _G.PowerPogress = 0
     _G.ACT = true
-    EO = 0.2 -- EffectOtmization
+    EO = 0.15 -- EffectOtmization
     EO2 = 2 / EO -- EffectOtmization
 
     sound2 = Instance.new("Sound")
@@ -425,9 +453,9 @@ if 1 then
             part.CanCollide = false
             part.Anchored = true
     
-            if _G.EffectsPosition then
+            if _G.EffectsPosition2 then
                 part.CFrame =
-                    _G.EffectsPosition *
+                    _G.EffectsPosition2 *
                     CFrame.new(
                         math.random(PowerExplosion * (-1), PowerExplosion),
                         math.random(PowerExplosion * (-1), PowerExplosion),
@@ -497,42 +525,6 @@ if 1 then
         )
         task.wait(0.2)
 
-        _G.Agility = true
-
-        task.spawn(
-            function()
-                function AgilityY()
-                    pcall(
-                        function()
-                            local player = game.Players.LocalPlayer
-                            local character = player.Character
-                            if character then
-                                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                                local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-                                if humanoidRootPart and humanoid then
-                                    local moveDirection = humanoid.MoveDirection
-
-                                    if moveDirection.Magnitude > 0 and _G.ACT then
-                                        local newVelocity =
-                                            Vector3.new(
-                                            moveDirection.X * 200,
-                                            humanoidRootPart.Velocity.Y,
-                                            moveDirection.Z * 200
-                                        )
-                                        humanoidRootPart.Velocity = newVelocity
-                                    end
-                                end
-                            end
-                        end
-                    )
-                end
-                while _G.Agility do
-                    task.wait(0.5)
-                    AgilityY()
-                end
-            end
-        )
 
         -- Funções auxiliares
         function criarParticula(position, parent, duracao, cor, tamanhoInicial, tamanhoFinal)
@@ -833,7 +825,7 @@ if 1 then
                             workspace,
                             70 * EO * PowerExplosionMultiplication,
                             Color3.fromRGB(255, 255, 255),
-                            1,
+                            0,
                             4
                         )
                         criarFormas(
@@ -1209,9 +1201,9 @@ if 1 then
 
                     local forwardPosition =
                         Vector3.new(
-                        rootPart.Position.X + (cameraDirection.X * BollDistance), -- Distância aumentada para 70 unidades
+                        rootPart.Position.X + (cameraDirection.X * BollDistance),
                         rootPart.Position.Y,
-                        rootPart.Position.Z + (cameraDirection.Z * BollDistance) -- Distância aumentada para 70 unidades
+                        rootPart.Position.Z + (cameraDirection.Z * BollDistance)
                     )
 
                     -- Ajustar a posição da esfera com base no terreno
@@ -1289,7 +1281,7 @@ if 1 then
 
             toggleButton.MouseButton1Click:Connect(
                 function()
-                    if character and character.PrimaryPart and not _G.PowerTP then
+                    if character and character.PrimaryPart and not _G.PowerTP and false then
                         _G.PowerTP = (_G.Gear < 5 or _G.Gear == 5)
                         toggleButton.TextSize = 25
                         toggleButton.Text = "🕗" -- Emoji
@@ -1314,6 +1306,13 @@ if 1 then
                         toggleButton.Active = true
                         toggleButton.BackgroundTransparency = 0.65
                         toggleButton.TextSize = 20
+                    else
+                        X2 = TP_TO_X_Ball(15, true)
+
+       for i = 1, 150 do
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = X2
+        task.wait()
+    end
                     end
                 end
             )
@@ -1809,7 +1808,7 @@ if 1 then
         textLabel0 = Instance.new("TextLabel")
         textLabel0.Parent = screenGui
         textLabel0.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
-        textLabel0.Position = UDim2.new(0.35, 0, 0, -15) -- Posição central no topo da tela
+        textLabel0.Position = UDim2.new(0.35, 0, 0, -20) -- Posição central no topo da tela
         textLabel0.BackgroundTransparency = 1 -- Sem fundo
         textLabel0.TextColor3 = Color3.new(0, 1, 0) 
         textLabel0.TextStrokeTransparency = 0 -- Contorno no texto
@@ -1821,7 +1820,7 @@ if 1 then
         textLabel = Instance.new("TextLabel")
         textLabel.Parent = screenGui
         textLabel.Size = UDim2.new(0.3, 0, 0.1, 0) -- Tamanho da caixa de texto
-        textLabel.Position = UDim2.new(0.35, 0, 0, -35) -- Posição central no topo da tela
+        textLabel.Position = UDim2.new(0.35, 0, 0, -40) -- Posição central no topo da tela
         textLabel.BackgroundTransparency = 1 -- Sem fundo
         textLabel.TextColor3 = Color3.new(0, 1, 0) 
         textLabel.TextStrokeTransparency = 0 -- Contorno no texto
@@ -1853,6 +1852,12 @@ if 1 then
         textLabel3.Font = Enum.Font.FredokaOne -- Fonte fofinha
         textLabel3.TextSize = 10 -- Tamanho fixo da fonte
         textLabel3.Transparency = 1
+
+        if _G.Gear == 7 then
+            textLabel.Text = "Galaxy Destroyer!"
+            textLabel.TextColor3 = Color3.new(1, 0, 1)
+            GearOriginalText = "Galaxy Destroyer!"
+        end
 
         if _G.Gear == 6 then
             textLabel.Text = "SUPERIOR GEAR"
@@ -1893,16 +1898,9 @@ if 1 then
                 if _G.Race then
                     local player = game.Players.LocalPlayer
                     character = player and player.Character
-                    k = character.HumanoidRootPart.CFrame + Vector3.new(0, 300, 0)
-                    task.spawn(
-                        function()
-                            for i = 1, 3 do
-                                character.HumanoidRootPart.CFrame = k
-                                task.wait()
-                            end
-                        end
-                    )
-
+                    k = character.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+                    task.spawn(ActivePower)
+                    
                     task.spawn(function()
                         -- Flash inicial
                         local tweenService = game:GetService("TweenService")
@@ -1913,12 +1911,12 @@ if 1 then
                         local frame = Instance.new("Frame", flash)
                         frame.Size = UDim2.new(1, 0, 1, 0)
                         frame.BackgroundColor3 = Color3.fromRGB(255, 255, 200)
-                        frame.BackgroundTransparency = 0.55
+                        frame.BackgroundTransparency = 0.45
 
                         local tweenFlash =
                             TweenService:Create(
                             frame,
-                            TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                            TweenInfo.new(2.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
                             {BackgroundTransparency = 1}
                         )
                         tweenFlash:Play()
@@ -1930,6 +1928,17 @@ if 1 then
                                 task.spawn(2)
                                 flash:Destroy()
                     end)
+                    task.spawn(
+                        function()
+                            for i = 1, 3 do
+                                character.HumanoidRootPart.CFrame = k
+                                task.wait()
+                            end
+                        end
+                    )
+
+        game.Players.LocalPlayer.Character:ScaleTo(1.8)
+                    
                     Reset = false
                     progress = 100
                     maxTime = 60
@@ -1940,7 +1949,9 @@ if 1 then
                     X = 0.01
                     _G.PowerPogress = 0
                     _G.BarCountdown = false
-                    ActiveTP()
+                    if not _G.SettingTable.TeleportHability then
+                        ActiveTP()
+                    end
 
                     if _G.Gear > 1 and _G.Gear < 4 then
                         JumpBoostPower()
@@ -1985,7 +1996,6 @@ if 1 then
                         )
                     end
 
-                    ActivePower()
                 elseif _G.ActiveRace and _G.Gear > 4 then
                     z = z + 1
                     print(z)
@@ -2038,7 +2048,7 @@ if 1 then
         textAlignment.MaxTextSize = 22
         textAlignment.Parent = percentText
 
-        local progress = 0
+         progress = 0
         local maxProgress = 100
         NoMax = true
         X = 0.5 -- X
@@ -2072,6 +2082,7 @@ if 1 then
                 return baseY
             end
         end
+
         task.spawn(
             function()
                 function CheckVelocityY()
@@ -2100,9 +2111,11 @@ if 1 then
                             XX =
                                 _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) +
                                 (math.max(ChecksVelocity(_G.MyDamage) - 280, 0) * 1.2) +
-                                9
+                                9 + 
+                                (_G.Gear * 12) +
+                                _G.ADM_Boost_1 
                         else
-                            XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                            XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed + _G.ADM_Boost_1 
                         end
 
                         _G.FOVSpeed = XX / 2
@@ -2127,12 +2140,12 @@ if 1 then
                     _G.JumpPowerPower = math.floor(ChecksJump(_G.MyDamage) / H)
 
                     if _G.JumpPowerPower and _G.SettingTable.Jump then
-                        YY = (_G.JumpPowerPower / H) + _G.SettingTable.Jump
+                        YY = ((_G.JumpPowerPower / H) + _G.SettingTable.Jump) - 80
                     else
                         YY = _G.JumpPowerPower or _G.SettingTable.Jump
                     end
 
-                    textLabel3.Text = "+" .. math.floor(math.min(YY, 300)) .. " ↑"
+                    textLabel3.Text = "+" .. math.floor(math.min(YY, 200)) .. " ↑"
                 end
 
                 while true do
@@ -2210,6 +2223,8 @@ if 1 then
         end
         function resetBar()
             if Reset then
+        game.Players.LocalPlayer.Character:ScaleTo(1)
+
                 _G.ACT = false
                 _G.ActiveRace = false
                 _G.Race = false
@@ -2229,10 +2244,12 @@ if 1 then
                     toggleButton:Destroy()
                     toggleButton = nil
                     borderFrame:Destroy()
+                    sphere:Destroy()
+                else
+                    BollDistance = 150
                 end
                 percentText.TextSize = 16.5
 
-                sphere:Destroy()
                 if _G.Gear > 1 and _G.Gear < 4 then
                     JumpBoost:Disconnect()
                 end
@@ -2280,8 +2297,8 @@ if 1 then
                 local tweenInfo = TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
                 TweenService:Create(barFrame, tweenInfo, {Position = UDim2.new(0.5, 0, 0, -140)}):Play()
-                TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -35)}):Play()
-                TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -15)}):Play()
+                TweenService:Create(textLabel, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -40)}):Play()
+                TweenService:Create(textLabel0, tweenInfo, {Position = UDim2.new(0.35, 0, 0, -20)}):Play()
                 task.wait(3.45)
                 _G.PowerBarY = -120
             end
@@ -2304,6 +2321,13 @@ if 1 then
 
             if (_G.PowerPogress < progress) then
                 progress = progress - X
+            end
+
+            if _G.ADM_Boost_2 then
+                if progress < 99 then
+                    progress = 99
+                    maxProgress = 100
+                end
             end
 
             if _G.PowerPogress > 99.99 and not AnimPowerBar then
@@ -2387,7 +2411,11 @@ if 1 then
                     )
                 end
             else
-                percentText.Text = string.format("%.1f%%", progress)
+                if _G.ADM_Boost_2 and _G.ActiveRace then
+                    percentText.Text = "..."
+                else
+                    percentText.Text = string.format("%.1f%%", progress)
+                end
             end
 
             if _G.ActiveRace and progress < 1 then
@@ -2434,6 +2462,8 @@ if 1 then
             if progress <= p and _G.ActiveRace then
                 X = 0.001
             end
+
+            
         end
 
         game:GetService("RunService").RenderStepped:Connect(
@@ -2444,43 +2474,8 @@ if 1 then
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
 
-        local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
 
-        damageLog = {}
-        local checkInterval = 0.1
-        maxTime = 180
-        local lastHealth = humanoid.Health
-
-        local function cleanUpDamageLog()
-            local currentTime = os.clock()
-            for i = #damageLog, 1, -1 do
-                if currentTime - damageLog[i].timestamp > maxTime then
-                    table.remove(damageLog, i)
-                end
-            end
-        end
-
-        local function getTotalDamage()
-            local total = 0
-            for _, entry in ipairs(damageLog) do
-                total = total + entry.damage
-            end
-            return total
-        end
-
-        humanoid.HealthChanged:Connect(
-            function(newHealth)
-                if newHealth < lastHealth then
-                    local damage = lastHealth - newHealth
-                    table.insert(damageLog, {damage = damage, timestamp = os.clock()})
-                end
-                lastHealth = newHealth
-            end
-        )
-
-        local maxDistance = 20
+        local maxDistance = 30
         numberToIncrease = 0
         local playersInArea = {}
 
@@ -2520,16 +2515,82 @@ if 1 then
 
         _G.CombatTimer = 0
         _G.MyDamage = 0
+        local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local damageLog = {}
+local checkInterval = 0.1
+maxTime = 300
+local humanoid, connection
+local running = false
+
+local function cleanUpDamageLog()
+    local currentTime = os.clock()
+    for i = #damageLog, 1, -1 do
+        if currentTime - damageLog[i].timestamp > maxTime then
+            table.remove(damageLog, i)
+        end
+    end
+end
+
+local function getTotalDamage()
+    local total = 0
+    for _, entry in ipairs(damageLog) do
+        total = total + entry.damage
+    end
+    return total
+end
+
+local function startTracking()
+    if running or not humanoid then return end
+    running = true
+    local lastHealth = humanoid.Health
+
+    connection = humanoid.HealthChanged:Connect(function(newHealth)
+        if newHealth < lastHealth then
+            table.insert(damageLog, {damage = lastHealth - newHealth, timestamp = os.clock()})
+        end
+        lastHealth = newHealth
+    end)
+
+    task.spawn(function()
+        while running do
+            task.wait(checkInterval)
+            cleanUpDamageLog()
+            _G.MyDamage = getTotalDamage()
+        end
+    end)
+end
+
+local function stopTracking()
+    running = false
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
+end
+
+local function resetTracking()
+    damageLog = {}
+end
+
+local function onCharacterAdded(character)
+    stopTracking()
+    humanoid = character:WaitForChild("Humanoid")
+    startTracking()
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+
         task.spawn(
             function()
                 function Counter1Y()
-                    cleanUpDamageLog()
-                    local totalDamage = getTotalDamage()
-                    _G.MyDamage = totalDamage
-
                     InCombatDetect(playerGui)
                     if (_G.InCombat) and not _G.PlayerDeth then
-                        _G.CombatTimer = _G.CombatTimer + math.max((_G.Gear / 1), 2.5)
+                        _G.CombatTimer = _G.CombatTimer + math.max((_G.Gear), 2.5)
                     elseif false then
                         task.spawn(
                             function()
@@ -2540,6 +2601,7 @@ if 1 then
                             end
                         )
                     end
+
                     local Players = game:GetService("Players")
 
                     local LocalPlayer = Players.LocalPlayer
@@ -2555,13 +2617,14 @@ if 1 then
                                     if primaryPart then
                                         local distance = (primaryPart.Position - charPos).Magnitude
                                         if distance < 50 then
-                                            _G.CombatTimer = _G.CombatTimer + 2.5
+                                            _G.CombatTimer = _G.CombatTimer + 4
                                         end
                                     end
                                 end
                             end
                         end
                     end
+
                 end
 
                 while true do
@@ -2576,7 +2639,12 @@ if 1 then
                 function DamageY()
                     _G.MyDamage = _G.MyDamage or 1
                     if not _G.ActiveRace and not _G.PlayerDeth then
-                        _G.PowerPogress = math.min((_G.MyDamage / 120) + (_G.CombatTimer / 2) + _G.Players, 100)
+                        adm = 0
+                        if _G.ADM_Boost_2 then
+                            adm = 100
+                        end
+
+                        _G.PowerPogress = math.min((_G.MyDamage / 100) + (_G.CombatTimer / 2) + _G.Players, 100) + adm
                     end
                 end
 
@@ -3203,14 +3271,14 @@ if 1 then
     function SuperView()
         -- Variáveis globais para controlar o script
         _G.IsScriptRunning = true
-        _G.MonitoringTime = 20
+        _G.MonitoringTime = 10
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
         _G.SensitivitySpeed = 0.5
         _G.SensitivityDistance = 0.5
 
         -- Variáveis internas
-        local sphere = nil
+         sphere = nil
         local velocityHistory = {}
         local directionHistory = {}
         local maxHistorySize = 350
@@ -3242,6 +3310,20 @@ if 1 then
         local function updateSphereColor(sphere)
             game:GetService("RunService").RenderStepped:Connect(
                 function()
+                    if _G.IsScriptRunning and (not _G.SelectedBall) then
+
+                        if (not (_G.SelectedBall.Parent) or not (_G.SelectedBall.Position)) then
+                            if sphere then
+                                sphere:Destroy()
+                                sphere = nil
+                            end
+                            _G.SelectedPosition = nil
+                            _G.SelectedPosition2 = nil
+                            _G.SelectedBall = nil
+                        end
+
+                    end
+
                     ChangeColorX()
                 end
             )
@@ -3337,11 +3419,39 @@ if 1 then
         function MudarPlayerMonitorado(newPlayerName)
             local targetPlayer = newPlayerName
 
-            if targetPlayer then
+            if targetPlayer and false then
                 updateTargetPlayer(targetPlayer)
+if _G.ADM then
+                local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+
+StarterGui:SetCore("ChatMakeSystemMessage", {
+    Text = "[ADM] Player trocado!! " .. tostring(targetPlayer.Name),
+    Color = Color3.fromRGB(0, 255, 0), -- Verde
+    Font = Enum.Font.SourceSansBold,
+    FontSize = Enum.FontSize.Size24
+})
+end
             else
                 -- Volta para o local player se o jogador não for encontrado
                 updateTargetPlayer(game.Players.LocalPlayer)
+
+
+                if _G.ADM and false then
+                    local Players = game:GetService("Players")
+    local StarterGui = game:GetService("StarterGui")
+    
+    local player = Players.LocalPlayer
+    
+    StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "[ADM] Sem players." .. tostring(newPlayerName),
+        Color = Color3.fromRGB(255, 0, 0), -- Verde
+        Font = Enum.Font.SourceSansBold,
+        FontSize = Enum.FontSize.Size24
+    })
+    end
             end
         end
 
@@ -3353,7 +3463,7 @@ if 1 then
     function ChangeTargetPlayer(newPlayerName)
         local targetPlayer = game.Players:FindFirstChild(newPlayerName)
         if targetPlayer then
-            MudarPlayerMonitorado(newPlayerName)
+            MudarPlayerMonitorado(targetPlayer)
         end
     end
 
@@ -3414,7 +3524,7 @@ if 1 then
                     local dotProduct = direction:Dot(camera.CFrame.LookVector)
 
                     -- Verifica se o jogador está dentro da área de observação
-                    if dotProduct > observationArea then
+                    if dotProduct > (observationArea + 0) then
                         -- Verifica se este jogador está mais centralizado (mais próximo do ponto de foco) que o anterior
                         if dotProduct > bestDotProduct then
                             if _G.LockPlayer then
@@ -3959,6 +4069,11 @@ if 1 then
         end
     end
 
+    function print(M, M2)
+        
+    end
+    
+
     local player = game.Players.LocalPlayer
     local distanceBehind = 20 -- Distância atrás do jogador selecionado
     local minHeightFromGround = 4500 -- Altura mínima para ajuste de posição
@@ -3979,6 +4094,31 @@ if 1 then
             return nil, math.huge -- Retorna "muito grande" se não encontrar o chão
         end
     end
+
+    function TP_TO_X_Ball(X2, P)
+        P = P or false
+        X2 = X2
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+    
+        if not _G.SelectedPosition then
+            return
+        end
+    
+        local X1 = rootPart.Position
+        local Y = _G.SelectedPosition
+    
+        local direction = (Y - X1).unit
+        local finalPosition = Y + (direction * X2)
+    
+        if not P then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(finalPosition)
+        else
+            return CFrame.new(finalPosition)
+        end
+    end
+    
 
     -- Função para teleportar o LocalPlayer para trás da câmera de outro jogador
     function TPTBP(distanceBehind)
@@ -4227,7 +4367,7 @@ if 1 then
             Esp_Player_SizeText = 12.5,
             Esp_Player_HeightText = 3,
             OBS_Transparency = 0.6,
-            UIScale = 435,
+            UIScale = 440,
             BorderColorDefault = 0,
             SelectPlayer_Cam = 40,
             SelectPlayer_ObservationArea = 0.96,
@@ -4255,6 +4395,8 @@ if 1 then
     _G.Gear = _G.SettingTable.Gear or _G.SettingTable2.Gear or 1
     print("[Save System] Save system initialized successfully!")
 end
+
+_G.SettingTable2.UIScale = 450
 
 -- ========================== Tutorial System ===========================
 if 1 then
@@ -4317,8 +4459,8 @@ if 1 then
     local Window =
         redzlib:MakeWindow(
         {
-            Title = "MyMidnight Team",
-            SubTitle = "BloxFruits Super Script!",
+            Title = "BloxFruits Super Script! V2",
+            SubTitle = "MyMidnight Team",
             SaveFolder = "Nothing.lua"
         }
     )
@@ -4343,7 +4485,7 @@ if 1 then
     Script = Window:MakeTab({"Script", "hammer"})
     Extra = Window:MakeTab({"Plus / Extra", "plus-circle"})
     --Play = Window:MakeTab({"PlayMusic", "play-circle"})
-    Config = Window:MakeTab({"Configuration", "hammer"})
+    --Config = Window:MakeTab({"Configuration", "hammer"})
 end
 
 -- ========================== Players-Menu =====================
@@ -4427,27 +4569,6 @@ if 1 then
             Callback = function(Value)
                 _G.SettingTable.AimbotV2 = Value
                 
-
-                if (Value) then
-                    if not (t == "Done!") then
-                        InfoText.Text = typeof(t)
-                        if (typeof(t) == "number") then
-                            _G.SettingTable.AimBotTutorial = t + 1
-                            t = t + 1
-
-                            if (t > 300) then
-                                -- _G.SettingTable.AimBotTutorial = "Ignored!" 
-                                InfoText.Text = "Ignored"
-                            else
-                                InfoText.Text = ""
-
-                                AimotTutorial()
-                            end
-                        else
-                            _G.SettingTable.AimBotTutorial = 0
-                        end
-                    end
-                end
 
                 if _G.SettingTable.AimbotV2 then
                     pcall(
@@ -5475,7 +5596,7 @@ if true then
                         YY = _G.JumpPowerPower or _G.SettingTable.Jump or 50
                     end
 
-                    humanoid.JumpPower = math.min(YY, 300)
+                    humanoid.JumpPower = math.min(YY, 200)
                 end
             end
         end
@@ -5563,9 +5684,10 @@ if true then
                                                         XX =
                                                             _G.SettingTable.SafeMode_Speed +
                                                             ((_G.VelcityPower - 150) * 0.5) +
-                                                            math.max(ChecksVelocity(_G.MyDamage) - 280, 0)
+                                                            math.max(ChecksVelocity(_G.MyDamage) - 280, 0) +
+                                                            _G.ADM_Boost_1
                                                     else
-                                                        XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed
+                                                        XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed + _G.ADM_Boost_1
                                                     end
 
                                                     local newVelocity =
@@ -5585,7 +5707,7 @@ if true then
                             SkyConnection =
                                 RunService.RenderStepped:Connect(
                                 function()
-                                    BoostAngelX()
+                                    task.spawn(BoostAngelX)
                                 end
                             )
 
@@ -5650,20 +5772,23 @@ if true then
                                     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
                                     bodyVelocity:Destroy()
                             end
-                        end
-                        if (_G.SettingTable2.AbsoluteNoStun > 1) or _G.NoStunPower then
-                            local Player = game.Players.LocalPlayer
-                            local Character = Player.Character or Player.CharacterAdded:Wait()
-                            local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-                            humanoidRootPart.ChildAdded:Connect(
-                                function(child)
-                                    if child:IsA("BodyVelocity") and _G.SettingTable.Stun and IsHundredNoStunVar2 then
-                                        child:Destroy() -- Destrói imediatamente o BodyVelocity se for recriado
+                            if (_G.SettingTable2.AbsoluteNoStun > 1) or _G.NoStunPower then
+                                local Player = game.Players.LocalPlayer
+                                local Character = Player.Character or Player.CharacterAdded:Wait()
+                                local humanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    
+                                humanoidRootPart.ChildAdded:Connect(
+                                    function(child)
+                                        if child:IsA("BodyVelocity") and _G.SettingTable.Stun then
+                                            child:Destroy() -- Destrói imediatamente o BodyVelocity se for recriado
+                                        end
                                     end
-                                end
-                            )
+                                )
+                            end
                         end
+
+                        
                         NoStunConnection =
                             RunService.RenderStepped:Connect(
                             function()
@@ -5672,7 +5797,7 @@ if true then
                         )
 
                         while _G.SettingTable.Stun do
-                            task.wait()
+                            task.wait(0.5)
                         end
 
                         NoStunConnection:Disconnect()
@@ -6242,7 +6367,7 @@ if true then
                 end
 
                 while _G.MinkV7 do
-                    task.wait()
+                    task.wait(0.5)
                     MINKV7Y()
                 end
             end
@@ -6334,6 +6459,8 @@ if true then
             end
         }
     )
+        
+    
     DDD = true
 
     Utilities:AddToggle(
@@ -6479,13 +6606,14 @@ if true then
                     if not toggleButton then
                         ActiveTP()
                         task.wait()
-                        BollDistance = 140
+                        BollDistance = 150
                     end
 
                     if not Value and toggleButton and not _G.ActiveRace then
                         toggleButton:Destroy()
                         toggleButton = nil
                         borderFrame:Destroy()
+                        sphere:Destroy()
                     end
                 end
             }
@@ -6900,7 +7028,7 @@ if true then
 end
 
 --================== Deth System =====================
-if true then
+if false then
     Config:AddSection({"Menu - Visual ( Need Reload )"})
 
     Config:AddToggle(
@@ -7010,7 +7138,7 @@ if true then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TPTBP(0)
+                            TP_TO_X_Ball(15)
                             task.wait()
                         end
                     end
@@ -7023,7 +7151,7 @@ if true then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TPTBP(0)
+                            TP_TO_X_Ball(15)
                             task.wait()
                         end
                     end
@@ -7033,10 +7161,14 @@ if true then
                     UsesSkills(NameMelee(), "C") and NameMelee() == "Electric Claw" and _G.SPLY and
                         _G.SettingTable.GluePower
                  then
-                    if _G.ActiveRace and _G.Gear > 5 then
+                    if _G.ActiveRace and _G.Gear > 5 and _G.SelectedBall.Position then
                         sound4:Play()
                         for i = 1, 10 do
-                            TPTBP(0)
+                            local player = game.Players.LocalPlayer
+                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                            localRootPart.CFrame = _G.SelectedBall.Position
+
+                           
                             task.wait()
                         end
                     end
@@ -7044,12 +7176,16 @@ if true then
 
                 if
                     UsesSkills(NameMelee(), "Z") and NameMelee() == "Electric Claw" and _G.SPLY and
-                        _G.SettingTable.GluePower
+                        _G.SettingTable.GluePower and _G.SelectedBall.Position 
                  then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TPTBP(0)
+                            local player = game.Players.LocalPlayer
+                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                            localRootPart.CFrame = _G.SelectedBall.Position
+
+
                             task.wait()
                         end
                     end
@@ -7057,12 +7193,15 @@ if true then
 
                 if
                     UsesSkills(NameMelee(), "C") and NameMelee() == "Dough-Dough" and _G.SPLY and
-                        _G.SettingTable.GluePower
+                        _G.SettingTable.GluePower and _G.SelectedBall.Position 
                  then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TPTBP(0)
+                            
+                            local player = game.Players.LocalPlayer
+                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                            localRootPart.CFrame = _G.SelectedBall.Position
                             task.wait(0.1)
                         end
                     end
@@ -7173,6 +7312,7 @@ if true then
 
     local function onPlayerDeath()
         _G.PlayerDeth = true
+       
     end
 
     local function setupDeathDetection(character)
@@ -7181,6 +7321,12 @@ if true then
         humanoid.Died:Connect(
             function()
                 onPlayerDeath()
+                if not Value and toggleButton and not _G.ActiveRace then
+                    toggleButton:Destroy()
+                    toggleButton = nil
+                    borderFrame:Destroy()
+                    sphere:Destroy()
+                end
             end
         )
     end
@@ -7195,6 +7341,14 @@ if true then
             task.wait(1)
             _G.PlayerDeth = false
             X = 0.5
+            if not toggleButton and _G.SettingTable.TeleportHability then
+                ActiveTP()
+                task.wait()
+                BollDistance = 150
+            end
+            _G.EffectsPosition = nil
+
+
             task.wait(1)
             restoreInventory()
             ReloadList()
@@ -7202,4 +7356,314 @@ if true then
     )
 end
 
+--================== ADM System =====================
+if true then
+
+    _G.ADM = true
+-- Serviço do Roblox para chat
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local commands = {
+    ["kill"] = function()
+        if LocalPlayer.Character then
+            LocalPlayer.Character:BreakJoints()
+        end
+    end,
+    ["jump"] = function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.Jump = true
+        end
+    end,
+    ["speed"] = function(speed)
+        speed = tonumber(speed) or 16
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        end
+
+        _G.ADM_Boost_1 = speed
+    end,
+    ["cloak"] = function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Invisibility Cloak Ready",
+            Text = "Clique para ativar a invisibilidade",
+            Duration = 20,
+            Button1 = "Okay."
+        })
+    end,
+    ["scale"] = function(X)
+        game.Players.LocalPlayer.Character:ScaleTo(X)
+    end,
+    ["op"] = function(X)
+        if 1 then 
+        
+        _G.ADM_Boost_2 = true
+    else
+        _G.ADM_Boost_2 = false
+
+        end
+    end,
+    ["ns"] = function()
+        local RunService = game:GetService("RunService")
+        task.spawn(function()
+            RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character
+                    if character then
+                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        
+                        if humanoidRootPart and humanoid then
+                            -- FORÇA a remoção de qualquer coisa que possa interferir na movimentação
+                            for _, obj in pairs(humanoidRootPart:GetChildren()) do
+                                if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") or obj:IsA("BodyPosition") or 
+                                   obj:IsA("BodyAngularVelocity") or obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
+                                    obj:Destroy()
+                                end
+                            end
+        
+                            -- Pega a direção de movimento atual do jogador (analógico)
+                            local moveDirection = humanoid.MoveDirection
+        
+                            -- Verifica se o jogador está se movendo (direção analógica)
+                            if moveDirection.Magnitude > 0  and not flying then
+                                if _G.VelcityPower and _G.SettingTable.SafeMode_Speed then
+                                    XX =
+                                        _G.SettingTable.SafeMode_Speed + ((_G.VelcityPower - 150) * 0.5) +
+                                        (math.max(ChecksVelocity(_G.MyDamage) - 280, 0) * 1.2) +
+                                        9 + 
+                                        (_G.Gear * 12) +
+                                        _G.ADM_Boost_1 
+                                else
+                                    XX = _G.VelcityPower or _G.SettingTable.SafeMode_Speed + _G.ADM_Boost_1 
+                                end
+
+                                local speed = XX / 38 -- Velocidade ajustada
+                                local newPosition = humanoidRootPart.Position + Vector3.new(moveDirection.X * speed, 0, moveDirection.Z * speed)
+        
+                                -- Faz um Raycast para verificar o chão e impedir atravessar ele
+                                local rayOrigin = newPosition + Vector3.new(0, 40, 0) -- Ponto acima do jogador
+                                local rayDirection = Vector3.new(0, -40, 0) -- Direção para baixo
+                                local raycastParams = RaycastParams.new()
+                                raycastParams.FilterDescendantsInstances = {character} -- Evita detectar o próprio jogador
+                                raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+        
+                                local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+        
+                                if raycastResult then
+                                    -- Ajusta a posição para ficar sobre o chão detectado
+                                    newPosition = Vector3.new(newPosition.X, raycastResult.Position.Y + 4, newPosition.Z)
+                                end
+        
+                                -- FORÇA a movimentação sem atravessar o chão
+                                humanoidRootPart.CFrame = CFrame.new(newPosition)
+                            end
+                        end
+                    end
+                end)
+            end)
+        end)        
+    end,
+    ["fl"] = function()
+
+
+function fly()
+    local RunService = game:GetService("RunService")
+    
+        local player = game:GetService("Players").LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local flying = true
+        local speedSET = 300 -- Aumentei a velocidade
+    
+        -- Criar um AlignOrientation para fixar a rotação
+        local alignOrientation = Instance.new("AlignOrientation")
+        alignOrientation.Parent = humanoidRootPart
+        alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment
+        alignOrientation.RigidityEnabled = true
+        alignOrientation.Attachment0 = humanoidRootPart:FindFirstChildWhichIsA("Attachment") or Instance.new("Attachment", humanoidRootPart)
+    
+        -- Teleportar o jogador para cima ao iniciar
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+    
+        -- Função de voo
+        local function updateFlight()
+            RunService.Heartbeat:Connect(function()
+    
+                -- Direção de movimento usando MoveDirection
+                local moveDirection = humanoid.MoveDirection * speedSET
+                local camera = workspace.CurrentCamera
+                local lookVector = camera.CFrame.LookVector
+                local cameraAngleY = math.sin(math.rad((lookVector.Y * 90) + 20)) -- Inclinação da câmera no eixo Y
+    
+                -- Ajuste do eixo Y com inversão ao mover para trás
+                local ySpeed = 0
+                if moveDirection.Magnitude > 0 then
+    
+                    if cameraAngleY < 0 then
+                        cameraAngleY = cameraAngleY * 1.25
+                    end
+    
+                    if cameraAngleY > 0 then
+                        cameraAngleY = cameraAngleY / 4
+                    end
+    
+                    ySpeed = (cameraAngleY * speedSET) + 70
+    
+                    -- Se estiver indo para trás, inverter o movimento vertical
+                    if moveDirection:Dot(-camera.CFrame.LookVector) > 0 then
+                        ySpeed = -ySpeed
+                    end
+                end
+    
+                -- Aplicar a velocidade diretamente no HumanoidRootPart
+                humanoidRootPart.AssemblyLinearVelocity = Vector3.new(moveDirection.X, ySpeed + 2.55555, moveDirection.Z)
+    
+                -- Fixar rotação na direção da câmera
+                alignOrientation.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + camera.CFrame.LookVector)
+    
+                -- Impedir que o voo pare se outros scripts mexerem na velocidade
+                if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                end
+            end)
+        end
+    
+        -- Inicializar voo
+        humanoid.PlatformStand = true
+        task.spawn(updateFlight) -- Mantém o voo fluído
+    
+        -- Cancelar voo
+        local UIS = game:GetService("UserInputService")
+        UIS.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.E then
+                
+            end
+        end)
+
+        if flying then
+            flying = not flying
+                if not flying then
+                    humanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+                    humanoid.PlatformStand = false
+                    alignOrientation:Destroy() -- Remover AlignOrientation ao desativar o voo
+                end
+        end
+    end
+    
+    fly()
+    
+    end,
+    ["adm"] = function()
+        _G.ADM = not _G.ADM
+    end,
+    ["tp"] = function()
+       X2 = TP_TO_X_Ball(30, true)
+
+       for i = 1, 150 do
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = X2
+        task.wait()
+    end
+    end,
+    ["c"] = function(X)
+        _G.L = X
+    end,
+        ["eg"] = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+        
+        -- Criar attachments para o Trail
+        local attachment0 = Instance.new("Attachment")
+        attachment0.Parent = rootPart
+        
+        local attachment1 = Instance.new("Attachment")
+        attachment1.Position = Vector3.new(0, -2, 0) -- Ajuste para centralizar melhor
+        attachment1.Parent = rootPart
+        
+        -- Criar o Trail
+        local trail = Instance.new("Trail")
+        trail.Attachment0 = attachment0
+        trail.Attachment1 = attachment1
+        trail.Lifetime = 3 -- Rastro dura mais tempo
+        trail.LightEmission = 1 -- Faz o Trail brilhar
+        trail.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.8, 0), NumberSequenceKeypoint.new(1, 1)}
+        trail.WidthScale = NumberSequence.new(800) -- Aumenta a espessura do Trail
+        trail.Parent = rootPart
+        
+        -- Criar um efeito de iluminação
+        local light = Instance.new("PointLight")
+        light.Brightness = 1
+        light.Range = 20
+        light.Color = Color3.fromRGB(255, 255, 255) -- Começa com branco, mas vai seguir a cor do Trail
+        light.Parent = rootPart
+        
+        -- Cores suaves para o Trail
+        local colorPattern = {
+        Color3.fromRGB(255, 0, 0),    -- Vermelho
+        Color3.fromRGB(255, 85, 0),   -- Vermelho-Alaranjado
+        Color3.fromRGB(255, 165, 0),  -- Laranja
+        Color3.fromRGB(255, 255, 0),  -- Amarelo
+        Color3.fromRGB(127, 255, 0),  -- Verde-Claro
+        Color3.fromRGB(0, 255, 0),    -- Verde
+        Color3.fromRGB(0, 255, 127),  -- Verde-Azul
+        Color3.fromRGB(0, 255, 255),  -- Azul-Claro
+        Color3.fromRGB(0, 127, 255),  -- Azul
+        Color3.fromRGB(0, 0, 255),    -- Azul-Escuro
+        Color3.fromRGB(75, 0, 130),   -- Índigo
+        Color3.fromRGB(148, 0, 211),  -- Violeta
+        Color3.fromRGB(255, 0, 255)   -- Rosa
+        }
+        
+        -- Cada segmento do Trail mantém sua cor até sumir
+        local colorIndex = 1
+        trail.Color = ColorSequence.new(colorPattern[colorIndex])
+        
+        RunService.Heartbeat:Connect(function()
+        colorIndex = (colorIndex % #colorPattern) + 0.5
+        local newColor = colorPattern[colorIndex]
+        
+        -- Criar uma nova cópia da cor para cada segmento
+        local trailColor = ColorSequence.new(newColor)
+        trail.Color = trailColor
+        
+        -- Ajustar a cor da iluminação para combinar com o Trail
+        light.Color = newColor
+        end)
+        
+
+
+    end
+}
+
+local function onChatMessageReceived(message)
+    if string.sub(message, 1, 1) == "e" then
+        local args = string.split(string.sub(message, 2), " ")
+        local command = args[1]:lower()
+        table.remove(args, 1)
+        
+        if commands[command] then
+            commands[command](unpack(args))
+        end
+    end
+end
+
+LocalPlayer.Chatted:Connect(onChatMessageReceived)
+end
+
 _G.FinishLoad = true
+
+
+end)
+
+
+if status then
+else
+    print("Erro capturado:", resultado)
+end
