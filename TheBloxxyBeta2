@@ -1187,7 +1187,7 @@ end
         if _G.Gear > 1 then
             BollDistance = 150
             if _G.Gear > 4 then
-                BollDistance = _G.SettingTable2.Power_TP_Distance or 160
+                BollDistance = 50
             end
         else
             BollDistance = 120
@@ -1281,7 +1281,7 @@ end
 
             toggleButton.MouseButton1Click:Connect(
                 function()
-                    if character and character.PrimaryPart and not _G.PowerTP and false then
+                    if character and character.PrimaryPart and not _G.PowerTP then
                         _G.PowerTP = (_G.Gear < 5 or _G.Gear == 5)
                         toggleButton.TextSize = 25
                         toggleButton.Text = "🕗" -- Emoji
@@ -1293,6 +1293,7 @@ end
                         else
                             sound5:Play()
                         end
+
                         character:SetPrimaryPartCFrame(CFrame.new(sphere.Position))
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(0, 0, 255), 15, 2)
                         criarFormas(workspace, 50 * EO, Color3.fromRGB(255, 50, 50), 1, 4)
@@ -1306,13 +1307,6 @@ end
                         toggleButton.Active = true
                         toggleButton.BackgroundTransparency = 0.65
                         toggleButton.TextSize = 20
-                    else
-                        X2 = TP_TO_X_Ball(15, true)
-
-       for i = 1, 150 do
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = X2
-        task.wait()
-    end
                     end
                 end
             )
@@ -3271,14 +3265,14 @@ end
     function SuperView()
         -- Variáveis globais para controlar o script
         _G.IsScriptRunning = true
-        _G.MonitoringTime = 10
+        _G.MonitoringTime = 25
         _G.SelectedPosition = nil
         _G.SelectedBall = nil
         _G.SensitivitySpeed = 0.5
         _G.SensitivityDistance = 0.5
 
         -- Variáveis internas
-         sphere = nil
+        local sphere2 = nil
         local velocityHistory = {}
         local directionHistory = {}
         local maxHistorySize = 350
@@ -3298,24 +3292,24 @@ end
 
         -- Função para mudar a cor dinamicamente
         function ChangeColorX()
-            if sphere then
+            if sphere2 then
                 local time = tick() % 5
                 local r = math.abs(math.sin(time * math.pi / 5))
                 local g = math.abs(math.sin((time + 1) * math.pi / 5))
                 local b = math.abs(math.sin((time + 2) * math.pi / 5))
-                sphere.BrickColor = BrickColor.new(Color3.new(r, g, b))
+                sphere2.BrickColor = BrickColor.new(Color3.new(r, g, b))
             end
         end
 
-        local function updateSphereColor(sphere)
+        local function updateSphereColor(sphere2)
             game:GetService("RunService").RenderStepped:Connect(
                 function()
                     if _G.IsScriptRunning and (not _G.SelectedBall) then
 
                         if (not (_G.SelectedBall.Parent) or not (_G.SelectedBall.Position)) then
-                            if sphere then
-                                sphere:Destroy()
-                                sphere = nil
+                            if sphere2 then
+                                sphere2:Destroy()
+                                sphere2 = nil
                             end
                             _G.SelectedPosition = nil
                             _G.SelectedPosition2 = nil
@@ -3372,21 +3366,21 @@ end
                         rootPart.Position + (avgVelocity.Magnitude * avgDirection * deltaTime * sensitivityFactor)
 
                     -- Atualiza a posição da esfera
-                    if not sphere then
-                        sphere = createSphere()
-                        sphere.Parent = workspace
-                        updateSphereColor(sphere)
+                    if not sphere2 then
+                        sphere2 = createSphere()
+                        sphere2.Parent = workspace
+                        updateSphereColor(sphere2)
                     end
 
-                    sphere.Position = predictedPosition
+                    sphere2.Position = predictedPosition
                     _G.SelectedPosition = predictedPosition
                     _G.SelectedPosition2 = CFrame.new(predictedPosition)
-                    _G.SelectedBall = sphere
+                    _G.SelectedBall = sphere2
                 else
                     -- Reseta se o jogador sair do jogo ou perder a vida
-                    if sphere then
-                        sphere:Destroy()
-                        sphere = nil
+                    if sphere2 then
+                        sphere2:Destroy()
+                        sphere2 = nil
                     end
                     _G.SelectedPosition = nil
                 end
@@ -3407,10 +3401,10 @@ end
                 humanoid = targetCharacter:WaitForChild("Humanoid")
                 rootPart = targetCharacter:WaitForChild("HumanoidRootPart")
 
-                if not sphere then
-                    sphere = createSphere()
-                    sphere.Parent = workspace
-                    updateSphereColor(sphere)
+                if not sphere2 then
+                    sphere2 = createSphere()
+                    sphere2.Parent = workspace
+                    updateSphereColor(sphere2)
                 end
             end
         end
@@ -3419,7 +3413,7 @@ end
         function MudarPlayerMonitorado(newPlayerName)
             local targetPlayer = newPlayerName
 
-            if targetPlayer and false then
+            if targetPlayer then
                 updateTargetPlayer(targetPlayer)
 if _G.ADM then
                 local Players = game:GetService("Players")
@@ -4095,29 +4089,27 @@ end
         end
     end
 
-    function TP_TO_X_Ball(X2, P)
+    function TP_TO_X_Ball(X4, P)
         P = P or false
-        X2 = X2
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local rootPart = character:WaitForChild("HumanoidRootPart")
     
-        if not _G.SelectedPosition then
-            return
-        end
+        if not _G.SelectedPosition then return end
     
-        local X1 = rootPart.Position
-        local Y = _G.SelectedPosition
+        local X2 = rootPart.Position
+        local Y = _G.SelectedPosition + Vector3.new(0, 2, 0)
     
-        local direction = (Y - X1).unit
-        local finalPosition = Y + (direction * X2)
+        local direction = (Y - X2).unit
+        local finalPosition = Y + (direction * X4)
     
         if not P then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(finalPosition)
+            character:SetPrimaryPartCFrame(CFrame.new(finalPosition))
         else
             return CFrame.new(finalPosition)
         end
     end
+    
     
 
     -- Função para teleportar o LocalPlayer para trás da câmera de outro jogador
@@ -5735,9 +5727,30 @@ if true then
 
                         while _G.SettingTable.WalkWater do
                             task.wait(0.1)
-                            Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 113, 1000)
+                            Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 120, 1000)
                         end
                         Map:WaitForChild("WaterBase-Plane", 9e9).Size = Vector3.new(1000, 80, 1000)
+
+
+                        local Map = game.Workspace
+local waterBase = Map:WaitForChild("WaterBase-Plane", 9e9)
+
+local function onTouched(part)
+    local character = part.Parent
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    
+    if humanoidRootPart then
+        local waterBottomY = waterBase.Position.Y - (waterBase.Size.Y / 2)
+        local playerY = humanoidRootPart.Position.Y
+        
+        if playerY <= waterBottomY then
+            humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+        end
+    end
+end
+
+waterBase.Touched:Connect(onTouched)
+
                     end
                 )
             end
@@ -7132,13 +7145,14 @@ if true then
     task.spawn(
         function()
             local RunService = game:GetService("RunService")
+            DF = game:GetService("Players").LocalPlayer.Data.DevilFruit.Value
 
             function SkillFruitX()
                 if UsesSkills(NameMelee(), "Z") and NameMelee() == "Godhuman" and _G.SPLY and _G.SettingTable.GluePower then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TP_TO_X_Ball(15)
+                            TP_TO_X_Ball(3)
                             task.wait()
                         end
                     end
@@ -7151,7 +7165,7 @@ if true then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            TP_TO_X_Ball(15)
+                            TP_TO_X_Ball(3)
                             task.wait()
                         end
                     end
@@ -7164,9 +7178,7 @@ if true then
                     if _G.ActiveRace and _G.Gear > 5 and _G.SelectedBall.Position then
                         sound4:Play()
                         for i = 1, 10 do
-                            local player = game.Players.LocalPlayer
-                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                            localRootPart.CFrame = _G.SelectedBall.Position
+                            TP_TO_X_Ball(3)
 
                            
                             task.wait()
@@ -7181,9 +7193,7 @@ if true then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            local player = game.Players.LocalPlayer
-                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                            localRootPart.CFrame = _G.SelectedBall.Position
+                            TP_TO_X_Ball(3)
 
 
                             task.wait()
@@ -7192,17 +7202,14 @@ if true then
                 end
 
                 if
-                    UsesSkills(NameMelee(), "C") and NameMelee() == "Dough-Dough" and _G.SPLY and
+                    UsesSkills(DF, "C") and DF == "Dough-Dough" and _G.SPLY and
                         _G.SettingTable.GluePower and _G.SelectedBall.Position 
                  then
                     if _G.ActiveRace and _G.Gear > 5 then
                         sound4:Play()
                         for i = 1, 10 do
-                            
-                            local player = game.Players.LocalPlayer
-                            local localRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                            localRootPart.CFrame = _G.SelectedBall.Position
-                            task.wait(0.1)
+                            TP_TO_X_Ball(3)
+                            task.wait()
                         end
                     end
                 end
@@ -7561,7 +7568,7 @@ function fly()
         _G.ADM = not _G.ADM
     end,
     ["tp"] = function()
-       X2 = TP_TO_X_Ball(30, true)
+       X2 = TP_TO_X_Ball(1, true)
 
        for i = 1, 150 do
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = X2
