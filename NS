@@ -1,0 +1,9 @@
+{
+Value = false,
+Title = "",
+Message = "",
+Button = false,
+ButtonMessage = "",
+Link = false,
+LinkURL = ""
+}
