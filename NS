@@ -1,11 +1,11 @@
 {
-Value = true,
-Title = "🚀 New Server 😁",
-Message = "A new server is coming, along with the new update, get ready, the Webwooks are back. 🔥",
-Button = false,
-ButtonMessage = "",
-Link = false,
-LinkURL = "",
-Id = "ACDE",
-Times = "3"
+  "Value": true,
+  "Title": "🚀 New Server 😁",
+  "Message": "A new server is coming, along with the new update, get ready, the Webwooks are back. 🔥",
+  "Button": false,
+  "ButtonMessage": "",
+  "Link": false,
+  "LinkURL": "",
+  "Id": "ACDE",
+  "Times": 3
 }
