@@ -4,9 +4,9 @@
   "Message": "A new server is coming, along with the new update, get ready, the Webwooks are back. 🔥",
   "Button": true,
   "ButtonMessage": "Okay!",
-  "Duration": 5,
+  "Duration": 10,
   "Link": false,
   "LinkURL": "",
   "Id": "ACDE",
-  "Times": 3
+  "Times": 2
 }
