@@ -23,7 +23,7 @@ local function pullPlayerToHighPosition()
     local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
-    
+
     local lookVector = rootPart.CFrame.LookVector
     local forwardOffset = Vector3.new(lookVector.X * 200, 0, lookVector.Z * 30) -- 30 unidades à frente, ignorando Y
     local highPosition = rootPart.Position + forwardOffset + Vector3.new(0, 100, 0) -- Mantém a altura +100
@@ -103,22 +103,31 @@ end
 
 clonedElement.MouseButton1Down:Connect(function()
     print("Novo clique detectado no elemento clonado!")
+        NS = true
     clonedElement.Active = false
     pullPlayerToHighPosition()
     createInvisibleFloor()
     clonedElement.Active = true
+        task.wait(1)
+        NS = false
 end)
 
 clonedElement2.MouseButton1Down:Connect(function()
         task.wait(1)
         if selectedTarget then
+            task.spawn(function()
+                    for i = 1, 80 do
+
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
             local direction = (character.HumanoidRootPart.Position - targetPosition).unit
             local newPosition = targetPosition + direction * -15  -- 5 unidades atrás do alvo
             character:SetPrimaryPartCFrame(CFrame.new(newPosition))
-            for i = 1, 10 do
+                        task.wait()
+                end
+                end)
+            for i = 1, 200 do
 
             pcall(function()   
                 selectedTarget = getNearestPlayer()
@@ -140,9 +149,9 @@ clonedElement2.MouseButton1Down:Connect(function()
                 end
             end)
 
-                task.wait(0.1)
+                task.wait()
                 end
-                
+
         end
 
 end)
@@ -186,10 +195,10 @@ end
 -- Função chamada ao pressionar o botão
 local function selectTarget()
     local newTarget = getNearestPlayer()
-  
+
     if newTarget then
         selectedTarget = newTarget
-       
+
     end
 end
 
@@ -197,7 +206,7 @@ end
 RunService.RenderStepped:Connect(function()
         selectedTarget = getNearestPlayer()
 
-        
+
     if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
         local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -209,9 +218,32 @@ RunService.RenderStepped:Connect(function()
 
             targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-             
+
         end
     end
+
+
+        pcall(function()
+if NS then
+                for _, obj in pairs(humanoidRootPart:GetChildren()) do
+                    if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") or
+                       obj:IsA("BodyPosition") or obj:IsA("BodyAngularVelocity") or
+                       obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
+                        obj.Velocity = Vector3.new(0, 0, 0)
+                        obj.AngularVelocity = Vector3.new(0, 0, 0)
+                        if obj:IsA("BodyPosition") then
+                            obj.Position = humanoidRootPart.Position
+                        end
+                        if obj:IsA("BodyGyro") then
+                            obj.CFrame = humanoidRootPart.CFrame
+                        end
+                        if obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
+                            obj.Force = Vector3.new(0, 0, 0)
+                        end
+                    end
+                end
+                end
+            end)
 end)
 
 
@@ -261,7 +293,7 @@ local Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
 if Humanoid then
     local defaultWalkSpeed = Humanoid.WalkSpeed
-    local targetSpeed = defaultWalkSpeed * 2
+    local targetSpeed = defaultWalkSpeed * 4
 
     -- Função para manter a velocidade
     local function maintainSpeed()
@@ -284,8 +316,8 @@ local Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
 if Humanoid then
     local defaultWalkSpeed = Humanoid.WalkSpeed
-    local targetSpeed = defaultWalkSpeed * 2
-    local targetJumpPower = Humanoid.JumpPower * 3
+    local targetSpeed = defaultWalkSpeed * 2.25
+    local targetJumpPower = Humanoid.JumpPower * 2.5
     Humanoid.UseJumpPower = true
     Humanoid.JumpPower = targetJumpPower
 
