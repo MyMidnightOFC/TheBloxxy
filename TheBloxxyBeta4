@@ -17,9 +17,7 @@ end
 local clonedElement = dashElement:Clone()
 local clonedElement2 = runElement:Clone()
 
-
 local function pullPlayerToHighPosition()
-
     local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -42,36 +40,50 @@ local function createInvisibleFloor()
     floor.Parent = workspace
 
     -- Grupo de colisão
-    if not pcall(function() PhysicsService:CreateCollisionGroup("PlayerFloor") end) then
+    if
+        not pcall(
+            function()
+                PhysicsService:CreateCollisionGroup("PlayerFloor")
+            end
+        )
+     then
         warn("Grupo PlayerFloor já existe")
     end
-    if not pcall(function() PhysicsService:CreateCollisionGroup("Player") end) then
+    if
+        not pcall(
+            function()
+                PhysicsService:CreateCollisionGroup("Player")
+            end
+        )
+     then
         warn("Grupo Player já existe")
     end
 
     PhysicsService:SetPartCollisionGroup(floor, "PlayerFloor")
     PhysicsService:SetPartCollisionGroup(rootPart, "Player")
     for i = 1, 5 do
+        pcall(
+            function()
+                selectedTarget = getNearestPlayer()
 
-    pcall(function()   
-            selectedTarget = getNearestPlayer()
+                if
+                    selectedTarget and selectedTarget.Character and
+                        selectedTarget.Character:FindFirstChild("HumanoidRootPart")
+                 then
+                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
+                    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
+                    if root then
+                        local distance = (targetPosition - root.Position).Magnitude
+                        local offsetHeight = 0
+                        local proportionalOffset = -2
 
-            if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
-                local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-                if root then
-                    local distance = (targetPosition - root.Position).Magnitude
-                    local offsetHeight = 0
-                    local proportionalOffset = -2
-
-                    targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
-                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-
+                        targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
+                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+                    end
                 end
             end
-        end)
+        )
         task.wait(0.1)
     end
     -- Espera 4 segundos antes do fade out
@@ -101,71 +113,37 @@ for _, connection in pairs(getconnections(clonedElement2.MouseButton1Click)) do
     connection:Disable()
 end
 
-clonedElement.MouseButton1Down:Connect(function()
-    print("Novo clique detectado no elemento clonado!")
+clonedElement.MouseButton1Down:Connect(
+    function()
+        print("Novo clique detectado no elemento clonado!")
         NS = true
-    clonedElement.Active = false
-    pullPlayerToHighPosition()
-    createInvisibleFloor()
-    clonedElement.Active = true
-        task.wait(1)
-        NS = false
-end)
-
-clonedElement2.MouseButton1Down:Connect(function()
-        task.wait(1)
-        if selectedTarget then
-            task.spawn(function()
-                    for i = 1, 80 do
-
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-            local direction = (character.HumanoidRootPart.Position - targetPosition).unit
-            local newPosition = targetPosition + direction * -15  -- 5 unidades atrás do alvo
-            character:SetPrimaryPartCFrame(CFrame.new(newPosition))
-                        task.wait()
-                end
-                end)
-            for i = 1, 200 do
-
-            pcall(function()   
-                selectedTarget = getNearestPlayer()
-
-
-                if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-                    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-                    if root then
-                        local distance = (targetPosition - root.Position).Magnitude
-                        local offsetHeight = 0
-                        local proportionalOffset = -2
-
-                        targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
-                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-
-                    end
-                end
+        View = true
+        task.spawn(function()
+                task.wait(0.2)
+                NS = false
+                View = false
             end)
+        clonedElement.Active = false
+        pullPlayerToHighPosition()
+        createInvisibleFloor()
+        clonedElement.Active = true
+       
+    end
+)
 
-                task.wait()
-                end
-
-        end
-
-end)
-
-
+clonedElement2.MouseButton1Down:Connect(
+    function()
+        task.wait(1)
+      TP = true
+        View = true 
+        task.wait(1.45)
+        TP = false
+        View = false
+    end
+)
 
 clonedElement.Parent = playerGui.Mobile
 clonedElement2.Parent = playerGui.Mobile
-
-
-
-
-
-
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -173,7 +151,7 @@ local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local LocalPlayer = Player
 
- selectedTarget = nil -- Variável global para armazenar o alvo
+selectedTarget = nil -- Variável global para armazenar o alvo
 
 -- Função para encontrar o jogador mais próximo
 local function getNearestPlayer()
@@ -182,7 +160,8 @@ local function getNearestPlayer()
 
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= Player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local distance = (otherPlayer.Character.HumanoidRootPart.Position - Player.Character.HumanoidRootPart.Position).Magnitude
+            local distance =
+                (otherPlayer.Character.HumanoidRootPart.Position - Player.Character.HumanoidRootPart.Position).Magnitude
             if distance < closestDistance and (otherPlayer ~= selectedTarget or true) then
                 closestDistance = distance
                 closestPlayer = otherPlayer
@@ -198,54 +177,98 @@ local function selectTarget()
 
     if newTarget then
         selectedTarget = newTarget
-
     end
 end
 
-
-RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(
+    function()
+        pcall(
+            function()
         selectedTarget = getNearestPlayer()
 
+        if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
-    if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root and clicking then
+                local distance = (targetPosition - root.Position).Magnitude
+                local offsetHeight = 0
+                local proportionalOffset = -2
 
-        if root and clicking then
-            local distance = (targetPosition - root.Position).Magnitude
-            local offsetHeight = 0
-            local proportionalOffset = -2
-
-            targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-
+                targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+            end
         end
-    end
+            end)
 
 
-        pcall(function()
-if NS then
-                for _, obj in pairs(humanoidRootPart:GetChildren()) do
-                    if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") or
-                       obj:IsA("BodyPosition") or obj:IsA("BodyAngularVelocity") or
-                       obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
-                        obj.Velocity = Vector3.new(0, 0, 0)
-                        obj.AngularVelocity = Vector3.new(0, 0, 0)
-                        if obj:IsA("BodyPosition") then
-                            obj.Position = humanoidRootPart.Position
-                        end
-                        if obj:IsA("BodyGyro") then
-                            obj.CFrame = humanoidRootPart.CFrame
-                        end
-                        if obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
-                            obj.Force = Vector3.new(0, 0, 0)
+        pcall(
+            function()
+                selectedTarget = getNearestPlayer()
+
+                if
+                    selectedTarget and selectedTarget.Character and
+                        selectedTarget.Character:FindFirstChild("HumanoidRootPart") and View
+                 then
+                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
+                    local root =
+                        LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+                    if root then
+                        local distance = (targetPosition - root.Position).Magnitude
+                        local offsetHeight = 0
+                        local proportionalOffset = 0
+
+                        targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
+                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+                    end
+                end
+            end
+        )
+
+        pcall(
+        function()
+                if selectedTarget and TP then
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
+                    local direction = (character.HumanoidRootPart.Position - targetPosition).unit
+                    local newPosition = targetPosition + direction * -10 -- 5 unidades atrás do alvo
+                    character:SetPrimaryPartCFrame(CFrame.new(newPosition))
+                    task.wait()
+                end
+            end
+        )
+        
+
+        pcall(
+            function()
+                if NS then
+                    for _, obj in pairs(humanoidRootPart:GetChildren()) do
+                        if
+                            obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") or obj:IsA("BodyPosition") or
+                                obj:IsA("BodyAngularVelocity") or
+                                obj:IsA("BodyThrust") or
+                                obj:IsA("BodyForce")
+                         then
+                            obj.Velocity = Vector3.new(0, 0, 0)
+                            obj.AngularVelocity = Vector3.new(0, 0, 0)
+                            if obj:IsA("BodyPosition") then
+                                obj.Position = humanoidRootPart.Position
+                            end
+                            if obj:IsA("BodyGyro") then
+                                obj.CFrame = humanoidRootPart.CFrame
+                            end
+                            if obj:IsA("BodyThrust") or obj:IsA("BodyForce") then
+                                obj.Force = Vector3.new(0, 0, 0)
+                            end
                         end
                     end
                 end
-                end
-            end)
-end)
-
+            end
+        )
+    end
+)
 
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
@@ -255,95 +278,91 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 -- Criando a área invisível
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = PlayerGui
+screenGui.ResetOnSpawn = false
 
 local touchArea = Instance.new("Frame")
 touchArea.Size = UDim2.new(0.3, 0, 0.3, 0) -- Ajuste o tamanho
-touchArea.Position = UDim2.new(0.5, 0, -0.1, 0) -- Ajuste a posição
+touchArea.Position = UDim2.new(0.5, 0, -0.25, 0) -- Ajuste a posição
 touchArea.BackgroundTransparency = 0.9 -- Deixa invisível
 touchArea.Active = true -- Permite interação sem bloquear o jogo
 touchArea.Parent = screenGui
 
- clicking = false
-
+clicking = false
 
 -- Iniciar clique ao tocar na área
-touchArea.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+touchArea.InputBegan:Connect(
+    function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             clicking = true
+        end
     end
-end)
+)
 
 -- Parar clique ao soltar
-touchArea.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        clicking = false
-    end
-end)
-
-
-
-
-
-
-
-
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-
-if Humanoid then
-    local defaultWalkSpeed = Humanoid.WalkSpeed
-    local targetSpeed = defaultWalkSpeed * 4
-
-    -- Função para manter a velocidade
-    local function maintainSpeed()
-        while true do
-            if Humanoid.WalkSpeed ~= targetSpeed then
-                Humanoid.WalkSpeed = targetSpeed
-            end
-            task.wait(0.1) -- Pequeno intervalo para evitar sobrecarga
+touchArea.InputEnded:Connect(
+    function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            clicking = false
         end
     end
+)
 
-    -- Inicia a manutenção da velocidade
-    task.spawn(maintainSpeed)
-end
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
+local player = Players.LocalPlayer
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+local function setupCharacter(character)
+    local humanoid = character:WaitForChild("Humanoid")
 
-if Humanoid then
-    local defaultWalkSpeed = Humanoid.WalkSpeed
-    local targetSpeed = defaultWalkSpeed * 2.25
-    local targetJumpPower = Humanoid.JumpPower * 2.5
-    Humanoid.UseJumpPower = true
-    Humanoid.JumpPower = targetJumpPower
+    -- Definir valores padrão
+    local defaultWalkSpeed = humanoid.WalkSpeed
+    local targetSpeed = defaultWalkSpeed * 4.5
+    local targetJumpPower = humanoid.JumpPower * 2.7
 
-    -- Função para manter a velocidade e o pulo
-    local function maintainAttributes()
-        while true do
-            if Humanoid.WalkSpeed ~= targetSpeed then
-                Humanoid.WalkSpeed = targetSpeed
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = targetJumpPower
+
+    -- Função para manter atributos
+    task.spawn(
+        function()
+            while humanoid.Parent do
+                humanoid.WalkSpeed = targetSpeed
+                humanoid.JumpPower = targetJumpPower
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true) -- Pulo infinito
+                task.wait(0.1)
             end
-            if Humanoid.JumpPower ~= targetJumpPower then
-                Humanoid.JumpPower = targetJumpPower
-            end
-            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true) -- Permite pulo infinito
-            task.wait(0.1) -- Pequeno intervalo para evitar sobrecarga
         end
-    end
+    )
 
-    -- Inicia a manutenção dos atributos
-    task.spawn(maintainAttributes)
-end
-
-
-function onJumpRequest()
-    game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(
-        "Jumping"
+    -- Pulo infinito
+    UserInputService.JumpRequest:Connect(
+        function()
+            if humanoid.Parent then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
     )
 end
 
-    connection = game:GetService("UserInputService").JumpRequest:connect(onJumpRequest)
+-- Aplicar ao personagem atual
+if player.Character then
+    setupCharacter(player.Character)
+end
+
+-- Aplicar após reset
+player.CharacterAdded:Connect(setupCharacter)
+
+local uis = game:GetService("UserInputService")
+local player = game:GetService("Players").LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+uis.JumpRequest:Connect(
+    function()
+        task.wait() -- Garante que o jogo processe o pulo normal antes de forçar outro
+        if humanoid:GetState() ~= Enum.HumanoidStateType.Seated then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+)
