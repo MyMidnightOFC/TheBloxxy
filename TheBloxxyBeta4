@@ -1,20 +1,29 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+if player.Character or _G.EXECUTED then
+else
+    while not (player.Character) do task.wait(0.5)
+
+    end
+end
+    
 function isnil(thing)
     return (thing == nil)
-end
-local function round(n)
+    end
+    local function round(n)
     return math.floor(tonumber(n) + 0.5)
-end
-function getPlayerByName(name)
+    end
+    function getPlayerByName(name)
     for _, player in pairs(Players:GetPlayers()) do
         if player.Name == name then
             return player
         end
     end
     return nil
-end
+    end
 
-Number = math.random(1, 1000000)
-function UpdateEspPlayer()
+    Number = math.random(1, 1000000)
+    function UpdateEspPlayer()
     for i,v in pairs(game:GetService'Players':GetChildren()) do
         pcall(function()
             if not isnil(v.Character) then
@@ -68,31 +77,31 @@ function UpdateEspPlayer()
             end
         end)
     end
-end
+    end
 
 
 
 
-local Players = game:GetService("Players")
-local PhysicsService = game:GetService("PhysicsService")
-local TweenService = game:GetService("TweenService")
+    local Players = game:GetService("Players")
+    local PhysicsService = game:GetService("PhysicsService")
+    local TweenService = game:GetService("TweenService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
-local playerGui = player:WaitForChild("PlayerGui")
-local dashElement = playerGui:FindFirstChild("Mobile") and playerGui.Mobile:FindFirstChild("Dash")
-local runElement = playerGui:FindFirstChild("Mobile") and playerGui.Mobile:FindFirstChild("Run")
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local playerGui = player:WaitForChild("PlayerGui")
+    local dashElement = playerGui:FindFirstChild("Mobile") and playerGui.Mobile:FindFirstChild("Dash")
+    local runElement = playerGui:FindFirstChild("Mobile") and playerGui.Mobile:FindFirstChild("Run")
 
-if not dashElement then
+    if not dashElement then
     warn("Dash UI não encontrado!")
     return
-end
+    end
 
-local clonedElement = dashElement:Clone()
-local clonedElement2 = runElement:Clone()
+    local clonedElement = dashElement:Clone()
+    local clonedElement2 = runElement:Clone()
 
-local function pullPlayerToHighPosition()
+    local function pullPlayerToHighPosition()
     local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -101,9 +110,21 @@ local function pullPlayerToHighPosition()
     local forwardOffset = Vector3.new(lookVector.X * 200, 0, lookVector.Z * 30) -- 30 unidades à frente, ignorando Y
     local highPosition = rootPart.Position + forwardOffset + Vector3.new(0, 100, 0) -- Mantém a altura +100
     rootPart.CFrame = CFrame.new(highPosition, highPosition + Vector3.new(lookVector.X, 0, lookVector.Z)) -- Mantém a direção
-end
+    character:SetPrimaryPartCFrame(CFrame.new(highPosition, highPosition + Vector3.new(lookVector.X, 0, lookVector.Z)))
+
+    end
+
+local Players = game:GetService("Players")
+local PhysicsService = game:GetService("PhysicsService")
+local TweenService = game:GetService("TweenService")
 
 local function createInvisibleFloor()
+    local player = Players.LocalPlayer
+    if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
+
+    local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
     local floor = Instance.new("Part")
     floor.Size = Vector3.new(8, 1, 8)
     floor.Position = Vector3.new(rootPart.Position.X, rootPart.Position.Y - 1, rootPart.Position.Z)
@@ -115,85 +136,98 @@ local function createInvisibleFloor()
     floor.Parent = workspace
 
     -- Grupo de colisão
-    if
-        not pcall(
-            function()
-                PhysicsService:CreateCollisionGroup("PlayerFloor")
-            end
-        )
-     then
+    if not pcall(function() PhysicsService:CreateCollisionGroup("PlayerFloor") end) then
         warn("Grupo PlayerFloor já existe")
     end
-    if
-        not pcall(
-            function()
-                PhysicsService:CreateCollisionGroup("Player")
-            end
-        )
-     then
+    if not pcall(function() PhysicsService:CreateCollisionGroup("Player") end) then
         warn("Grupo Player já existe")
     end
 
     PhysicsService:SetPartCollisionGroup(floor, "PlayerFloor")
     PhysicsService:SetPartCollisionGroup(rootPart, "Player")
+
     for i = 1, 5 do
-        pcall(
-            function()
-                selectedTarget = getNearestPlayer()
+        pcall(function()
+            local selectedTarget = getNearestPlayer()
+            if selectedTarget and selectedTarget.Character and selectedTarget.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
+                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-                if
-                    selectedTarget and selectedTarget.Character and
-                        selectedTarget.Character:FindFirstChild("HumanoidRootPart")
-                 then
-                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-                    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local distance = (targetPosition - root.Position).Magnitude
+                    local proportionalOffset = -2
 
-                    if root then
-                        local distance = (targetPosition - root.Position).Magnitude
-                        local offsetHeight = 0
-                        local proportionalOffset = -2
-
-                        targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
-                        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
-                    end
+                    targetPosition = targetPosition + Vector3.new(0, proportionalOffset, 0)
+                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetPosition)
                 end
             end
-        )
+        end)
         task.wait(0.1)
     end
-    -- Espera 4 segundos antes do fade out
-    task.wait(29)
 
-    -- Animação de fade out em 1 segundo
-    local fadeInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local fadeGoal = {Transparency = 1}
-    local fadeTween = TweenService:Create(floor, fadeInfo, fadeGoal)
-    fadeTween:Play()
-    fadeTween.Completed:Wait()
+task.spawn(function()
 
-    floor:Destroy()
+
+            local Players = game:GetService("Players")
+            local TweenService = game:GetService("TweenService")
+            local localPlayer = Players.LocalPlayer
+
+            local function getDistance()
+                if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    return (floor.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
+                end
+                return math.huge
+            end
+
+            -- Espera até que o jogador esteja a mais de 70 metros de distância
+            while getDistance() <= 70 do
+                task.wait(1) -- Aguarda 1 segundo antes de verificar novamente
+            end
+
+            -- Animação de fade out em 1 segundo
+            local fadeInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+            local fadeGoal = {Transparency = 1}
+            local fadeTween = TweenService:Create(floor, fadeInfo, fadeGoal)
+            fadeTween:Play()
+            fadeTween.Completed:Wait()
+
+            floor:Destroy()
+
+
+            
+        end)
 end
 
-clonedElement.Size = UDim2.new(0.18, 0, 0.18, 0)
-clonedElement.Position = UDim2.new(0.35, 0, 0.6, 0)
+-- Monitorar quando o personagem renasce e chamar a função
+local function onCharacterAdded(character)
+    task.wait(1) -- Espera um pouco para o HumanoidRootPart carregar
+    createInvisibleFloor()
+end
 
-clonedElement2.Size = UDim2.new(0.18, 0, 0.18, 0)
-clonedElement2.Position = UDim2.new(0.6, 0, 0.6, 0)
 
-for _, connection in pairs(getconnections(clonedElement.MouseButton1Click)) do
+player.CharacterAdded:Connect(onCharacterAdded)
+
+
+    clonedElement.Size = UDim2.new(0.18, 0, 0.18, 0)
+    clonedElement.Position = UDim2.new(0.35, 0, 0.6, 0)
+
+    clonedElement2.Size = UDim2.new(0.18, 0, 0.18, 0)
+    clonedElement2.Position = UDim2.new(0.6, 0, 0.6, 0)
+
+    for _, connection in pairs(getconnections(clonedElement.MouseButton1Click)) do
     connection:Disable()
-end
+    end
 
-for _, connection in pairs(getconnections(clonedElement2.MouseButton1Click)) do
+    for _, connection in pairs(getconnections(clonedElement2.MouseButton1Click)) do
     connection:Disable()
-end
+    end
 
-clonedElement.MouseButton1Down:Connect(
+    clonedElement.MouseButton1Down:Connect(
     function()
         print("Novo clique detectado no elemento clonado!")
         NS = true
         task.spawn(function()
-task.wait(8)
+    task.wait(8)
                 NS = false
 
             end)
@@ -203,9 +237,9 @@ task.wait(8)
         clonedElement.Active = true
 
     end
-)
+    )
 
-clonedElement2.MouseButton1Down:Connect(
+    clonedElement2.MouseButton1Down:Connect(
     function()
         task.wait(1)
       TP = true
@@ -214,21 +248,21 @@ clonedElement2.MouseButton1Down:Connect(
         TP = false
         View = false
     end
-)
+    )
 
-clonedElement.Parent = playerGui.Mobile
-clonedElement2.Parent = playerGui.Mobile
+    clonedElement.Parent = playerGui.Mobile
+    clonedElement2.Parent = playerGui.Mobile
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-local LocalPlayer = Player
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local Camera = workspace.CurrentCamera
+    local RunService = game:GetService("RunService")
+    local LocalPlayer = Player
 
-selectedTarget = nil -- Variável global para armazenar o alvo
+    selectedTarget = nil -- Variável global para armazenar o alvo
 
--- Função para encontrar o jogador mais próximo
-local function getNearestPlayer()
+    -- Função para encontrar o jogador mais próximo
+    local function getNearestPlayer()
     local closestPlayer = nil
     local closestDistance = math.huge
 
@@ -243,18 +277,18 @@ local function getNearestPlayer()
         end
     end
     return closestPlayer
-end
+    end
 
--- Função chamada ao pressionar o botão
-local function selectTarget()
+    -- Função chamada ao pressionar o botão
+    local function selectTarget()
     local newTarget = getNearestPlayer()
 
     if newTarget then
         selectedTarget = newTarget
     end
-end
+    end
 
-RunService.RenderStepped:Connect(
+    RunService.RenderStepped:Connect(
     function()
         pcall(
             function()
@@ -347,7 +381,7 @@ RunService.RenderStepped:Connect(
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
 
-                    character:SetPrimaryPartCFrame(CFrame.new(9999, -450, 9999))
+                    character:SetPrimaryPartCFrame(PPP1)
                 end
             end
         )
@@ -357,96 +391,110 @@ RunService.RenderStepped:Connect(
                 UpdateEspPlayer()
             end)
     end
-)
+    )
 
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    local UserInputService = game:GetService("UserInputService")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Criando a área invisível
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = PlayerGui
-screenGui.ResetOnSpawn = false
+    -- Criando a área invisível
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = PlayerGui
+    screenGui.ResetOnSpawn = false
 
-local touchArea = Instance.new("Frame")
-touchArea.Size = UDim2.new(0.3, 0, 0.3, 0) -- Ajuste o tamanho
-touchArea.Position = UDim2.new(0.75, 0, -0.195, 0) -- Ajuste a posição
-touchArea.BackgroundTransparency = 0.9 -- Deixa invisível
-touchArea.Active = true -- Permite interação sem bloquear o jogo
-touchArea.Parent = screenGui
+    local touchArea = Instance.new("Frame")
+    touchArea.Size = UDim2.new(0.3, 0, 0.3, 0) -- Ajuste o tamanho
+    touchArea.Position = UDim2.new(0.75, 0, -0.195, 0) -- Ajuste a posição
+    touchArea.BackgroundTransparency = 0.9 -- Deixa invisível
+    touchArea.Active = true -- Permite interação sem bloquear o jogo
+    touchArea.Parent = screenGui
 
 
-clicking = false
+    clicking = false
 
--- Iniciar clique ao tocar na área
-touchArea.InputBegan:Connect(
+    -- Iniciar clique ao tocar na área
+    touchArea.InputBegan:Connect(
     function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             clicking = true
         end
     end
-)
+    )
 
--- Parar clique ao soltar
-touchArea.InputEnded:Connect(
+    -- Parar clique ao soltar
+    touchArea.InputEnded:Connect(
     function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             clicking = false
         end
     end
-)
+    )
 
 
 
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    local UserInputService = game:GetService("UserInputService")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Criando a área invisível
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = PlayerGui
-screenGui.ResetOnSpawn = false
+    -- Criando a área invisível
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = PlayerGui
+    screenGui.ResetOnSpawn = false
 
-local touchArea = Instance.new("Frame")
-touchArea.Size = UDim2.new(0.3, 0, 0.3, 0) -- Ajuste o tamanho
-touchArea.Position = UDim2.new(-0.12, 0, 0.05, 0) -- Ajuste a posição
-touchArea.BackgroundTransparency = 0.89 -- Deixa invisível
-touchArea.Active = true -- Permite interação sem bloquear o jogo
-touchArea.Parent = screenGui
+    local touchArea = Instance.new("Frame")
+    touchArea.Size = UDim2.new(0.3, 0, 0.3, 0) -- Ajuste o tamanho
+    touchArea.Position = UDim2.new(-0.12, 0, 0.05, 0) -- Ajuste a posição
+    touchArea.BackgroundTransparency = 0.89 -- Deixa invisível
+    touchArea.Active = true -- Permite interação sem bloquear o jogo
+    touchArea.Parent = screenGui
 
--- Iniciar clique ao tocar na área
-touchArea.InputBegan:Connect(
+    -- Iniciar clique ao tocar na área
+    touchArea.InputBegan:Connect(
     function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
+                PPP1 = CFrame.new(13e7, -450, 13e7)
             PPP = HumanoidRootPart.CFrame + Vector3.new(0, 20, 0)
             Fucking = true
+task.wait(4)
+            if Fucking then
+                Fucking = false
+
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+
+                character:SetPrimaryPartCFrame(PPP)
+            end
+
         end
     end
-)
+    )
 
--- Parar clique ao soltar
-touchArea.InputEnded:Connect(
+    -- Parar clique ao soltar
+    touchArea.InputEnded:Connect(
     function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             task.wait(0.35)
+            if Fucking then
+
             Fucking = false
 
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
 
             character:SetPrimaryPartCFrame(PPP)
+            end
         end
     end
-)
+    )
 
 
-task.spawn(function()
+    task.spawn(function()
 
         local Players = game:GetService("Players")
         local UserInputService = game:GetService("UserInputService")
@@ -455,8 +503,8 @@ task.spawn(function()
         local player = Players.LocalPlayer
 
         -- Configurable multipliers
-        local WALK_SPEED_MULTIPLIER = 12.5
-        local JUMP_POWER_MULTIPLIER = 2.2
+        local WALK_SPEED_MULTIPLIER = 9.5
+        local JUMP_POWER_MULTIPLIER = 1.9
 
         local function setupCharacter(character)
             local humanoid = character:WaitForChild("Humanoid")
@@ -520,16 +568,31 @@ task.spawn(function()
 
     end)
 
-local uis = game:GetService("UserInputService")
-local player = game:GetService("Players").LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
+    local uis = game:GetService("UserInputService")
+    local player = game:GetService("Players").LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
 
-uis.JumpRequest:Connect(
+    uis.JumpRequest:Connect(
     function()
         task.wait() -- Garante que o jogo processe o pulo normal antes de forçar outro
         if humanoid:GetState() ~= Enum.HumanoidStateType.Seated then
             humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
-)
+    )
+
+
+-- Criar a plataforma
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(10000, 2, 10000) -- Tamanho da plataforma
+platform.Anchored = true
+platform.CanCollide = true
+platform.Color = Color3.fromRGB(255, 0, 0) -- Vermelha
+platform.Parent = workspace
+platform.Transparency = 0.75
+
+
+platform.Position = CFrame.new(13e7, -480, 13e7)
+
+_G.EXECUTED = true
