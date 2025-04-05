@@ -6,7 +6,7 @@ else
 
     end
 end
-    
+
 function isnil(thing)
     return (thing == nil)
     end
@@ -194,7 +194,7 @@ task.spawn(function()
             floor:Destroy()
 
 
-            
+
         end)
 end
 
@@ -339,10 +339,24 @@ player.CharacterAdded:Connect(onCharacterAdded)
                 if selectedTarget and TP then
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
-                    local targetPosition = selectedTarget.Character.HumanoidRootPart.Position
-                    local direction = (character.HumanoidRootPart.Position - targetPosition).unit
-                    local newPosition = targetPosition + direction * -10 -- 5 unidades atrás do alvo
-                    character:SetPrimaryPartCFrame(CFrame.new(newPosition))
+                    local camera = game.Workspace.CurrentCamera
+
+                    -- Posição do jogador que será teleportado
+                    local targetPlayer = selectedTarget
+                    local targetCharacter = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+
+                    -- Posição e direção da câmera
+                    local cameraPos = camera.CFrame.Position
+                    local lookAtDirection = camera.CFrame.LookVector
+
+                    -- Calcula a nova posição para ficar na frente do outro jogador
+                    local targetPosition = targetCharacter.HumanoidRootPart.Position
+                    local offset = lookAtDirection * 4  -- Distância que vai ficar na frente do jogador
+                    local newPos = targetPosition + offset
+
+                    -- Teleporta o jogador para a nova posição
+                    character:SetPrimaryPartCFrame(CFrame.new(newPos, targetPosition))
+
                 end
             end
         )
@@ -380,8 +394,30 @@ player.CharacterAdded:Connect(onCharacterAdded)
                 if Fucking then
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
+                    local hrp = character:WaitForChild("HumanoidRootPart")
 
-                    character:SetPrimaryPartCFrame(PPP1)
+                    -- Lista de 25 coords limbo style
+                    local limboPositions = {
+                        {99999999, -450, 99999999},
+                        {-99999999, -450, -99999999},
+                        {50000000, -450, -50000000},
+                        {-50000000, -450, 50000000}
+
+                    }
+
+                    -- Função pra rotação aleatória (em radianos)
+                    local function getRandomRotation()
+                        local yaw = math.rad(math.random(0, 360))
+                        return CFrame.Angles(0, yaw, 0)
+                    end
+
+                    -- Escolhe posição aleatória da lista
+                    local chosenPos = limboPositions[math.random(1, #limboPositions)]
+                    local position = Vector3.new(unpack(chosenPos))
+
+                    -- Aplica teleporte com rotação aleatória
+                    hrp.CFrame = CFrame.new(position) * getRandomRotation()
+
                 end
             end
         )
@@ -479,7 +515,7 @@ task.wait(4)
     touchArea.InputEnded:Connect(
     function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            task.wait(0.35)
+            task.wait(0.45)
             if Fucking then
 
             Fucking = false
@@ -488,6 +524,14 @@ task.wait(4)
             local character = player.Character or player.CharacterAdded:Wait()
 
             character:SetPrimaryPartCFrame(PPP)
+                task.wait(0.05)
+                character:SetPrimaryPartCFrame(PPP)
+                task.wait(0.05)
+                character:SetPrimaryPartCFrame(PPP)
+                task.wait(0.05)
+                character:SetPrimaryPartCFrame(PPP)
+
+
             end
         end
     end
@@ -503,7 +547,7 @@ task.wait(4)
         local player = Players.LocalPlayer
 
         -- Configurable multipliers
-        local WALK_SPEED_MULTIPLIER = 9.5
+        local WALK_SPEED_MULTIPLIER = 9.8
         local JUMP_POWER_MULTIPLIER = 1.9
 
         local function setupCharacter(character)
