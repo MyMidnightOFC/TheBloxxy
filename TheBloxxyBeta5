@@ -1,0 +1,70 @@
+function Hop()
+    -- Check if server is within 10 minutes of next hour
+    local currentTime = os.date("*t")
+    if currentTime.min > 50 then
+        return -- Don't do anything if less than 10 minutes to next hour
+    end
+
+    local placeId = game.PlaceId
+    local attemptedServers = {}
+    local cursor = ""
+    
+    function FindBestServer()
+        local serversData
+        if cursor == "" then
+            serversData = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        else
+            serversData = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor))
+        end
+
+        -- Store potential servers that meet our criteria
+        local potentialServers = {}
+        
+        if serversData.nextPageCursor and serversData.nextPageCursor ~= "null" and serversData.nextPageCursor ~= nil then
+            cursor = serversData.nextPageCursor
+        end
+
+        for _, server in pairs(serversData.data) do
+            local serverId = tostring(server.id)
+            local playerCount = tonumber(server.playing)
+            local maxPlayers = tonumber(server.maxPlayers)
+            
+            -- Check if server is not full and not already attempted
+            if playerCount < maxPlayers and not table.find(attemptedServers, serverId) then
+                -- Only consider servers with less than 20 players
+                if playerCount < 20 then
+                    table.insert(potentialServers, {
+                        id = serverId,
+                        players = playerCount
+                    })
+                end
+            end
+        end
+
+        -- Sort servers by player count (highest first)
+        table.sort(potentialServers, function(a, b)
+            return a.players > b.players
+        end)
+
+        -- Try to teleport to the best server (most players but under 20)
+        if #potentialServers > 0 then
+            local bestServer = potentialServers[1]
+            table.insert(attemptedServers, bestServer.id)
+            
+            pcall(function()
+                game:GetService("TeleportService"):TeleportToPlaceInstance(placeId, bestServer.id, game.Players.LocalPlayer)
+            end)
+            return true
+        end
+        
+        return false
+    end
+
+    -- Main hopping function
+    while wait(1) do
+        local success = pcall(FindBestServer)
+        if not success or cursor == "" then
+            break -- Stop if we've gone through all pages or there's an error
+        end
+    end
+end
